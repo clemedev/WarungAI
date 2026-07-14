@@ -30,3 +30,14 @@
   justify-content: space-between;
   font-size: 0.9rem;
 }
+
+@media (min-width: 880px) {
+  .card {
+    height: 100%;
+  }
+
+  .item {
+    font-size: 0.95rem;
+    padding: 0.15rem 0;
+  }
+}

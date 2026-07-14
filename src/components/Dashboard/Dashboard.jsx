@@ -22,7 +22,14 @@ function compute() {
   };
 }
 
-/** Main dashboard — everything comes from insights.js, per the contract. */
+/**
+ * Main dashboard — everything comes from insights.js, per the contract.
+ * Layout: on mobile this is one stacked column (source order below).
+ * On desktop (≥ 880px, see Dashboard.module.css) the same elements are
+ * placed onto a named CSS grid — summary spans the top, the chart and
+ * top-items sit side by side, insight and the share card close it out —
+ * so the wrapper divs below exist purely to carry grid-area names.
+ */
 export default function Dashboard() {
   const [data, setData] = useState(compute);
 
@@ -39,35 +46,49 @@ export default function Dashboard() {
 
   return (
     <div className={styles.wrap}>
-      <SalesSummaryCard
-        stats={stats}
-        split={split}
-        dailyTarget={dailyTarget}
-        onTargetChange={handleTargetChange}
-      />
+      <div className={styles.summaryArea}>
+        <SalesSummaryCard
+          stats={stats}
+          split={split}
+          dailyTarget={dailyTarget}
+          onTargetChange={handleTargetChange}
+        />
+      </div>
 
       {!hasAnyData && (
-        <p className={styles.empty}>
-          Belum ada jualan minggu ini. Rekod jualan pertama anda di tab
-          “➕ Jualan”! (No sales yet this week — log your first sale.)
-        </p>
+        <div className={styles.emptyArea}>
+          <p className={styles.empty}>
+            Belum ada jualan minggu ini. Rekod jualan pertama anda di tab
+            “➕ Jualan”! (No sales yet this week — log your first sale.)
+          </p>
+        </div>
       )}
 
-      <InsightOfTheDay insight={insight} />
-      <SevenDayChart trend={stats.sevenDayTrend} />
-      <TopItemsList items={stats.topItems} />
+      <div className={styles.chartArea}>
+        <SevenDayChart trend={stats.sevenDayTrend} />
+      </div>
 
-      <div className={styles.summaryCard}>
-        <h3 className={styles.summaryTitle}>Ringkasan hari ini</h3>
-        <p className={styles.summaryText}>{summary}</p>
-        <a
-          className={styles.waButton}
-          href={waHref}
-          target="_blank"
-          rel="noreferrer"
-        >
-          📤 Kongsi ke WhatsApp
-        </a>
+      <div className={styles.topArea}>
+        <TopItemsList items={stats.topItems} />
+      </div>
+
+      <div className={styles.insightArea}>
+        <InsightOfTheDay insight={insight} />
+      </div>
+
+      <div className={styles.footerArea}>
+        <div className={styles.summaryCard}>
+          <h3 className={styles.summaryTitle}>Ringkasan hari ini</h3>
+          <p className={styles.summaryText}>{summary}</p>
+          <a
+            className={styles.waButton}
+            href={waHref}
+            target="_blank"
+            rel="noreferrer"
+          >
+            📤 Kongsi ke WhatsApp
+          </a>
+        </div>
       </div>
     </div>
   );

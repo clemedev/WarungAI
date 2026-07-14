@@ -8,6 +8,12 @@
   min-height: 100dvh;
 }
 
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .header {
   text-align: center;
 }
@@ -50,6 +56,15 @@
 
 .main {
   flex: 1;
+  min-width: 0;
+}
+
+.wideContent {
+  max-width: 1080px;
+}
+
+.narrowContent {
+  max-width: 620px;
 }
 
 .saleWrap {
@@ -100,5 +115,111 @@
   .tab,
   .tabActive {
     font-size: 0.75rem;
+  }
+}
+
+/* ---------------------------------------------------------------
+   Desktop layout (≥ 880px). Plain flex row + a *sticky* sidebar —
+   deliberately not the grid-row-spanning trick from the previous
+   pass. That approach coupled the sidebar's row height to how much
+   content the current tab happened to render, which is exactly why
+   it drifted to a different spot per page and left a stretched,
+   empty block behind short pages. Sticky positioning ties the
+   sidebar to the viewport instead of to sibling content, so it's
+   always in the same place regardless of what "main" contains, and
+   "main" is free to be however tall it needs to be with no reserved
+   leftover space.
+   ------------------------------------------------------------- */
+@media (min-width: 880px) {
+  .app {
+    max-width: none;
+    width: 100%;
+    padding: 0;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0;
+    min-height: 100dvh;
+    background: #faf7f2;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 0;
+    flex: 0 0 248px;
+    width: 248px;
+    height: 100dvh;
+    overflow-y: auto;
+    border-right: 1px solid #eee2cf;
+    gap: 0;
+  }
+
+  .header {
+    text-align: left;
+    padding: 2rem 1.5rem 1rem;
+  }
+
+  .logo {
+    font-size: 1.35rem;
+  }
+
+  .tagline {
+    font-size: 0.82rem;
+  }
+
+  .tabs {
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.5rem 1rem 1.5rem;
+  }
+
+  .tab,
+  .tabActive {
+    flex: none;
+    text-align: left;
+    padding: 0.65rem 0.8rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    font-size: 0.88rem;
+  }
+
+  .tab:hover {
+    background: #f0ece1;
+  }
+
+  .tabActive {
+    background: #eaf5ef;
+    color: #1a7f4b;
+    border-color: #cfe8da;
+  }
+
+  .main {
+    padding: 2rem 2.5rem 3rem;
+  }
+
+  .wideContent,
+  .narrowContent {
+    margin: 0;
+  }
+
+  .saleWrap {
+    gap: 1rem;
+  }
+
+  .subTabs {
+    max-width: 360px;
+  }
+
+  .toast {
+    left: auto;
+    right: 2rem;
+    bottom: 2rem;
+    transform: none;
+  }
+}
+
+@media (min-width: 1200px) {
+  .main {
+    padding: 2.5rem 3.5rem 3.5rem;
   }
 }

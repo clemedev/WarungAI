@@ -84,3 +84,38 @@
   font-size: 0.8rem;
   opacity: 0.9;
 }
+
+/* ---------------------------------------------------------------
+   Desktop: the card now sits at ~700-900px wide instead of a
+   360px phone column. Rather than stretching the same three
+   stacked rows across all that width (long, sparse-looking bars),
+   put the headline numbers and the target/split block side by
+   side, so the card reads as one cohesive panel instead of a
+   tall thin phone widget lost in whitespace.
+   ------------------------------------------------------------- */
+@media (min-width: 880px) {
+  .card {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    column-gap: 2rem;
+    row-gap: 0.4rem;
+    align-items: center;
+    padding: 1.4rem 1.75rem;
+  }
+
+  .numbers {
+    gap: 1.75rem;
+  }
+
+  .value {
+    font-size: 1.9rem;
+  }
+
+  .targetRow {
+    gap: 0.4rem;
+  }
+
+  .split {
+    grid-column: 2;
+  }
+}

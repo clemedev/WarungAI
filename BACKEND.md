@@ -110,7 +110,68 @@ main                        ← always deployable, this is what gets demoed
 
 ---
 
-## 5. Notes / open questions
+---
+
+## 6. Stretch goal: multi-device sync (only if time remains)
+
+**Not required for MVP.** localStorage does not sync across devices or browsers —
+each device has its own separate data. This is a known, acceptable limitation
+for the hackathon demo (and arguably a feature: works offline, no setup, no
+API keys, no server costs).
+
+**Only attempt this if the MVP is fully working and demo-ready with real time left.**
+Don't start this in the final 30 minutes before a demo — async bugs are easy to
+introduce and hard to catch under time pressure.
+
+### Why it's realistic to bolt on later
+`storage.js` is the only file that touches data persistence. The rest of the
+app (parsers, insights, dashboard) only ever calls its functions
+(`getSales()`, `saveSale()`, etc.) — never `localStorage` directly. Swapping
+what's *inside* `storage.js` doesn't require touching OCR, voice input, or
+dashboard UI code.
+
+**This only holds if that rule is followed all the way through the hackathon —
+never call `localStorage` directly from a component, always go through
+`storage.js`.**
+
+### Migration path: Firebase (Firestore), free tier
+1. Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com) (free, no card needed)
+2. Enable Firestore Database (test mode is fine for a hackathon)
+3. Enable Authentication → Anonymous sign-in (no login screen needed, each device gets a unique user ID)
+4. `npm install firebase`
+5. Add Firebase config to a new `firebase.js` file
+6. Rewrite the functions inside `storage.js` to call Firestore instead of localStorage, e.g.:
+   ```js
+   import { collection, addDoc, getDocs } from 'firebase/firestore';
+   import { db } from './firebase';
+
+   export async function saveSale(sale) {
+     await addDoc(collection(db, 'sales'), sale);
+   }
+
+   export async function getSales() {
+     const snapshot = await getDocs(collection(db, 'sales'));
+     return snapshot.docs.map(doc => doc.data());
+   }
+   ```
+7. Scope data per owner using their anonymous auth UID (`where('ownerId', '==', currentUser.uid)`) so devices only see their own data
+8. **Update every caller of storage functions to use `await`** — Firebase functions are async, localStorage functions were not. This is the main ripple effect to budget time for.
+
+### Tradeoffs to weigh before doing this
+- Reintroduces "needs internet" and "has an API key/config" — contradicts the original offline-friendly, no-backend pitch. Decide which story matters more for judges.
+- Adds a new failure surface: auth, network errors, security rules
+- Keep a fallback — don't let an unstable migration risk a working demo. Consider a separate git branch so you can revert to localStorage if it's not stable in time.
+
+### Rough time budget
+- Firebase setup + SDK install: ~20–30 min
+- Rewriting `storage.js` functions: ~1–2 hours
+- Updating callers to use `await`: ~30–60 min
+- Testing + buffer for async bugs: ~1 hour minimum
+
+
+---
+
+## 7. Notes / open questions
 
 _(use this space during the hackathon to flag anything that needs the other engineer's input)_
 

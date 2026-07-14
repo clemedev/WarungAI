@@ -31,54 +31,70 @@ export default function App() {
 
   return (
     <div className={styles.app}>
-      <header className={styles.header}>
-        <h1 className={styles.logo}>🍛 WarungAI</h1>
-        <p className={styles.tagline}>Rekod jualan dalam beberapa saat</p>
-      </header>
+      <aside className={styles.sidebar}>
+        <header className={styles.header}>
+          <h1 className={styles.logo}>🍛 WarungAI</h1>
+          <p className={styles.tagline}>Rekod jualan dalam beberapa saat</p>
+        </header>
 
-      <nav className={styles.tabs}>
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            className={tab === t.id ? styles.tabActive : styles.tab}
-            onClick={() => setTab(t.id)}
-            title={t.full}
-          >
-            {t.label}
-          </button>
-        ))}
-      </nav>
+        <nav className={styles.tabs}>
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              className={tab === t.id ? styles.tabActive : styles.tab}
+              onClick={() => setTab(t.id)}
+              title={t.full}
+            >
+              {t.label}
+            </button>
+          ))}
+        </nav>
+      </aside>
 
       <main className={styles.main}>
-        {tab === 'dashboard' && <Dashboard />}
-
-        {tab === 'sale' && (
-          <div className={styles.saleWrap}>
-            <div className={styles.subTabs}>
-              <button
-                className={entryMode === 'chat' ? styles.subTabActive : styles.subTab}
-                onClick={() => setEntryMode('chat')}
-              >
-                💬 Taip / 🎤 Suara
-              </button>
-              <button
-                className={entryMode === 'scan' ? styles.subTabActive : styles.subTab}
-                onClick={() => setEntryMode('scan')}
-              >
-                📷 Imbas Resit
-              </button>
-            </div>
-            {entryMode === 'chat' && (
-              <ChatEntry products={products} onSaved={handleSaved} />
-            )}
-            {entryMode === 'scan' && (
-              <ReceiptScanner products={products} onSaved={handleSaved} />
-            )}
+        {tab === 'dashboard' && (
+          <div className={styles.wideContent}>
+            <Dashboard />
           </div>
         )}
 
-        {tab === 'products' && <ProductList onChange={refreshProducts} />}
-        {tab === 'expenses' && <ExpenseTracker />}
+        {tab === 'sale' && (
+          <div className={styles.narrowContent}>
+            <div className={styles.saleWrap}>
+              <div className={styles.subTabs}>
+                <button
+                  className={entryMode === 'chat' ? styles.subTabActive : styles.subTab}
+                  onClick={() => setEntryMode('chat')}
+                >
+                  💬 Taip / 🎤 Suara
+                </button>
+                <button
+                  className={entryMode === 'scan' ? styles.subTabActive : styles.subTab}
+                  onClick={() => setEntryMode('scan')}
+                >
+                  📷 Imbas Resit
+                </button>
+              </div>
+              {entryMode === 'chat' && (
+                <ChatEntry products={products} onSaved={handleSaved} />
+              )}
+              {entryMode === 'scan' && (
+                <ReceiptScanner products={products} onSaved={handleSaved} />
+              )}
+            </div>
+          </div>
+        )}
+
+        {tab === 'products' && (
+          <div className={styles.narrowContent}>
+            <ProductList onChange={refreshProducts} />
+          </div>
+        )}
+        {tab === 'expenses' && (
+          <div className={styles.narrowContent}>
+            <ExpenseTracker />
+          </div>
+        )}
       </main>
 
       {toast && <div className={styles.toast}>{toast}</div>}

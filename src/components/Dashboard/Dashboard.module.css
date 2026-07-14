@@ -44,3 +44,66 @@
   font-weight: 600;
   font-size: 0.9rem;
 }
+
+/* ---------------------------------------------------------------
+   Desktop (≥ 880px): swap the single stacked column for a named
+   grid — summary spans the full width up top, chart + top-items
+   run side by side, insight sits as a slim strip, and the
+   share/summary card closes the page full-width.
+   ------------------------------------------------------------- */
+@media (min-width: 880px) {
+  .wrap {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-areas:
+      'summary summary'
+      'empty   empty'
+      'chart   top'
+      'insight insight'
+      'footer  footer';
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  .summaryArea {
+    grid-area: summary;
+  }
+
+  .emptyArea {
+    grid-area: empty;
+  }
+
+  .chartArea {
+    grid-area: chart;
+  }
+
+  .topArea {
+    grid-area: top;
+  }
+
+  .insightArea {
+    grid-area: insight;
+  }
+
+  .footerArea {
+    grid-area: footer;
+  }
+
+  /* summary card's own internal layout can spread out horizontally
+     now that it isn't fighting a 560px phone column */
+  .summaryCard {
+    padding: 1.25rem 1.5rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .wrap {
+    grid-template-columns: 380px 1fr 320px;
+    grid-template-areas:
+      'summary summary summary'
+      'empty   empty   empty'
+      'chart   chart   top'
+      'insight insight insight'
+      'footer  footer  footer';
+  }
+}

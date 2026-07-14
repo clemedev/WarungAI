@@ -1,0 +1,71 @@
+.card {
+  border: 1px solid #d7c9a8;
+  background: #fffaf0;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.warning {
+  margin: 0;
+  padding: 0.5rem 0.7rem;
+  background: #fdecea;
+  border: 1px solid #f5c6c0;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.field select,
+.field input {
+  font: inherit;
+  font-weight: 400;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+}
+
+.save,
+.cancel {
+  flex: 1;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: none;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.save {
+  background: #1a7f4b;
+  color: #fff;
+}
+
+.save:disabled {
+  background: #a8c9b8;
+  cursor: not-allowed;
+}
+
+.cancel {
+  background: #eee;
+}

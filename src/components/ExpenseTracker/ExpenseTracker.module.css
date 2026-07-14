@@ -1,0 +1,106 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1rem;
+  background: #fffaf0;
+  border: 1px solid #d7c9a8;
+  border-radius: 12px;
+}
+
+.title {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.field select,
+.field input {
+  font: inherit;
+  font-weight: 400;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.save {
+  padding: 0.65rem;
+  border: none;
+  border-radius: 8px;
+  background: #1a7f4b;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.save:disabled {
+  background: #a8c9b8;
+  cursor: not-allowed;
+}
+
+.todayTotal {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.empty {
+  color: #777;
+  font-size: 0.9rem;
+  text-align: center;
+  margin: 0;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.6rem 0.9rem;
+  background: #fff;
+  border: 1px solid #e5e0d5;
+  border-radius: 10px;
+}
+
+.itemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.meta {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.delete {
+  border: none;
+  background: #f4f1ea;
+  border-radius: 8px;
+  padding: 0.4rem 0.55rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}

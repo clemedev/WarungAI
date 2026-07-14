@@ -1,0 +1,86 @@
+.card {
+  background: #1a7f4b;
+  color: #fff;
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.numbers {
+  display: flex;
+  gap: 1rem;
+}
+
+.stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.label {
+  font-size: 0.78rem;
+  opacity: 0.85;
+}
+
+.value {
+  font-size: 1.45rem;
+  font-weight: 700;
+}
+
+.profit {
+  color: #d3f7e2;
+}
+
+.loss {
+  color: #ffc4bc;
+}
+
+.targetRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.targetHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.targetInput {
+  width: 4.5rem;
+  font: inherit;
+  font-size: 0.8rem;
+  border: none;
+  border-radius: 6px;
+  padding: 0.15rem 0.35rem;
+  margin-left: 0.2rem;
+}
+
+.pct {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.bar {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  background: #ffd75e;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.split {
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.9;
+}

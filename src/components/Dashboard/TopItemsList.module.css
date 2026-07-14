@@ -1,0 +1,32 @@
+.card {
+  background: #fff;
+  border: 1px solid #e5e0d5;
+  border-radius: 14px;
+  padding: 1rem;
+}
+
+.title {
+  margin: 0 0 0.6rem;
+  font-size: 0.95rem;
+}
+
+.empty {
+  margin: 0;
+  color: #777;
+  font-size: 0.85rem;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}

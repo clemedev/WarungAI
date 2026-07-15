@@ -3,19 +3,33 @@
 // Rule for everyone: NEVER touch localStorage directly from a component.
 // Always go through these functions — this is what keeps the Firebase
 // migration in BACKEND.md §6 possible later.
+//
+// Every key is namespaced by the signed-in vendor (auth.js), so each
+// vendor on a device has fully separate products/sales/expenses/settings.
+// The UI only renders behind the login gate, so reads while signed out
+// just return empty defaults.
 
-const KEYS = {
-  products: 'warungai.products',
-  sales: 'warungai.sales',
-  expenses: 'warungai.expenses',
-  settings: 'warungai.settings',
-};
+import { getCurrentUserId } from './auth.js';
 
 const DEFAULT_SETTINGS = {
   dailyTarget: 200, // RM sales target per day, editable on the dashboard
 };
 
-function readList(key) {
+const KEYS = {
+  products: 'products',
+  sales: 'sales',
+  expenses: 'expenses',
+  settings: 'settings',
+};
+
+function userKey(base) {
+  const uid = getCurrentUserId();
+  return uid ? `warungai.${uid}.${base}` : null;
+}
+
+function readList(base) {
+  const key = userKey(base);
+  if (!key) return [];
   try {
     return JSON.parse(localStorage.getItem(key)) ?? [];
   } catch {
@@ -23,7 +37,9 @@ function readList(key) {
   }
 }
 
-function writeList(key, list) {
+function writeList(base, list) {
+  const key = userKey(base);
+  if (!key) throw new Error('storage: no vendor signed in');
   localStorage.setItem(key, JSON.stringify(list));
 }
 
@@ -90,15 +106,19 @@ export function deleteExpense(id) {
 // ---- Settings ----
 
 export function getSettings() {
+  const key = userKey(KEYS.settings);
+  if (!key) return { ...DEFAULT_SETTINGS };
   try {
-    return { ...DEFAULT_SETTINGS, ...(JSON.parse(localStorage.getItem(KEYS.settings)) ?? {}) };
+    return { ...DEFAULT_SETTINGS, ...(JSON.parse(localStorage.getItem(key)) ?? {}) };
   } catch {
     return { ...DEFAULT_SETTINGS };
   }
 }
 
 export function saveSettings(partial) {
+  const key = userKey(KEYS.settings);
+  if (!key) throw new Error('storage: no vendor signed in');
   const next = { ...getSettings(), ...partial };
-  localStorage.setItem(KEYS.settings, JSON.stringify(next));
+  localStorage.setItem(key, JSON.stringify(next));
   return next;
 }

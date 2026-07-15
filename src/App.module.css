@@ -142,7 +142,20 @@
     background: #faf7f2;
   }
 
+  .signOut {
+    margin-top: auto;
+    padding: 0.6rem;
+    font: inherit;
+    font-size: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    text-align: left;
+  }
+
   .sidebar {
+    display: flex; flex-direction: column;
     position: sticky;
     top: 0;
     flex: 0 0 248px;

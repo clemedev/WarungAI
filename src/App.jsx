@@ -4,7 +4,10 @@ import ReceiptScanner from './components/ReceiptScanner/ReceiptScanner';
 import ChatEntry from './components/ChatEntry/ChatEntry';
 import ProductList from './components/ProductList/ProductList';
 import ExpenseTracker from './components/ExpenseTracker/ExpenseTracker';
+import LoginScreen from './components/LoginScreen/LoginScreen';
+import SalesList from './components/SalesList/SalesList';
 import { getProducts } from './lib/storage';
+import { getCurrentUser, signOut } from './lib/auth';
 import styles from './App.module.css';
 
 const TABS = [
@@ -15,10 +18,28 @@ const TABS = [
 ];
 
 export default function App() {
+  const [user, setUser] = useState(getCurrentUser);
   const [tab, setTab] = useState('dashboard');
   const [entryMode, setEntryMode] = useState('chat'); // chat | scan
-  const [products, setProducts] = useState(getProducts);
+  const [products, setProducts] = useState([]);
   const [toast, setToast] = useState('');
+  const [salesVersion, setSalesVersion] = useState(0); // bump to refresh SalesList
+
+  function handleAuthed(authedUser) {
+    setUser(authedUser);
+    setProducts(getProducts());
+  }
+
+  function handleSignOut() {
+    signOut();
+    setUser(null);
+    setProducts([]);
+    setTab('dashboard');
+  }
+
+  if (!user) {
+    return <LoginScreen onAuthed={handleAuthed} />;
+  }
 
   function refreshProducts() {
     setProducts(getProducts());
@@ -27,6 +48,7 @@ export default function App() {
   function handleSaved(count) {
     setToast(`✅ ${count} jualan disimpan`);
     setTimeout(() => setToast(''), 3000);
+    setSalesVersion((v) => v + 1);
   }
 
   return (
@@ -49,6 +71,10 @@ export default function App() {
             </button>
           ))}
         </nav>
+
+        <button className={styles.signOut} onClick={handleSignOut}>
+          🚪 {user.name} — Log keluar
+        </button>
       </aside>
 
       <main className={styles.main}>
@@ -81,6 +107,12 @@ export default function App() {
               {entryMode === 'scan' && (
                 <ReceiptScanner products={products} onSaved={handleSaved} />
               )}
+
+              <SalesList
+                products={products}
+                refreshKey={salesVersion}
+                onChange={() => setSalesVersion((v) => v + 1)}
+              />
             </div>
           </div>
         )}

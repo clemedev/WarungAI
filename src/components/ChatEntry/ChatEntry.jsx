@@ -1,71 +1,197 @@
-import { useEffect, useState } from 'react';
-import { parseNaturalLanguageEntry } from '../../lib/nlEntryParser';
-import { saveSale } from '../../lib/storage';
+import {
+  useEffect,
+  useState,
+} from 'react';
+
+import {
+  parseNaturalLanguageEntry,
+} from '../../lib/nlEntryParser.js';
+
+import {
+  saveSale,
+} from '../../lib/supabaseSales.js';
+
 import ConfirmSale from '../ConfirmSale/ConfirmSale';
 import VoiceEntry from '../VoiceEntry/VoiceEntry';
+
 import styles from './ChatEntry.module.css';
 
-/**
- * Chat-style typed sales entry, e.g. "Sold 3 nasi lemak RM12".
- * The mic button (VoiceEntry) drops its transcript into the same input, so
- * voice and text share one parse → confirm → save pipeline.
- */
-export default function ChatEntry({ products, onSaved }) {
-  const [text, setText] = useState('');
-  const [draft, setDraft] = useState(null);
-  const [source, setSource] = useState('chat');
-  const [history, setHistory] = useState([]); // this session's saved entries
+export default function ChatEntry({
+  products,
+  onSaved,
+}) {
+  const [text, setText] =
+    useState('');
 
-  // voice transcript arrives → parse immediately as source 'voice'
-  const [voiceText, setVoiceText] = useState(null);
+  const [draft, setDraft] =
+    useState(null);
+
+  const [source, setSource] =
+    useState('chat');
+
+  const [history, setHistory] =
+    useState([]);
+
+  const [voiceText, setVoiceText] =
+    useState(null);
+
+  const [saving, setSaving] =
+    useState(false);
+
+  const [error, setError] =
+    useState('');
+
   useEffect(() => {
-    if (voiceText) {
-      setText(voiceText);
-      setDraft(parseNaturalLanguageEntry(voiceText, products));
-      setSource('voice');
-      setVoiceText(null);
+    if (!voiceText) {
+      return;
     }
+
+    setText(voiceText);
+
+    setDraft(
+      parseNaturalLanguageEntry(
+        voiceText,
+        products,
+      ),
+    );
+
+    setSource('voice');
+    setVoiceText(null);
+    setError('');
   }, [voiceText, products]);
 
-  function handleSubmit(e) {
-    e.preventDefault();
-    if (!text.trim()) return;
-    setDraft(parseNaturalLanguageEntry(text, products));
+  function handleSubmit(event) {
+    event.preventDefault();
+
+    const cleanText = text.trim();
+
+    if (
+      !cleanText ||
+      saving
+    ) {
+      return;
+    }
+
+    setError('');
+
+    setDraft(
+      parseNaturalLanguageEntry(
+        cleanText,
+        products,
+      ),
+    );
+
     setSource('chat');
   }
 
-  function handleSave(sale) {
-    const saved = saveSale(sale);
-    const product = products.find((p) => p.id === saved.productId);
-    setHistory((h) => [
-      { id: saved.id, label: `${saved.quantity} × ${product?.name ?? '?'} — RM${saved.total.toFixed(2)} (${saved.source})` },
-      ...h,
-    ]);
+  async function handleSave(sale) {
+    if (saving) {
+      return;
+    }
+
+    setSaving(true);
+    setError('');
+
+    try {
+      const saved =
+        await saveSale(sale);
+
+      const productName =
+        saved.productName ??
+        products.find(
+          (product) =>
+            product.id ===
+            saved.productId,
+        )?.name ??
+        'Produk tidak dikenali';
+
+      const label =
+        `${saved.quantity} × ` +
+        `${productName} — ` +
+        `RM${saved.total.toFixed(2)} ` +
+        `(${saved.source})`;
+
+      setHistory(
+        (currentHistory) => [
+          {
+            id: saved.id,
+            label,
+          },
+          ...currentHistory,
+        ],
+      );
+
+      setDraft(null);
+      setText('');
+
+      onSaved?.(1);
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : 'Gagal menyimpan jualan.',
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function handleCancel() {
+    if (saving) {
+      return;
+    }
+
     setDraft(null);
-    setText('');
-    onSaved?.(1);
+    setError('');
   }
 
   return (
     <div className={styles.wrap}>
       {products.length === 0 && (
         <p className={styles.notice}>
-          Tiada produk lagi — tambah produk dulu supaya jualan boleh dipadankan.
-          (No products yet — add products first so sales can be matched.)
+          Tiada produk lagi — tambah produk
+          dulu supaya jualan boleh
+          dipadankan.
         </p>
       )}
 
-      <form className={styles.inputRow} onSubmit={handleSubmit}>
+      {error && (
+        <p className={styles.notice}>
+          {error}
+        </p>
+      )}
+
+      <form
+        className={styles.inputRow}
+        onSubmit={handleSubmit}
+      >
         <input
           className={styles.input}
           type="text"
-          placeholder='cth: "Sold 3 nasi lemak RM12" / "jual 2 teh tarik rm6"'
+          placeholder='cth: "Jual 3 nasi lemak RM12"'
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(event) =>
+            setText(event.target.value)
+          }
+          disabled={saving}
         />
-        <VoiceEntry onTranscript={setVoiceText} />
-        <button className={styles.send} type="submit" disabled={!text.trim()}>
-          Hantar
+
+        <VoiceEntry
+          onTranscript={setVoiceText}
+        />
+
+        <button
+          className={styles.send}
+          type="submit"
+          disabled={
+            !text.trim() ||
+            saving ||
+            products.length === 0
+          }
+        >
+          {saving
+            ? 'Menyimpan...'
+            : 'Hantar'}
         </button>
       </form>
 
@@ -75,17 +201,31 @@ export default function ChatEntry({ products, onSaved }) {
           products={products}
           source={source}
           onSave={handleSave}
-          onCancel={() => setDraft(null)}
+          onCancel={handleCancel}
+          isSaving={saving}
         />
       )}
 
       {history.length > 0 && (
         <div className={styles.history}>
-          <h4 className={styles.historyTitle}>Disimpan sesi ini (saved this session)</h4>
+          <h4
+            className={
+              styles.historyTitle
+            }
+          >
+            Disimpan sesi ini
+          </h4>
+
           <ul>
-            {history.map((h) => (
-              <li key={h.id}>✅ {h.label}</li>
-            ))}
+            {history.map(
+              (historyItem) => (
+                <li
+                  key={historyItem.id}
+                >
+                  ✅ {historyItem.label}
+                </li>
+              ),
+            )}
           </ul>
         </div>
       )}

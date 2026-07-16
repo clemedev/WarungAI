@@ -242,8 +242,12 @@ export default function App() {
     setSalesVersion(0);
   }
 
-  function refreshProducts() {
-    setProducts(getProducts());
+  function refreshProducts(nextProducts) {
+    setProducts(
+      Array.isArray(nextProducts)
+        ? nextProducts
+        : [],
+    );
   }
 
   function handleSaved(count) {

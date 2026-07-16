@@ -1,75 +1,202 @@
-import { useState } from 'react';
-import { getSales, deleteSale } from '../../lib/storage';
-import { todayISO } from '../../lib/dates';
+import {
+  useEffect,
+  useState,
+} from 'react';
+
+import {
+  deleteSale,
+  getSales,
+} from '../../lib/supabaseSales.js';
+
+import {
+  todayISO,
+} from '../../lib/dates.js';
+
 import styles from './SalesList.module.css';
 
 const SOURCE_LABEL = {
+  manual: '✍️ Manual',
   chat: '💬 Taip',
   voice: '🎤 Suara',
   ocr: '📷 Resit',
+  receipt: '📷 Resit',
 };
 
-/**
- * Full sales history, newest first — reads directly from storage so it
- * survives refresh and shows entries from every source (chat/voice/OCR),
- * not just what was saved this session.
- */
-export default function SalesList({ products, refreshKey, onChange }) {
-  const [sales, setSales] = useState(getSales);
+export default function SalesList({
+  refreshKey,
+  onChange,
+}) {
+  const [sales, setSales] =
+    useState([]);
 
-  // re-read from storage whenever the parent bumps refreshKey (after a save)
-  const [lastKey, setLastKey] = useState(refreshKey);
-  if (refreshKey !== lastKey) {
-    setLastKey(refreshKey);
-    setSales(getSales());
-  }
+  const [loading, setLoading] =
+    useState(true);
 
-  function productName(id) {
-    return products.find((p) => p.id === id)?.name ?? 'Produk dipadam';
-  }
+  const [deletingId, setDeletingId] =
+    useState(null);
 
-  function handleDelete(sale) {
-    if (!window.confirm(`Padam jualan ${productName(sale.productId)}?`)) return;
-    deleteSale(sale.id);
-    setSales(getSales());
-    onChange?.();
-  }
+  const [error, setError] =
+    useState('');
 
   const today = todayISO();
-  // newest first: sort by date desc, keep insertion order within a day (reversed)
-  const sorted = [...sales].sort((a, b) => b.date.localeCompare(a.date));
 
-  if (sorted.length === 0) {
+  async function loadSales() {
+    setLoading(true);
+    setError('');
+
+    try {
+      const nextSales =
+        await getSales();
+
+      setSales(nextSales);
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : 'Gagal mendapatkan sejarah jualan.',
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadSales();
+  }, [refreshKey]);
+
+  async function handleDelete(sale) {
+    const confirmed =
+      window.confirm(
+        `Padam jualan ${sale.productName}?`,
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingId(sale.id);
+    setError('');
+
+    try {
+      await deleteSale(sale.id);
+      await loadSales();
+      onChange?.();
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : 'Gagal memadam jualan.',
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
+  if (loading) {
     return (
       <div className={styles.card}>
-        <h3 className={styles.title}>Sejarah jualan (sales history)</h3>
-        <p className={styles.empty}>Tiada jualan direkod lagi.</p>
+        <h3 className={styles.title}>
+          Sejarah jualan
+        </h3>
+
+        <p className={styles.empty}>
+          Memuatkan jualan...
+        </p>
       </div>
     );
   }
 
   return (
     <div className={styles.card}>
-      <h3 className={styles.title}>Sejarah jualan (sales history)</h3>
-      <ul className={styles.list}>
-        {sorted.slice(0, 50).map((s) => (
-          <li key={s.id} className={styles.item}>
-            <div className={styles.itemInfo}>
-              <strong>
-                {s.quantity} × {productName(s.productId)}
-              </strong>
-              <span className={styles.meta}>
-                RM{Number(s.total).toFixed(2)} · {SOURCE_LABEL[s.source] ?? s.source}
-                {s.paymentMethod ? ` · ${s.paymentMethod === 'qr' ? 'QR' : 'Tunai'}` : ''}
-                {s.date !== today ? ` · ${s.date}` : ''}
-              </span>
-            </div>
-            <button className={styles.delete} onClick={() => handleDelete(s)}>
-              🗑️
-            </button>
-          </li>
-        ))}
-      </ul>
+      <h3 className={styles.title}>
+        Sejarah jualan
+      </h3>
+
+      {error && (
+        <p className={styles.empty}>
+          {error}
+        </p>
+      )}
+
+      {sales.length === 0 ? (
+        <p className={styles.empty}>
+          Tiada jualan direkod lagi.
+        </p>
+      ) : (
+        <ul className={styles.list}>
+          {sales
+            .slice(0, 50)
+            .map((sale) => (
+              <li
+                key={sale.id}
+                className={styles.item}
+              >
+                <div
+                  className={
+                    styles.itemInfo
+                  }
+                >
+                  <strong>
+                    {sale.quantity} ×{' '}
+                    {sale.productName}
+                  </strong>
+
+                  <span
+                    className={styles.meta}
+                  >
+                    RM
+                    {sale.total.toFixed(2)}
+                    {' · '}
+                    {SOURCE_LABEL[
+                      sale.source
+                    ] ?? sale.source}
+
+                    {' · '}
+                    {sale.paymentMethod ===
+                    'qr'
+                      ? 'QR'
+                      : 'Tunai'}
+
+                    {sale.date !== today
+                      ? ` · ${sale.date}`
+                      : ''}
+                  </span>
+
+                  <span
+                    className={styles.meta}
+                  >
+                    Kos RM
+                    {sale.totalCost.toFixed(
+                      2,
+                    )}
+                    {' · '}
+                    Untung RM
+                    {sale.grossProfit.toFixed(
+                      2,
+                    )}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  className={styles.delete}
+                  onClick={() =>
+                    handleDelete(sale)
+                  }
+                  disabled={
+                    deletingId === sale.id
+                  }
+                  aria-label={`Padam jualan ${sale.productName}`}
+                  title="Padam jualan"
+                >
+                  {deletingId === sale.id
+                    ? '...'
+                    : '🗑️'}
+                </button>
+              </li>
+            ))}
+        </ul>
+      )}
     </div>
   );
 }

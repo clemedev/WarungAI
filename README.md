@@ -1,140 +1,808 @@
-# WarungAI — Project Plan
 
-**AI Bookkeeping Assistant for Malaysian Warung Owners & Hawkers**
-Codex Hackathon Submission
+# WarungAI 🍛
+
+**AI-assisted bookkeeping for Malaysian warung owners and hawkers**
+
+WarungAI is a mobile-first web application that converts typed, spoken, and scanned sales information into confirmed bookkeeping records.
+
+The application helps Malaysian micro-business owners understand daily sales, expenses, profit, payment breakdowns, and product performance without requiring complicated accounting software.
+
+> **Core journey:** Record a sale → review the extracted information → save a trusted transaction → understand today’s business performance.
+
+## Live Application
+
+- **Live Demo:** https://warung-ai-sepia.vercel.app/
+- **GitHub Repository:** https://github.com/clemedev/WarungAI
 
 ---
 
-## 1. Problem Statement
+## The Problem
 
-Malaysian warung owners and hawkers track sales and costs manually (or not at all), making it hard to know their real daily profit, which items are underpriced, or how their business trends week to week. WarungAI turns a receipt photo, a typed sentence, or a spoken sentence into structured sales data — then surfaces plain-Bahasa-Malaysia insights a busy trader can act on in seconds.
+Many Malaysian warung owners, hawkers, and small food-stall operators still record transactions using notebooks, WhatsApp messages, calculators, or memory.
 
-## 2. Tech Stack
+This makes it difficult to answer simple but important questions:
 
-| Layer | Choice | Notes |
-|---|---|---|
-| Framework | React (Vite) | Fast dev server, easy GitHub Pages deploy |
-| OCR | Tesseract.js | Runs in-browser, no backend/API key needed |
-| Charts | Chart.js (via `react-chartjs-2`) | 7-day trend, top items |
-| Storage | `localStorage` | No backend, no server cost |
-| Voice input | Web Speech API (`SpeechRecognition`) | Browser-native, no key needed |
-| Deployment | GitHub Pages | Static hosting, matches "no backend" constraint |
-| Styling | CSS Modules | One `.module.css` file per component, scoped class names |
+- How much did the business earn today?
+- What was the cost of the products sold?
+- How much was spent on ingredients, gas, packaging, or utilities?
+- What is today’s actual profit?
+- Which menu item sells best?
+- Is a product being sold below cost?
+- How much revenue came from cash versus QR payments?
 
-**Why React instead of the original pure HTML/CSS/JS plan:** submission requirements need a React app. Tesseract.js, Chart.js, and the Web Speech API all work fine inside React components — the "no backend" and "no API key" properties of the original plan are unaffected.
+Existing bookkeeping tools may be too complicated, expensive, or designed primarily for larger businesses.
 
-## 3. Core User Workflow
+WarungAI provides a simpler, Bahasa Malaysia-friendly workflow designed around the daily activities of a small food business.
 
-**Note:** WarungAI is a responsive web app — it works on both desktop and mobile browsers, not mobile-only. Owners can use it on a phone at the stall or on a laptop/desktop at home for review, so layout should adapt cleanly across screen sizes.
+---
 
+## Main Features
+
+### Secure user accounts
+
+- Email registration and login using Supabase Authentication
+- Email confirmation for new accounts
+- Persistent sessions after browser refresh
+- Shop or vendor name saved with the user account
+- Secure logout
+- User-owned records protected using PostgreSQL Row Level Security
+- Data isolation tested using multiple Supabase accounts
+
+### Product management
+
+Users can:
+
+- Add menu products
+- Set selling prices
+- Set cost prices
+- Record current stock
+- Configure a low-stock warning level
+- Edit product information
+- Archive products without deleting historical records
+- View the expected margin for each product
+
+### Typed sales entry
+
+Users can enter natural-language sales such as:
+
+```text
+Jual 3 nasi lemak RM12
 ```
-1. Owner opens WarungAI in browser (desktop or mobile)
-2. Owner sets up Product List (name, sell price, cost price) — one-time/editable
-3. Daily sales entry via ONE of:
-     a) Snap receipt photo → Tesseract.js OCR → parser extracts items/totals → confirm/edit → save
-     b) Type in chat box: "Sold 3 nasi lemak RM12" → parser matches product → confirm/edit → save
-     c) Tap mic → speak sale → same parse/confirm flow
-4. Expense entry: log daily costs (ingredients, gas, packaging)
-5. Dashboard auto-updates:
-     - Daily total sales / profit
-     - 7-day trend chart
-     - Top-selling items
-     - Live progress toward a daily target
-     - AI insight of the day (rule-based first, real "AI" later)
-     - Plain-BM daily summary
-6. Owner can share daily summary to WhatsApp in one tap
+
+WarungAI extracts:
+
+- Product
+- Quantity
+- Total amount
+- Input source
+
+The extracted result is shown in a confirmation form before anything is saved.
+
+### Voice sales entry
+
+Users can record sales using the browser microphone.
+
+Example:
+
+```text
+Jual dua teh tarik enam ringgit
 ```
 
-## 4. Feature List & Priority
+Voice input uses the same workflow as typed input:
 
-### Core (must ship for demo)
-1. Product listing page — add item name, selling price, cost price
-2. OCR receipt scan — photo → sales record
-3. Chat-style typed sales entry ("Sold 3 nasi lemak RM12")
-4. Voice input — mic button to speak sales entries
-5. Expense tracker — daily costs (ingredients, gas, packaging)
-6. Profit calculation — gross sales minus costs, per item and per day
-7. Daily sales summary in Bahasa Malaysia
-8. "Insight of the day" — one flag/recommendation (e.g. "Mee goreng dijual bawah kos")
-9. Dashboard — daily total, 7-day chart, top items, live target progress
-
-### Supporting (ship if time allows)
-10. Low stock alert (sales vs starting quantity)
-11. Multi-item quick-add (tap preset items instead of typing)
-12. Best selling day/time insight
-13. WhatsApp share (one-tap daily summary)
-14. Cash vs QR payment split tracker
-15. Customer count tracker (total + average spend)
-
-### Post-hackathon (not for demo)
-16. Monthly sales invoice generation
-17. Tax document preparation
-18. Wake-word voice assistant
-19. Multi-user/team access
-
-## 5. Suggested Folder Structure
-
+```text
+Voice transcript
+→ Natural-language parser
+→ Product matching
+→ User confirmation
+→ Supabase transaction
 ```
-warungai/
+
+### Receipt OCR
+
+Users can upload or photograph a printed receipt.
+
+WarungAI uses Tesseract.js to:
+
+1. Read text from the image
+2. Detect potential receipt items
+3. Extract product names, quantities, and amounts
+4. Ignore totals, payment lines, and common receipt noise
+5. Match extracted names against the user’s product list
+6. Display editable rows for review
+7. Save only the rows confirmed by the user
+
+The parser supports examples such as:
+
+```text
+2 x Nasi Lemak 8.00
+Nasi Lemak x2 8.00
+Nasi Lemak 2 8.00
+Nasi Lemak 8.00
+```
+
+WarungAI also handles common OCR confusion between:
+
+```text
+1
+I
+l
+il
+```
+
+### Confirmation before saving
+
+Typed, spoken, and scanned sales are never saved automatically.
+
+Users can review and correct:
+
+- Product
+- Quantity
+- Total amount
+- Payment method
+- Included or excluded receipt rows
+
+This prevents an incorrect OCR or parsing result from silently becoming a financial record.
+
+### Expense tracking
+
+Users can record daily operating expenses such as:
+
+- Ingredients
+- Gas
+- Packaging
+- Rent and utilities
+- Other costs
+
+Each expense can include:
+
+- Category
+- Amount
+- Date
+- Optional note
+- Input source
+
+Expenses are stored in Supabase and isolated by user account.
+
+### Sales history
+
+Users can view confirmed transactions from:
+
+- Typed input
+- Voice input
+- Receipt OCR
+- Manual entry
+
+Each sales record displays:
+
+- Product name
+- Quantity
+- Revenue
+- Cost
+- Gross profit
+- Payment method
+- Input source
+- Transaction date
+
+### Business dashboard
+
+The dashboard provides:
+
+- Today’s total sales
+- Today’s net profit
+- Cash-versus-QR payment split
+- Daily sales target
+- Target progress
+- Seven-day sales chart
+- Top-selling products
+- Bahasa Malaysia daily summary
+- Explainable warnings and recommendations
+- WhatsApp summary sharing
+
+### Explainable insights
+
+WarungAI can provide simple recommendations such as:
+
+```text
+⚠️ Nasi Lemak dijual bawah kos.
+```
+
+or:
+
+```text
+🔥 Nasi Lemak paling laris minggu ini. Pastikan stok mencukupi.
+```
+
+Financial calculations are deterministic and based on stored transaction records. WarungAI does not ask a generative model to calculate official financial totals.
+
+---
+
+## Technology Stack
+
+### Frontend
+
+- React 18
+- Vite 5
+- JavaScript
+- CSS Modules
+- Chart.js
+- `react-chartjs-2`
+
+### Input processing
+
+- Tesseract.js for in-browser OCR
+- Web Speech API for voice recognition
+- Deterministic natural-language parsing
+- Levenshtein-based fuzzy product matching
+- Rule-based Bahasa Malaysia summaries and recommendations
+
+### Backend services
+
+- Supabase Authentication
+- Supabase PostgreSQL
+- Supabase Row Level Security
+- Supabase Remote Procedure Calls
+- PostgreSQL atomic transaction logic
+
+### Deployment
+
+- Vercel
+- GitHub source control
+- Automatic Vercel deployments from GitHub
+
+---
+
+## Application Architecture
+
+```text
+React + Vite application
+        │
+        ├── Supabase Authentication
+        │       ├── Email registration
+        │       ├── Email confirmation
+        │       ├── Login and logout
+        │       └── Persistent sessions
+        │
+        ├── Supabase PostgreSQL
+        │       ├── products
+        │       ├── expenses
+        │       ├── sales
+        │       └── sale_items
+        │
+        ├── Row Level Security
+        │       └── Users access only their own business records
+        │
+        ├── Browser capabilities
+        │       ├── Tesseract.js OCR
+        │       ├── Web Speech API
+        │       └── Chart.js
+        │
+        └── Vercel
+                └── Production deployment
+```
+
+---
+
+## Database Design
+
+### `products`
+
+Stores products belonging to each authenticated user.
+
+```text
+id
+user_id
+name
+selling_price
+cost_price
+current_stock
+low_stock_threshold
+is_active
+created_at
+updated_at
+```
+
+Products are archived using:
+
+```text
+is_active = false
+```
+
+This avoids permanently deleting products that may be referenced by historical transactions.
+
+### `expenses`
+
+Stores operating expenses belonging to each authenticated user.
+
+```text
+id
+user_id
+category
+amount
+note
+expense_date
+source
+created_at
+updated_at
+```
+
+### `sales`
+
+Stores the parent record for each confirmed sale.
+
+```text
+id
+user_id
+sale_date
+payment_method
+source
+total_revenue
+total_cost
+gross_profit
+created_at
+```
+
+### `sale_items`
+
+Stores historical product information for each sale.
+
+```text
+id
+sale_id
+product_id
+product_name_snapshot
+quantity
+unit_price
+unit_cost
+line_total
+created_at
+```
+
+The snapshot fields ensure that historical transactions remain accurate even when a product is edited or archived later.
+
+For example, changing the current cost of Nasi Lemak does not change the cost stored in an earlier sale.
+
+---
+
+## Secure Sale Creation
+
+WarungAI uses a PostgreSQL function:
+
+```text
+create_single_item_sale(...)
+```
+
+The function performs the following operations atomically:
+
+1. Confirms that a user is authenticated
+2. Verifies that the selected product belongs to that user
+3. Confirms that the product is active
+4. Reads the official selling price and cost price
+5. Calculates the total product cost
+6. Calculates gross profit
+7. Creates the parent `sales` record
+8. Creates the related `sale_items` snapshot
+9. Returns the new sale ID
+
+This prevents partially saved transactions and ensures that the browser cannot submit a trusted product cost directly.
+
+---
+
+## Security Model
+
+WarungAI uses only browser-safe Supabase configuration values:
+
+```env
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+```
+
+The frontend does not contain:
+
+```text
+Supabase secret key
+Supabase service-role key
+Database password
+Database connection string
+OpenAI API key
+Claude API key
+Private server token
+```
+
+Anything using the `VITE_` prefix is visible in the browser bundle. Therefore, only the Supabase project URL and publishable key are used.
+
+The publishable key does not provide unrestricted database access. Security is enforced through:
+
+- Supabase Authentication
+- User JSON Web Tokens
+- PostgreSQL Row Level Security
+- Per-table ownership policies
+- `auth.uid()` checks
+- User-owned foreign keys
+
+Products, expenses, sales, and sale items were tested using multiple accounts to confirm that one user cannot retrieve another user’s records.
+
+---
+
+## Responsible AI and Data Handling
+
+WarungAI follows these principles:
+
+- Extracted information is treated as a draft
+- Users review information before saving
+- Unmatched OCR items are not automatically posted
+- Failed product matches require manual selection
+- Financial calculations use deterministic code
+- Product cost and price snapshots preserve historical accuracy
+- Data ownership is enforced in the database
+- No privileged backend key is exposed in the browser
+- Manual entry remains available when OCR or voice recognition fails
+
+---
+
+## Local Development
+
+### Prerequisites
+
+Install:
+
+- Node.js 18 or newer
+- npm
+- Git
+
+You will also need a Supabase project with the required tables, policies, and database function.
+
+### Clone the repository
+
+```bash
+git clone https://github.com/clemedev/WarungAI.git
+cd WarungAI
+```
+
+### Install dependencies
+
+```bash
+npm install
+```
+
+### Create environment variables
+
+Create `.env.local` in the project root:
+
+```env
+VITE_SUPABASE_URL=your-supabase-project-url
+VITE_SUPABASE_PUBLISHABLE_KEY=your-supabase-publishable-key
+```
+
+Do not commit `.env.local`.
+
+Confirm that Git ignores the file:
+
+```bash
+git check-ignore -v .env.local
+```
+
+### Start the development server
+
+```bash
+npm run dev
+```
+
+Open the URL shown by Vite, normally:
+
+```text
+http://localhost:5173
+```
+
+---
+
+## Available Commands
+
+Start development mode:
+
+```bash
+npm run dev
+```
+
+Run the automated tests:
+
+```bash
+npm test
+```
+
+Create a production build:
+
+```bash
+npm run build
+```
+
+Preview the production build:
+
+```bash
+npm run preview
+```
+
+---
+
+## Automated Tests
+
+The current automated test suite contains:
+
+```text
+16 parser tests
+11 storage and insight tests
+27 total passing tests
+```
+
+Run all tests:
+
+```bash
+npm test
+```
+
+### Parser test coverage
+
+The parser tests cover:
+
+- Printed receipt item extraction
+- Bahasa Malaysia total labels
+- Leading quantities
+- Trailing quantities
+- `product + quantity + total` receipt layouts
+- OCR confusion between `1`, `I`, and `l`
+- Comma decimal values
+- Receipts without an explicit total
+- Blurry or invalid OCR output
+- Empty and non-string input
+- English sales phrases
+- Bahasa Malaysia sales phrases
+- Bahasa Malaysia number words
+- Misspelled product names
+- Unknown products
+- Empty product lists
+- Exact and partial fuzzy matches
+
+### Storage and insight test coverage
+
+The logic tests cover:
+
+- Vendor-scoped local compatibility storage
+- Product persistence and updates
+- Daily-target settings
+- Profit calculations
+- Empty-day values
+- Seven-day dashboard data
+- Bahasa Malaysia summaries
+- Cash-versus-QR payment splits
+- Below-cost warnings
+- Best-selling product insights
+- Empty-data behavior
+
+The core Supabase workflows were also manually tested using multiple authenticated accounts:
+
+- Registration and login
+- Session persistence
+- Product creation, editing, and archiving
+- Expense creation and deletion
+- Typed sales
+- Voice sales
+- Receipt OCR sales
+- Sales history
+- Cascade sale-item deletion
+- Dashboard calculations
+- Row Level Security isolation
+
+---
+
+## Vercel Deployment
+
+The production application is available at:
+
+https://warung-ai-sepia.vercel.app/
+
+Recommended Vercel configuration:
+
+```text
+Framework Preset: Vite
+Root Directory: ./
+Build Command: npm run build
+Output Directory: dist
+```
+
+Add these variables to the Vercel **Production** and **Preview** environments:
+
+```text
+VITE_SUPABASE_URL
+VITE_SUPABASE_PUBLISHABLE_KEY
+```
+
+Do not add privileged Supabase keys using the `VITE_` prefix.
+
+After changing an environment variable, create a new deployment.
+
+### Supabase authentication URLs
+
+Configure Supabase Authentication with:
+
+```text
+Site URL:
+https://warung-ai-sepia.vercel.app/
+```
+
+Add these Redirect URLs:
+
+```text
+https://warung-ai-sepia.vercel.app/**
+http://localhost:5173/**
+```
+
+---
+
+## Demo Workflow
+
+A recommended live demonstration:
+
+1. Register or log in as a warung owner
+2. Show the shop name and secure session
+3. Add products with selling prices and cost prices
+4. Type:
+
+   ```text
+   Jual 3 nasi lemak RM12
+   ```
+5. Review the parsed sale
+6. Confirm the product, quantity, amount, and payment method
+7. Save the transaction
+8. Upload a clear printed receipt
+9. Review the OCR result
+10. Match the extracted row to an existing product
+11. Save the confirmed receipt transaction
+12. Add an operating expense
+13. Open the dashboard
+14. Show revenue, profit, payment split, seven-day trend, and top item
+15. Share the Bahasa Malaysia summary through WhatsApp
+
+### Example calculation
+
+```text
+Nasi Lemak selling price: RM4.00
+Nasi Lemak unit cost:     RM2.50
+Quantity sold:            3
+
+Revenue:                  RM12.00
+Product cost:             RM7.50
+Gross profit:             RM4.50
+Packaging expense:        RM1.50
+Net profit:               RM3.00
+```
+
+---
+
+## Project Structure
+
+```text
+WarungAI/
 ├── public/
+├── scripts/
+│   ├── test-insights.mjs
+│   └── test-parsers.mjs
 ├── src/
-│   ├── components/                # each component: ComponentName.jsx + ComponentName.module.css
-│   │   ├── ProductList/
-│   │   ├── ReceiptScanner/       # Tesseract.js OCR flow
-│   │   ├── ChatEntry/            # typed sales entry + parser
-│   │   ├── VoiceEntry/           # mic button + Web Speech API
-│   │   ├── ExpenseTracker/
+│   ├── components/
+│   │   ├── ChatEntry/
+│   │   ├── ConfirmSale/
 │   │   ├── Dashboard/
-│   │   │   ├── SalesSummaryCard.jsx
-│   │   │   ├── SalesSummaryCard.module.css
-│   │   │   ├── SevenDayChart.jsx
-│   │   │   ├── TopItemsList.jsx
-│   │   │   └── InsightOfTheDay.jsx
-│   │   └── shared/                # buttons, modals, layout
+│   │   ├── ExpenseTracker/
+│   │   ├── LoginScreen/
+│   │   ├── ProductList/
+│   │   ├── ReceiptScanner/
+│   │   ├── SalesList/
+│   │   └── VoiceEntry/
 │   ├── lib/
-│   │   ├── ocrParser.js          # turns OCR text -> {items, total}
-│   │   ├── nlEntryParser.js      # turns "Sold 3 nasi lemak RM12" -> record
-│   │   ├── insights.js           # rule-based insight/summary generators
-│   │   └── storage.js            # localStorage read/write helpers
-│   ├── pages/
-│   │   ├── Home.jsx / Dashboard.jsx
-│   │   ├── Products.jsx
-│   │   ├── AddSale.jsx
-│   │   └── Expenses.jsx
+│   │   ├── auth.js
+│   │   ├── dates.js
+│   │   ├── insights.js
+│   │   ├── nlEntryParser.js
+│   │   ├── ocrParser.js
+│   │   ├── storage.js
+│   │   ├── supabase.js
+│   │   ├── supabaseAuth.js
+│   │   ├── supabaseDashboard.js
+│   │   ├── supabaseExpenses.js
+│   │   ├── supabaseProducts.js
+│   │   ├── supabaseSales.js
+│   │   └── types.js
 │   ├── App.jsx
+│   ├── App.module.css
+│   ├── index.css
 │   └── main.jsx
-├── PLANNING.md
+├── .env.example
+├── .gitignore
+├── BACKEND.md
+├── index.html
+├── package.json
 ├── README.md
-└── package.json
+└── vite.config.js
 ```
 
-## 6. Core Data Model (localStorage)
+---
 
-```js
-// products
-{ id, name, sellPrice, costPrice }
+## Current Limitations
 
-// sales
-{ id, date, productId, quantity, total, source: 'ocr' | 'chat' | 'voice', paymentMethod: 'cash' | 'qr' }
+- OCR works best with clear and well-lit printed receipts
+- Handwritten or badly blurred receipts may require manual entry
+- OCR items must be matched to products already created in the user’s menu
+- Unmatched OCR rows are not automatically saved
+- Natural-language parsing currently focuses on one product per confirmation
+- Voice recognition depends on browser Web Speech API support
+- Microphone permission must be granted by the user
+- Receipt images are processed in the browser and are not retained in cloud storage
+- Daily target settings currently use lightweight browser storage
+- Archived products currently require direct database editing to restore
+- Generative-AI explanations are not part of the current production workflow
+- The application bundle can be further optimized through code splitting
 
-// expenses
-{ id, date, category, amount, note }
+---
+
+## Roadmap
+
+### Near-term improvements
+
+- Multi-item typed sales
+- Multi-item spoken sales
+- Restore archived products through the interface
+- Cloud-synchronized daily targets
+- Automatic stock deduction after confirmed sales
+- Low-stock alerts
+- OCR confidence indicators
+- Receipt-image preprocessing
+- Private receipt storage
+- Dashboard date filters
+- Improved loading and offline states
+- Additional Supabase integration tests
+
+### Post-hackathon
+
+- Monthly sales reports
+- Invoice generation
+- Tax-document preparation assistance
+- Staff access and business teams
+- Multiple users under one business
+- Advanced inventory forecasting
+- Secure server-side AI explanations
+- Offline synchronization
+- Native mobile packaging
+
+---
+
+## Hackathon Context
+
+WarungAI was developed for the **Codex Community Hackathon Kuala Lumpur 2026** under the theme:
+
+> **Raising the Floor: AI for Malaysia Boleh**
+
+The project focuses on practical AI-enabled tools that improve productivity and financial clarity for Malaysian micro, small, and medium enterprises.
+
+---
+
+## Team Responsibilities
+
+Update this section with your actual team members:
+
+```text
+Member 1 — Product design and frontend experience
+Member 2 — Supabase, database design, and security
+Member 3 — OCR, voice, parsing, and financial logic
+Member 4 — Integration, testing, deployment, and presentation
 ```
 
-## 7. Demo Script (for judges)
+---
 
-1. Show empty dashboard → add 3–4 products with prices.
-2. Snap/upload a sample receipt → OCR extracts items → confirm → sale logged.
-3. Type a sale in chat: "Sold 2 teh tarik RM6".
-4. Speak a sale via mic.
-5. Add an expense (e.g. gas RM20).
-6. Show dashboard: today's profit, 7-day chart, top item, insight of the day, BM summary.
-7. Tap WhatsApp share (if built).
+## License
 
-## 8. Immediate Next Steps
+Add the team’s chosen license before wider public distribution.
 
-- [ ] Scaffold Vite + React project (with CSS Modules)
-- [ ] Build Product List page first (everything else depends on it)
-- [ ] Build OCR flow + parser (highest risk item — test early)
-- [ ] Build chat + voice entry (share the same parser/record logic)
-- [ ] Build Dashboard last, once sales/expense data exists to visualize
+MIT is a common choice for hackathon projects, but the final license should be agreed upon by all team members.
+
+---
+
+Built for Malaysian warung owners and hawkers. 🇲🇾

@@ -1,4 +1,8 @@
-import { useEffect, useState } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 import Dashboard from './components/Dashboard/Dashboard';
 import ReceiptScanner from './components/ReceiptScanner/ReceiptScanner';
@@ -8,7 +12,9 @@ import ExpenseTracker from './components/ExpenseTracker/ExpenseTracker';
 import LoginScreen from './components/LoginScreen/LoginScreen';
 import SalesList from './components/SalesList/SalesList';
 
-import { getProducts } from './lib/storage';
+import {
+  getProducts,
+} from './lib/supabaseProducts.js';
 
 import {
   getCurrentUser,
@@ -21,23 +27,35 @@ import styles from './App.module.css';
 const TABS = [
   {
     id: 'dashboard',
-    label: '📊 Papan',
-    full: 'Papan pemuka',
+    icon: '▦',
+    label: 'Papan pemuka',
+    shortLabel: 'Papan',
+    description:
+      'Pantau jualan, untung dan prestasi perniagaan anda.',
   },
   {
     id: 'sale',
-    label: '➕ Jualan',
-    full: 'Rekod jualan',
+    icon: '+',
+    label: 'Rekod jualan',
+    shortLabel: 'Jualan',
+    description:
+      'Rekod jualan melalui teks, suara atau imbasan resit.',
   },
   {
     id: 'products',
-    label: '🍜 Produk',
-    full: 'Senarai produk',
+    icon: '◫',
+    label: 'Produk',
+    shortLabel: 'Produk',
+    description:
+      'Urus harga, kos, margin dan stok menu perniagaan.',
   },
   {
     id: 'expenses',
-    label: '🧾 Belanja',
-    full: 'Perbelanjaan',
+    icon: '◇',
+    label: 'Perbelanjaan',
+    shortLabel: 'Belanja',
+    description:
+      'Catat kos operasi untuk pengiraan untung yang tepat.',
   },
 ];
 
@@ -56,16 +74,6 @@ function mapSupabaseUser(user) {
   };
 }
 
-/**
- * Temporary compatibility bridge.
- *
- * Products, sales, expenses, and settings still use the existing synchronous
- * localStorage adapter. That adapter expects a local vendor session ID.
- *
- * Until each data domain is migrated to Supabase, use the authenticated
- * Supabase user ID as the localStorage namespace. Supabase remains the actual
- * authentication system.
- */
 function setLocalStorageIdentity(user) {
   if (!user) {
     localStorage.removeItem(
@@ -81,14 +89,14 @@ function setLocalStorageIdentity(user) {
   let existingUsers = [];
 
   try {
-    const storedUsers = JSON.parse(
+    const value = JSON.parse(
       localStorage.getItem(
         'warungai.users',
       ),
     );
 
-    if (Array.isArray(storedUsers)) {
-      existingUsers = storedUsers;
+    if (Array.isArray(value)) {
+      existingUsers = value;
     }
   } catch {
     existingUsers = [];
@@ -101,15 +109,13 @@ function setLocalStorageIdentity(user) {
     authProvider: 'supabase',
   };
 
-  const existingIndex =
-    existingUsers.findIndex(
-      (item) =>
-        item.id === localUser.id,
-    );
+  const index = existingUsers.findIndex(
+    (item) => item.id === localUser.id,
+  );
 
-  if (existingIndex >= 0) {
-    existingUsers[existingIndex] = {
-      ...existingUsers[existingIndex],
+  if (index >= 0) {
+    existingUsers[index] = {
+      ...existingUsers[index],
       ...localUser,
     };
   } else {
@@ -124,6 +130,59 @@ function setLocalStorageIdentity(user) {
   localStorage.setItem(
     'warungai.sessionUserId',
     localUser.id,
+  );
+}
+
+function getInitials(name) {
+  const parts = String(name ?? '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (parts.length === 0) {
+    return 'W';
+  }
+
+  return parts
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase();
+}
+
+function getGreeting() {
+  const hour = new Date().getHours();
+
+  if (hour < 12) {
+    return 'Selamat pagi';
+  }
+
+  if (hour < 18) {
+    return 'Selamat petang';
+  }
+
+  return 'Selamat malam';
+}
+
+function LoadingScreen() {
+  return (
+    <div className={styles.loadingScreen}>
+      <div className={styles.loadingBrand}>
+        <div className={styles.loadingLogo}>
+          🍛
+        </div>
+
+        <strong>WarungAI</strong>
+
+        <span>
+          Menyediakan ruang kerja anda...
+        </span>
+
+        <div className={styles.loadingBar}>
+          <span />
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -151,6 +210,39 @@ export default function App() {
     setSalesVersion,
   ] = useState(0);
 
+  const currentTab = useMemo(
+    () =>
+      TABS.find(
+        (item) => item.id === tab,
+      ) ?? TABS[0],
+    [tab],
+  );
+
+  const formattedDate = useMemo(
+    () =>
+      new Intl.DateTimeFormat(
+        'ms-MY',
+        {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        },
+      ).format(new Date()),
+    [],
+  );
+
+  async function loadProducts() {
+    try {
+      const nextProducts =
+        await getProducts();
+
+      setProducts(nextProducts);
+    } catch {
+      setProducts([]);
+    }
+  }
+
   useEffect(() => {
     let active = true;
 
@@ -167,23 +259,23 @@ export default function App() {
       );
 
       setUser(
-        mapSupabaseUser(
-          currentUser,
-        ),
+        mapSupabaseUser(currentUser),
       );
 
       if (currentUser) {
-        setProducts(getProducts());
+        await loadProducts();
       }
 
-      setAuthLoading(false);
+      if (active) {
+        setAuthLoading(false);
+      }
     }
 
     restoreUser();
 
     const unsubscribe =
       onAuthStateChange(
-        (nextUser) => {
+        async (nextUser) => {
           if (!active) {
             return;
           }
@@ -193,18 +285,18 @@ export default function App() {
           );
 
           setUser(
-            mapSupabaseUser(
-              nextUser,
-            ),
+            mapSupabaseUser(nextUser),
           );
 
-          setProducts(
-            nextUser
-              ? getProducts()
-              : [],
-          );
+          if (nextUser) {
+            await loadProducts();
+          } else {
+            setProducts([]);
+          }
 
-          setAuthLoading(false);
+          if (active) {
+            setAuthLoading(false);
+          }
         },
       );
 
@@ -214,11 +306,11 @@ export default function App() {
     };
   }, []);
 
-  function handleAuthed(
+  async function handleAuthed(
     authedUser,
   ) {
     setUser(authedUser);
-    setProducts(getProducts());
+    await loadProducts();
   }
 
   async function handleSignOut() {
@@ -242,7 +334,9 @@ export default function App() {
     setSalesVersion(0);
   }
 
-  function refreshProducts(nextProducts) {
+  function refreshProducts(
+    nextProducts,
+  ) {
     setProducts(
       Array.isArray(nextProducts)
         ? nextProducts
@@ -252,7 +346,7 @@ export default function App() {
 
   function handleSaved(count) {
     setToast(
-      `✅ ${count} jualan disimpan`,
+      `✓ ${count} jualan berjaya disimpan`,
     );
 
     window.setTimeout(() => {
@@ -264,16 +358,13 @@ export default function App() {
     );
   }
 
+  function openSale(mode = 'chat') {
+    setEntryMode(mode);
+    setTab('sale');
+  }
+
   if (authLoading) {
-    return (
-      <div className={styles.app}>
-        <main className={styles.main}>
-          <p>
-            Memeriksa sesi pengguna...
-          </p>
-        </main>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (!user) {
@@ -285,28 +376,26 @@ export default function App() {
   }
 
   return (
-    <div className={styles.app}>
-      <aside
-        className={styles.sidebar}
-      >
-        <header
-          className={styles.header}
-        >
-          <h1
-            className={styles.logo}
-          >
-            🍛 WarungAI
-          </h1>
+    <div className={styles.appShell}>
+      <aside className={styles.sidebar}>
+        <div className={styles.brand}>
+          <div className={styles.brandIcon}>
+            🍛
+          </div>
 
-          <p
-            className={styles.tagline}
-          >
-            Rekod jualan dalam beberapa saat
-          </p>
-        </header>
+          <div className={styles.brandText}>
+            <strong>WarungAI</strong>
+            <span>Pusat perniagaan</span>
+          </div>
+        </div>
+
+        <div className={styles.navLabel}>
+          Menu utama
+        </div>
 
         <nav
-          className={styles.tabs}
+          className={styles.desktopNav}
+          aria-label="Navigasi utama"
         >
           {TABS.map((item) => (
             <button
@@ -314,146 +403,366 @@ export default function App() {
               type="button"
               className={
                 tab === item.id
-                  ? styles.tabActive
-                  : styles.tab
+                  ? styles.navItemActive
+                  : styles.navItem
               }
               onClick={() =>
                 setTab(item.id)
               }
-              title={item.full}
             >
-              {item.label}
+              <span
+                className={styles.navIcon}
+                aria-hidden="true"
+              >
+                {item.icon}
+              </span>
+
+              <span>{item.label}</span>
             </button>
           ))}
         </nav>
+
+        <div className={styles.sidebarSpacer} />
+
+        <div className={styles.accountCard}>
+          <div className={styles.avatar}>
+            {getInitials(user.name)}
+          </div>
+
+          <div className={styles.accountDetails}>
+            <strong>{user.name}</strong>
+            <span>{user.email}</span>
+          </div>
+        </div>
 
         <button
           type="button"
           className={styles.signOut}
           onClick={handleSignOut}
         >
-          🚪 {user.name} — Log keluar
+          <span aria-hidden="true">↪</span>
+          Log keluar
         </button>
       </aside>
 
-      <main className={styles.main}>
-        {tab === 'dashboard' && (
-          <div
-            className={
-              styles.wideContent
-            }
-          >
-            <Dashboard />
+      <section className={styles.application}>
+        <header className={styles.mobileHeader}>
+          <div className={styles.mobileBrand}>
+            <span>🍛</span>
+            <strong>WarungAI</strong>
           </div>
-        )}
 
-        {tab === 'sale' && (
-          <div
-            className={
-              styles.narrowContent
-            }
-          >
-            <div
-              className={
-                styles.saleWrap
-              }
-            >
-              <div
+          <div className={styles.mobileAvatar}>
+            {getInitials(user.name)}
+          </div>
+        </header>
+
+        <main className={styles.main}>
+          <div className={styles.workspace}>
+            <header className={styles.topbar}>
+              <div className={styles.pageIdentity}>
+                <p className={styles.greeting}>
+                  {getGreeting()},{' '}
+                  <strong>{user.name}</strong>
+                </p>
+
+                <h1 className={styles.pageTitle}>
+                  {currentTab.label}
+                </h1>
+
+                <p className={styles.pageDescription}>
+                  {currentTab.description}
+                </p>
+              </div>
+
+              <div className={styles.topbarMeta}>
+                <span
+                  className={
+                    styles.secureBadge
+                  }
+                >
+                  <i />
+                  Data diselaraskan
+                </span>
+
+                <time
+                  className={styles.date}
+                  dateTime={new Date()
+                    .toISOString()
+                    .slice(0, 10)}
+                >
+                  {formattedDate}
+                </time>
+              </div>
+            </header>
+
+            {tab === 'dashboard' && (
+              <section
                 className={
-                  styles.subTabs
+                  styles.quickActions
                 }
+                aria-label="Tindakan pantas"
               >
                 <button
                   type="button"
                   className={
-                    entryMode === 'chat'
-                      ? styles.subTabActive
-                      : styles.subTab
+                    styles.primaryAction
                   }
                   onClick={() =>
-                    setEntryMode('chat')
+                    openSale('chat')
                   }
                 >
-                  💬 Taip / 🎤 Suara
+                  <span>+</span>
+
+                  <div>
+                    <strong>
+                      Rekod jualan
+                    </strong>
+                    <small>
+                      Taip atau guna suara
+                    </small>
+                  </div>
                 </button>
 
                 <button
                   type="button"
                   className={
-                    entryMode === 'scan'
-                      ? styles.subTabActive
-                      : styles.subTab
+                    styles.quickAction
                   }
                   onClick={() =>
-                    setEntryMode('scan')
+                    openSale('scan')
                   }
                 >
-                  📷 Imbas Resit
+                  <span>▣</span>
+
+                  <div>
+                    <strong>
+                      Imbas resit
+                    </strong>
+                    <small>
+                      Ekstrak menggunakan OCR
+                    </small>
+                  </div>
                 </button>
-              </div>
 
-              {entryMode === 'chat' && (
-                <ChatEntry
-                  products={products}
-                  onSaved={
-                    handleSaved
+                <button
+                  type="button"
+                  className={
+                    styles.quickAction
                   }
-                />
+                  onClick={() =>
+                    setTab('expenses')
+                  }
+                >
+                  <span>◇</span>
+
+                  <div>
+                    <strong>
+                      Tambah belanja
+                    </strong>
+                    <small>
+                      Rekod kos operasi
+                    </small>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  className={
+                    styles.quickAction
+                  }
+                  onClick={() =>
+                    setTab('products')
+                  }
+                >
+                  <span>◫</span>
+
+                  <div>
+                    <strong>
+                      Urus produk
+                    </strong>
+                    <small>
+                      Harga, kos dan stok
+                    </small>
+                  </div>
+                </button>
+              </section>
+            )}
+
+            <div className={styles.content}>
+              {tab === 'dashboard' && (
+                <div
+                  className={
+                    styles.wideContent
+                  }
+                >
+                  <Dashboard />
+                </div>
               )}
 
-              {entryMode === 'scan' && (
-                <ReceiptScanner
-                  products={products}
-                  onSaved={
-                    handleSaved
+              {tab === 'sale' && (
+                <div
+                  className={
+                    styles.narrowContent
                   }
-                />
+                >
+                  <div
+                    className={
+                      styles.saleWorkspace
+                    }
+                  >
+                    <div
+                      className={
+                        styles.entrySelector
+                      }
+                    >
+                      <button
+                        type="button"
+                        className={
+                          entryMode === 'chat'
+                            ? styles.entryActive
+                            : styles.entryOption
+                        }
+                        onClick={() =>
+                          setEntryMode(
+                            'chat',
+                          )
+                        }
+                      >
+                        <span>✦</span>
+                        <div>
+                          <strong>
+                            Taip atau suara
+                          </strong>
+                          <small>
+                            Rekod jualan pantas
+                          </small>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        className={
+                          entryMode === 'scan'
+                            ? styles.entryActive
+                            : styles.entryOption
+                        }
+                        onClick={() =>
+                          setEntryMode(
+                            'scan',
+                          )
+                        }
+                      >
+                        <span>▣</span>
+                        <div>
+                          <strong>
+                            Imbas resit
+                          </strong>
+                          <small>
+                            Baca resit bercetak
+                          </small>
+                        </div>
+                      </button>
+                    </div>
+
+                    <section
+                      className={
+                        styles.entryPanel
+                      }
+                    >
+                      {entryMode ===
+                        'chat' && (
+                        <ChatEntry
+                          products={products}
+                          onSaved={
+                            handleSaved
+                          }
+                        />
+                      )}
+
+                      {entryMode ===
+                        'scan' && (
+                        <ReceiptScanner
+                          products={products}
+                          onSaved={
+                            handleSaved
+                          }
+                        />
+                      )}
+                    </section>
+
+                    <SalesList
+                      refreshKey={
+                        salesVersion
+                      }
+                      onChange={() =>
+                        setSalesVersion(
+                          (version) =>
+                            version + 1,
+                        )
+                      }
+                    />
+                  </div>
+                </div>
               )}
 
-              <SalesList
-                products={products}
-                refreshKey={
-                  salesVersion
-                }
-                onChange={() =>
-                  setSalesVersion(
-                    (version) =>
-                      version + 1,
-                  )
-                }
-              />
+              {tab === 'products' && (
+                <div
+                  className={
+                    styles.narrowContent
+                  }
+                >
+                  <ProductList
+                    onChange={
+                      refreshProducts
+                    }
+                  />
+                </div>
+              )}
+
+              {tab === 'expenses' && (
+                <div
+                  className={
+                    styles.narrowContent
+                  }
+                >
+                  <ExpenseTracker />
+                </div>
+              )}
             </div>
           </div>
-        )}
+        </main>
+      </section>
 
-        {tab === 'products' && (
-          <div
+      <nav
+        className={styles.mobileNav}
+        aria-label="Navigasi mudah alih"
+      >
+        {TABS.map((item) => (
+          <button
+            key={item.id}
+            type="button"
             className={
-              styles.narrowContent
+              tab === item.id
+                ? styles.mobileNavActive
+                : styles.mobileNavItem
+            }
+            onClick={() =>
+              setTab(item.id)
             }
           >
-            <ProductList
-              onChange={
-                refreshProducts
-              }
-            />
-          </div>
-        )}
-
-        {tab === 'expenses' && (
-          <div
-            className={
-              styles.narrowContent
-            }
-          >
-            <ExpenseTracker />
-          </div>
-        )}
-      </main>
+            <span aria-hidden="true">
+              {item.icon}
+            </span>
+            <small>{item.shortLabel}</small>
+          </button>
+        ))}
+      </nav>
 
       {toast && (
         <div
           className={styles.toast}
+          role="status"
         >
           {toast}
         </div>

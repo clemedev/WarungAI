@@ -1,125 +1,351 @@
-// ocrParser.js — OWNER: Engineer A.
-// Turns raw Tesseract OCR text from a warung receipt into { items, total }.
-// Receipt formats vary a lot, so this is deliberately permissive: it extracts
-// what it can and the user corrects the rest in the confirm/edit step.
+// Converts raw Tesseract OCR text into:
+// {
+//   items: [{ name, quantity, price }],
+//   total: number | null
+// }
+//
+// Receipt formats vary, so every parsed result must still be reviewed
+// by the user before being saved.
 
-/** Lines containing these words are never treated as sale items. */
 const NON_ITEM_WORDS = [
-  // totals / payment
-  'total', 'jumlah', 'jml', 'amaun', 'amount', 'subtotal', 'sub-total',
-  'cash', 'tunai', 'change', 'baki', 'balance', 'bayaran', 'payment', 'paid',
-  'qr', 'duitnow', 'tng', 'touch', 'grabpay', 'boost',
-  // tax / service
-  'tax', 'gst', 'sst', 'cukai', 'service', 'servis', 'rounding',
-  // header / footer noise
-  'invoice', 'resit', 'receipt', 'bill', 'no.', 'tel', 'fax', 'terima kasih',
-  'thank', 'welcome', 'selamat', 'cashier', 'juruwang', 'table', 'meja',
-  'date', 'tarikh', 'time', 'masa', 'qty', 'item', 'harga', 'price', 'rm',
+  // Totals and payment
+  'total',
+  'jumlah',
+  'jml',
+  'amaun',
+  'amount',
+  'subtotal',
+  'sub-total',
+  'subjumlah',
+  'sub-jumlah',
+  'cash',
+  'tunai',
+  'change',
+  'baki',
+  'balance',
+  'bayaran',
+  'payment',
+  'paid',
+  'qr',
+  'duitnow',
+  'tng',
+  'touch',
+  'grabpay',
+  'boost',
+
+  // Tax and service fees
+  'tax',
+  'gst',
+  'sst',
+  'cukai',
+  'service',
+  'servis',
+  'rounding',
+  'caj',
+  'perkhidmatan',
+
+  // Header and footer noise
+  'invoice',
+  'resit',
+  'receipt',
+  'bill',
+  'no.',
+  'tel',
+  'fax',
+  'terima kasih',
+  'thank',
+  'welcome',
+  'selamat',
+  'cashier',
+  'juruwang',
+  'table',
+  'meja',
+  'date',
+  'tarikh',
+  'time',
+  'masa',
+  'qty',
+  'item',
+  'harga',
+  'price',
 ];
 
-const TOTAL_LINE_RE = /\b(grand\s*total|total|jumlah(\s*besar)?|jml|amaun|amount\s*due|amount)\b/i;
-const SKIP_IF_TOTAL_RE = /\b(subtotal|sub-total|item|qty|quantity)\b/i;
+const TOTAL_LINE_RE =
+  /\b(grand\s*total|total|jumlah(\s*besar)?|jml|amaun|amount\s*due|amount)\b/i;
 
-/** "12.00", "12,00", "RM12.50", "RM 12" at the end of a line. */
-const TRAILING_PRICE_RE = /(?:rm\s*)?(\d{1,4}(?:[.,]\d{2})|\d{1,4})\s*$/i;
+const SKIP_IF_TOTAL_RE =
+  /\b(subtotal|sub-total|subjumlah|sub-jumlah|item|qty|quantity)\b/i;
 
-function parseAmount(str) {
-  return parseFloat(str.replace(',', '.'));
+const TRAILING_PRICE_RE =
+  /(?:rm\s*)?(\d{1,4}(?:[.,]\d{2})|\d{1,4})\s*$/i;
+
+function parseAmount(value) {
+  return Number.parseFloat(
+    value.replace(',', '.'),
+  );
 }
 
-function round2(n) {
-  return Math.round(n * 100) / 100;
+function round2(value) {
+  return (
+    Math.round(
+      (Number(value) + Number.EPSILON) *
+        100,
+    ) / 100
+  );
+}
+
+function escapeRegExp(value) {
+  return value.replace(
+    /[.*+?^${}()|[\]\\]/g,
+    '\\$&',
+  );
 }
 
 function looksLikeNonItem(line) {
   const lower = line.toLowerCase();
-  return NON_ITEM_WORDS.some((w) => {
-    // match whole words so e.g. "roti" isn't killed by "no."
-    const re = new RegExp(`(^|[^a-z])${w.replace('.', '\\.')}([^a-z]|$)`, 'i');
-    return re.test(lower);
-  });
+
+  return NON_ITEM_WORDS.some(
+    (word) => {
+      const expression =
+        new RegExp(
+          `(^|[^a-z])${escapeRegExp(
+            word,
+          )}([^a-z]|$)`,
+          'i',
+        );
+
+      return expression.test(lower);
+    },
+  );
 }
 
-/** Dates, times, phone numbers, receipt numbers — all digits & separators. */
 function looksLikeNumericNoise(line) {
-  return /^[\d\s\/\-.:#*x]+$/i.test(line);
+  return /^[\d\s/.:#*x-]+$/i.test(
+    line,
+  );
 }
 
 /**
- * Parse one line into a receipt item, or return null.
- * Handles:  "2 x Nasi Lemak 12.00"  |  "Nasi Lemak x2 12.00"
- *           "2 Nasi Lemak 12.00"    |  "Nasi Lemak 12.00" (qty 1)
+ * Tesseract sometimes reads the number 1 as:
+ * i, I, l, L, il, or ll.
+ *
+ * Only treat these values as quantities when they appear in the
+ * expected quantity position.
+ */
+function parseQuantityToken(token) {
+  if (/^\d{1,3}$/.test(token)) {
+    return Number.parseInt(token, 10);
+  }
+
+  if (/^[iIlL]{1,2}$/.test(token)) {
+    return 1;
+  }
+
+  return null;
+}
+
+/**
+ * Supported item formats:
+ *
+ * 2 x Nasi Lemak 12.00
+ * 2 Nasi Lemak 12.00
+ * Nasi Lemak x2 12.00
+ * Nasi Lemak 3 12.00
+ * Nasi Lemak 12.00
+ *
+ * The final number is always treated as the line total.
  */
 function parseItemLine(line) {
-  const priceMatch = line.match(TRAILING_PRICE_RE);
-  if (!priceMatch) return null;
+  const priceMatch =
+    line.match(TRAILING_PRICE_RE);
 
-  const price = parseAmount(priceMatch[1]);
-  if (!(price > 0) || price > 9999) return null;
+  if (!priceMatch) {
+    return null;
+  }
 
-  let rest = line.slice(0, priceMatch.index).trim();
-  // drop currency/label leftovers between name and price, e.g. "... RM"
-  rest = rest.replace(/\b(rm|myr)\s*$/i, '').trim();
-  if (!rest) return null;
+  const price =
+    parseAmount(priceMatch[1]);
+
+  if (
+    !Number.isFinite(price) ||
+    price <= 0 ||
+    price > 9999
+  ) {
+    return null;
+  }
+
+  let rest = line
+    .slice(0, priceMatch.index)
+    .trim();
+
+  rest = rest
+    .replace(/\b(rm|myr)\s*$/i, '')
+    .trim();
+
+  if (!rest) {
+    return null;
+  }
 
   let quantity = 1;
 
-  // leading "2 x " / "2x " / "2 "
-  const leadQty = rest.match(/^(\d{1,3})\s*(?:x\s+|x(?=[a-z])|\s+)/i);
-  // trailing " x2" / " x 2"
-  const trailQty = rest.match(/\bx\s*(\d{1,3})\s*$/i);
+  // Format: "2 x Nasi Lemak" or "2 Nasi Lemak"
+  const leadingQuantity =
+    rest.match(
+      /^(\d{1,3})\s*(?:x\s+|x(?=[a-z])|\s+)/i,
+    );
 
-  if (leadQty) {
-    quantity = parseInt(leadQty[1], 10);
-    rest = rest.slice(leadQty[0].length).trim();
-  } else if (trailQty) {
-    quantity = parseInt(trailQty[1], 10);
-    rest = rest.slice(0, trailQty.index).trim();
+  // Format: "Nasi Lemak x2"
+  const trailingXQuantity =
+    rest.match(
+      /\bx\s*(\d{1,3})\s*$/i,
+    );
+
+  // Format: "Nasi Lemak 3"
+  // Also handles OCR mistakes such as "Roti Canai il".
+  const trailingQuantity =
+    rest.match(
+      /\s+(\d{1,3}|[iIlL]{1,2})\s*$/,
+    );
+
+  if (leadingQuantity) {
+    quantity = Number.parseInt(
+      leadingQuantity[1],
+      10,
+    );
+
+    rest = rest
+      .slice(
+        leadingQuantity[0].length,
+      )
+      .trim();
+  } else if (trailingXQuantity) {
+    quantity = Number.parseInt(
+      trailingXQuantity[1],
+      10,
+    );
+
+    rest = rest
+      .slice(
+        0,
+        trailingXQuantity.index,
+      )
+      .trim();
+  } else if (trailingQuantity) {
+    const parsedQuantity =
+      parseQuantityToken(
+        trailingQuantity[1],
+      );
+
+    if (parsedQuantity !== null) {
+      quantity = parsedQuantity;
+
+      rest = rest
+        .slice(
+          0,
+          trailingQuantity.index,
+        )
+        .trim();
+    }
   }
 
-  // name must contain at least 2 letters to be a plausible item
-  const name = rest.replace(/\s{2,}/g, ' ').replace(/[|_~`"]+/g, '').trim();
-  if ((name.match(/[a-z]/gi) || []).length < 2) return null;
-  if (!(quantity >= 1) || quantity > 999) quantity = 1;
+  if (
+    !Number.isInteger(quantity) ||
+    quantity < 1 ||
+    quantity > 999
+  ) {
+    quantity = 1;
+  }
 
-  return { name, quantity, price };
+  const name = rest
+    .replace(/\s{2,}/g, ' ')
+    .replace(/[|_~`"]+/g, '')
+    .trim();
+
+  const letterCount =
+    (name.match(/[a-z]/gi) ?? [])
+      .length;
+
+  if (letterCount < 2) {
+    return null;
+  }
+
+  return {
+    name,
+    quantity,
+    price: round2(price),
+  };
 }
 
-/**
- * @param {string} rawText raw text out of Tesseract.js
- * @returns {{ items: Array<import('./types').ReceiptItem>, total: number|null }}
- */
-export function parseReceiptText(rawText) {
+export function parseReceiptText(
+  rawText,
+) {
   const items = [];
   let total = null;
 
-  if (!rawText || typeof rawText !== 'string') return { items, total };
+  if (
+    !rawText ||
+    typeof rawText !== 'string'
+  ) {
+    return {
+      items,
+      total,
+    };
+  }
 
   const lines = rawText
     .split(/\r?\n/)
-    .map((l) => l.trim())
+    .map((line) => line.trim())
     .filter(Boolean);
 
   for (const line of lines) {
-    // total line? (keep the LAST total-looking line — grand total is at the bottom)
-    if (TOTAL_LINE_RE.test(line) && !SKIP_IF_TOTAL_RE.test(line)) {
-      const m = line.match(TRAILING_PRICE_RE);
-      if (m) {
-        total = parseAmount(m[1]);
+    if (
+      TOTAL_LINE_RE.test(line) &&
+      !SKIP_IF_TOTAL_RE.test(line)
+    ) {
+      const totalMatch =
+        line.match(
+          TRAILING_PRICE_RE,
+        );
+
+      if (totalMatch) {
+        total = parseAmount(
+          totalMatch[1],
+        );
+
         continue;
       }
     }
 
-    if (looksLikeNonItem(line) || looksLikeNumericNoise(line)) continue;
+    if (
+      looksLikeNonItem(line) ||
+      looksLikeNumericNoise(line)
+    ) {
+      continue;
+    }
 
-    const item = parseItemLine(line);
-    if (item) items.push(item);
+    const item =
+      parseItemLine(line);
+
+    if (item) {
+      items.push(item);
+    }
   }
 
-  // no explicit total found → derive from items so the confirm step has a number
-  if (total === null && items.length > 0) {
-    total = round2(items.reduce((sum, it) => sum + it.price, 0));
+  if (
+    total === null &&
+    items.length > 0
+  ) {
+    total = round2(
+      items.reduce(
+        (sum, item) =>
+          sum + item.price,
+        0,
+      ),
+    );
   }
 
-  return { items, total };
+  return {
+    items,
+    total,
+  };
 }

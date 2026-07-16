@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import Tesseract from 'tesseract.js';
 import { parseReceiptText } from '../../lib/ocrParser';
 import { matchProduct } from '../../lib/nlEntryParser';
-import { saveSale } from '../../lib/storage';
+import { saveSale } from '../../lib/supabaseSales.js';
 import { todayISO } from '../../lib/dates';
 import styles from './ReceiptScanner.module.css';
 
@@ -20,6 +20,7 @@ export default function ReceiptScanner({ products, onSaved }) {
   const [rows, setRows] = useState([]);
   const [receiptTotal, setReceiptTotal] = useState(null);
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
 
   async function handleFile(e) {
     const file = e.target.files?.[0];
@@ -78,20 +79,56 @@ export default function ReceiptScanner({ products, onSaved }) {
     setRows((rs) => rs.map((r, j) => (j === i ? { ...r, ...patch } : r)));
   }
 
-  function handleSaveAll() {
-    const good = rows.filter((r) => r.include && r.productId && r.total > 0);
-    for (const r of good) {
-      saveSale({
-        date: todayISO(),
-        productId: r.productId,
-        quantity: Number(r.quantity) || 1,
-        total: Number(r.total),
-        source: 'ocr',
-        paymentMethod: 'cash',
-      });
+  async function handleSaveAll() {
+    if (saving) {
+      return;
     }
-    reset();
-    onSaved?.(good.length);
+
+    const good = rows.filter(
+      (row) =>
+        row.include &&
+        row.productId &&
+        Number.isInteger(Number(row.quantity)) &&
+        Number(row.quantity) > 0 &&
+        Number.isFinite(Number(row.total)) &&
+        Number(row.total) > 0,
+    );
+
+    if (good.length === 0) {
+      setError(
+        'Tiada item yang sah untuk disimpan.',
+      );
+      return;
+    }
+
+    setSaving(true);
+    setError('');
+
+    try {
+      await Promise.all(
+        good.map((row) =>
+          saveSale({
+            date: todayISO(),
+            productId: row.productId,
+            quantity: Number(row.quantity),
+            total: Number(row.total),
+            source: 'ocr',
+            paymentMethod: 'cash',
+          }),
+        ),
+      );
+
+      reset();
+      onSaved?.(good.length);
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : 'Gagal menyimpan jualan daripada resit.',
+      );
+    } finally {
+      setSaving(false);
+    }
   }
 
   function reset() {
@@ -224,10 +261,12 @@ export default function ReceiptScanner({ products, onSaved }) {
           <div className={styles.actions}>
             <button
               className={styles.saveButton}
-              disabled={savableCount === 0}
+              disabled={savableCount === 0 || saving}
               onClick={handleSaveAll}
             >
-              Simpan {savableCount} item
+              {saving
+                ? 'Menyimpan...'
+                : `Simpan ${savableCount} item`}
             </button>
             <button className={styles.cancelButton} onClick={reset}>
               Batal

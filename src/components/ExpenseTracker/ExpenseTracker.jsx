@@ -1,119 +1,358 @@
-import { useState } from 'react';
-import { getExpenses, saveExpense, deleteExpense } from '../../lib/storage';
-import { todayISO } from '../../lib/dates';
+import {
+  useEffect,
+  useState,
+} from 'react';
+
+import {
+  deleteExpense,
+  getExpenses,
+  saveExpense,
+} from '../../lib/supabaseExpenses.js';
+
+import {
+  todayISO,
+} from '../../lib/dates.js';
+
 import styles from './ExpenseTracker.module.css';
 
 const CATEGORIES = [
-  { value: 'bahan', label: 'Bahan mentah (ingredients)' },
-  { value: 'gas', label: 'Gas' },
-  { value: 'pembungkusan', label: 'Pembungkusan (packaging)' },
-  { value: 'sewa', label: 'Sewa / utiliti' },
-  { value: 'lain', label: 'Lain-lain' },
+  {
+    value: 'bahan',
+    label: 'Bahan mentah (ingredients)',
+  },
+  {
+    value: 'gas',
+    label: 'Gas',
+  },
+  {
+    value: 'pembungkusan',
+    label: 'Pembungkusan (packaging)',
+  },
+  {
+    value: 'sewa',
+    label: 'Sewa / utiliti',
+  },
+  {
+    value: 'lain',
+    label: 'Lain-lain',
+  },
 ];
 
 function categoryLabel(value) {
-  return CATEGORIES.find((c) => c.value === value)?.label ?? value;
+  return (
+    CATEGORIES.find(
+      (category) =>
+        category.value === value,
+    )?.label ?? value
+  );
 }
 
-/** Daily expense logging — category, amount, optional note. */
-export default function ExpenseTracker({ onChange }) {
-  const [expenses, setExpenses] = useState(getExpenses);
-  const [category, setCategory] = useState('bahan');
-  const [amount, setAmount] = useState('');
-  const [note, setNote] = useState('');
+export default function ExpenseTracker({
+  onChange,
+}) {
+  const [expenses, setExpenses] =
+    useState([]);
 
-  const canSave = Number(amount) > 0;
+  const [category, setCategory] =
+    useState('bahan');
+
+  const [amount, setAmount] =
+    useState('');
+
+  const [note, setNote] =
+    useState('');
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [saving, setSaving] =
+    useState(false);
+
+  const [error, setError] =
+    useState('');
+
   const today = todayISO();
 
-  function refresh() {
-    setExpenses(getExpenses());
-    onChange?.();
+  const numericAmount =
+    Number(amount);
+
+  const canSave =
+    Number.isFinite(numericAmount) &&
+    numericAmount > 0;
+
+  async function loadExpenses() {
+    setLoading(true);
+    setError('');
+
+    try {
+      const nextExpenses =
+        await getExpenses();
+
+      setExpenses(nextExpenses);
+      onChange?.(nextExpenses);
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : 'Gagal mendapatkan perbelanjaan.',
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
-  function handleSubmit(e) {
-    e.preventDefault();
-    if (!canSave) return;
-    saveExpense({
-      date: today,
-      category,
-      amount: Number(amount),
-      ...(note.trim() ? { note: note.trim() } : {}),
-    });
-    setAmount('');
-    setNote('');
-    refresh();
+  useEffect(() => {
+    loadExpenses();
+  }, []);
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    if (!canSave || saving) {
+      return;
+    }
+
+    setSaving(true);
+    setError('');
+
+    try {
+      await saveExpense({
+        date: today,
+        category,
+        amount: numericAmount,
+        note: note.trim(),
+      });
+
+      setAmount('');
+      setNote('');
+
+      await loadExpenses();
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : 'Gagal menyimpan perbelanjaan.',
+      );
+    } finally {
+      setSaving(false);
+    }
   }
 
-  function handleDelete(exp) {
-    if (!window.confirm(`Padam perbelanjaan RM${exp.amount.toFixed(2)}?`)) return;
-    deleteExpense(exp.id);
-    refresh();
+  async function handleDelete(expense) {
+    const confirmed =
+      window.confirm(
+        `Padam perbelanjaan RM${expense.amount.toFixed(2)}?`,
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setSaving(true);
+    setError('');
+
+    try {
+      await deleteExpense(expense.id);
+      await loadExpenses();
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : 'Gagal memadam perbelanjaan.',
+      );
+    } finally {
+      setSaving(false);
+    }
   }
 
-  // newest first, today's expenses highlighted
-  const recent = [...expenses].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 20);
+  const recent = [...expenses]
+    .sort((first, second) => {
+      const dateComparison =
+        second.date.localeCompare(
+          first.date,
+        );
+
+      if (dateComparison !== 0) {
+        return dateComparison;
+      }
+
+      return String(
+        second.createdAt ?? '',
+      ).localeCompare(
+        String(first.createdAt ?? ''),
+      );
+    })
+    .slice(0, 20);
+
   const todayTotal = expenses
-    .filter((e) => e.date === today)
-    .reduce((sum, e) => sum + e.amount, 0);
+    .filter(
+      (expense) =>
+        expense.date === today,
+    )
+    .reduce(
+      (sum, expense) =>
+        sum + expense.amount,
+      0,
+    );
 
   return (
     <div className={styles.wrap}>
-      <form className={styles.form} onSubmit={handleSubmit}>
-        <h3 className={styles.title}>Tambah perbelanjaan hari ini</h3>
+      <form
+        className={styles.form}
+        onSubmit={handleSubmit}
+      >
+        <h3 className={styles.title}>
+          Tambah perbelanjaan hari ini
+        </h3>
+
         <label className={styles.field}>
           Kategori
-          <select value={category} onChange={(e) => setCategory(e.target.value)}>
-            {CATEGORIES.map((c) => (
-              <option key={c.value} value={c.value}>
-                {c.label}
-              </option>
-            ))}
+
+          <select
+            value={category}
+            onChange={(event) =>
+              setCategory(
+                event.target.value,
+              )
+            }
+            disabled={saving}
+          >
+            {CATEGORIES.map(
+              (categoryOption) => (
+                <option
+                  key={
+                    categoryOption.value
+                  }
+                  value={
+                    categoryOption.value
+                  }
+                >
+                  {
+                    categoryOption.label
+                  }
+                </option>
+              ),
+            )}
           </select>
         </label>
+
         <label className={styles.field}>
           Jumlah (RM)
+
           <input
             type="number"
-            min="0"
-            step="0.10"
+            min="0.01"
+            step="0.01"
+            inputMode="decimal"
             placeholder="20.00"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(event) =>
+              setAmount(
+                event.target.value,
+              )
+            }
+            disabled={saving}
+            required
           />
         </label>
+
         <label className={styles.field}>
           Nota (pilihan)
+
           <input
             type="text"
             placeholder="cth: tong gas baru"
             value={note}
-            onChange={(e) => setNote(e.target.value)}
+            onChange={(event) =>
+              setNote(
+                event.target.value,
+              )
+            }
+            disabled={saving}
           />
         </label>
-        <button className={styles.save} type="submit" disabled={!canSave}>
-          + Simpan perbelanjaan
+
+        {error && (
+          <p className={styles.empty}>
+            {error}
+          </p>
+        )}
+
+        <button
+          className={styles.save}
+          type="submit"
+          disabled={
+            !canSave || saving
+          }
+        >
+          {saving
+            ? 'Menyimpan...'
+            : '+ Simpan perbelanjaan'}
         </button>
       </form>
 
       <p className={styles.todayTotal}>
-        Perbelanjaan hari ini: <strong>RM{todayTotal.toFixed(2)}</strong>
+        Perbelanjaan hari ini:{' '}
+        <strong>
+          RM{todayTotal.toFixed(2)}
+        </strong>
       </p>
 
-      {recent.length === 0 ? (
-        <p className={styles.empty}>Tiada perbelanjaan direkod lagi.</p>
+      {loading ? (
+        <p className={styles.empty}>
+          Memuatkan perbelanjaan...
+        </p>
+      ) : recent.length === 0 ? (
+        <p className={styles.empty}>
+          Tiada perbelanjaan direkod
+          lagi.
+        </p>
       ) : (
         <ul className={styles.list}>
-          {recent.map((exp) => (
-            <li key={exp.id} className={styles.item}>
-              <div className={styles.itemInfo}>
-                <strong>RM{exp.amount.toFixed(2)}</strong>
-                <span className={styles.meta}>
-                  {categoryLabel(exp.category)}
-                  {exp.note ? ` — ${exp.note}` : ''}
-                  {exp.date !== today ? ` · ${exp.date}` : ''}
+          {recent.map((expense) => (
+            <li
+              key={expense.id}
+              className={styles.item}
+            >
+              <div
+                className={
+                  styles.itemInfo
+                }
+              >
+                <strong>
+                  RM
+                  {expense.amount.toFixed(
+                    2,
+                  )}
+                </strong>
+
+                <span
+                  className={styles.meta}
+                >
+                  {categoryLabel(
+                    expense.category,
+                  )}
+
+                  {expense.note
+                    ? ` — ${expense.note}`
+                    : ''}
+
+                  {expense.date !== today
+                    ? ` · ${expense.date}`
+                    : ''}
                 </span>
               </div>
-              <button className={styles.delete} onClick={() => handleDelete(exp)}>
+
+              <button
+                type="button"
+                className={styles.delete}
+                onClick={() =>
+                  handleDelete(expense)
+                }
+                disabled={saving}
+                aria-label={`Padam perbelanjaan RM${expense.amount.toFixed(2)}`}
+                title="Padam perbelanjaan"
+              >
                 🗑️
               </button>
             </li>

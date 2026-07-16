@@ -1,88 +1,242 @@
-import { useCallback, useState } from 'react';
 import {
-  getDashboardStats,
-  getDailySummary,
-  getInsightOfTheDay,
-  getPaymentSplit,
-} from '../../lib/insights';
-import { getSettings, saveSettings } from '../../lib/storage';
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
+
+import {
+  getDashboardData,
+} from '../../lib/supabaseDashboard.js';
+
+import {
+  getSettings,
+  saveSettings,
+} from '../../lib/storage.js';
+
 import SalesSummaryCard from './SalesSummaryCard';
 import SevenDayChart from './SevenDayChart';
 import TopItemsList from './TopItemsList';
 import InsightOfTheDay from './InsightOfTheDay';
+
 import styles from './Dashboard.module.css';
 
-function compute() {
-  return {
-    stats: getDashboardStats(),
-    summary: getDailySummary(),
-    insight: getInsightOfTheDay(),
-    split: getPaymentSplit(),
-    dailyTarget: getSettings().dailyTarget,
-  };
-}
+const EMPTY_DATA = {
+  stats: {
+    todayTotal: 0,
+    todayProfit: 0,
+    sevenDayTrend: [],
+    topItems: [],
+    targetProgress: 0,
+  },
+  summary:
+    'Tiada jualan direkod hari ini lagi.',
+  insight: null,
+  split: {
+    cash: 0,
+    qr: 0,
+  },
+  dailyTarget: 200,
+};
 
-/**
- * Main dashboard — everything comes from insights.js, per the contract.
- * Layout: on mobile this is one stacked column (source order below).
- * On desktop (≥ 880px, see Dashboard.module.css) the same elements are
- * placed onto a named CSS grid — summary spans the top, the chart and
- * top-items sit side by side, insight and the share card close it out —
- * so the wrapper divs below exist purely to carry grid-area names.
- */
 export default function Dashboard() {
-  const [data, setData] = useState(compute);
+  const [data, setData] =
+    useState(EMPTY_DATA);
 
-  const handleTargetChange = useCallback((dailyTarget) => {
-    if (dailyTarget > 0) saveSettings({ dailyTarget });
-    setData(compute());
-  }, []);
+  const [loading, setLoading] =
+    useState(true);
 
-  const { stats, summary, insight, split, dailyTarget } = data;
-  const hasAnyData = stats.sevenDayTrend.some((d) => d.total > 0);
+  const [error, setError] =
+    useState('');
 
-  const waText = `📊 WarungAI — ${new Date().toLocaleDateString('ms-MY')}\n${summary}`;
-  const waHref = `https://wa.me/?text=${encodeURIComponent(waText)}`;
+  const loadDashboard = useCallback(
+    async (
+      target =
+        getSettings().dailyTarget,
+    ) => {
+      setLoading(true);
+      setError('');
+
+      try {
+        const nextData =
+          await getDashboardData(
+            target,
+          );
+
+        setData(nextData);
+      } catch (caughtError) {
+        setError(
+          caughtError instanceof Error
+            ? caughtError.message
+            : 'Gagal memuatkan papan pemuka.',
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    loadDashboard();
+  }, [loadDashboard]);
+
+  const handleTargetChange =
+    useCallback(
+      async (dailyTarget) => {
+        if (
+          !Number.isFinite(
+            dailyTarget,
+          ) ||
+          dailyTarget <= 0
+        ) {
+          return;
+        }
+
+        saveSettings({
+          dailyTarget,
+        });
+
+        await loadDashboard(
+          dailyTarget,
+        );
+      },
+      [loadDashboard],
+    );
+
+  if (loading) {
+    return (
+      <div className={styles.wrap}>
+        <p className={styles.empty}>
+          Memuatkan papan pemuka...
+        </p>
+      </div>
+    );
+  }
+
+  const {
+    stats,
+    summary,
+    insight,
+    split,
+    dailyTarget,
+  } = data;
+
+  const hasAnyData =
+    stats.sevenDayTrend.some(
+      (day) => day.total > 0,
+    );
+
+  const whatsappText =
+    `📊 WarungAI — ` +
+    `${new Date().toLocaleDateString('ms-MY')}\n` +
+    summary;
+
+  const whatsappUrl =
+    `https://wa.me/?text=` +
+    encodeURIComponent(
+      whatsappText,
+    );
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.summaryArea}>
-        <SalesSummaryCard
-          stats={stats}
-          split={split}
-          dailyTarget={dailyTarget}
-          onTargetChange={handleTargetChange}
-        />
-      </div>
-
-      {!hasAnyData && (
-        <div className={styles.emptyArea}>
+      {error && (
+        <div
+          className={
+            styles.emptyArea
+          }
+        >
           <p className={styles.empty}>
-            Belum ada jualan minggu ini. Rekod jualan pertama anda di tab
-            “➕ Jualan”! (No sales yet this week — log your first sale.)
+            {error}
           </p>
         </div>
       )}
 
-      <div className={styles.chartArea}>
-        <SevenDayChart trend={stats.sevenDayTrend} />
+      <div
+        className={
+          styles.summaryArea
+        }
+      >
+        <SalesSummaryCard
+          stats={stats}
+          split={split}
+          dailyTarget={dailyTarget}
+          onTargetChange={
+            handleTargetChange
+          }
+        />
       </div>
 
-      <div className={styles.topArea}>
-        <TopItemsList items={stats.topItems} />
+      {!hasAnyData && (
+        <div
+          className={
+            styles.emptyArea
+          }
+        >
+          <p className={styles.empty}>
+            Belum ada jualan minggu ini.
+            Rekod jualan pertama anda di
+            tab “➕ Jualan”!
+          </p>
+        </div>
+      )}
+
+      <div
+        className={styles.chartArea}
+      >
+        <SevenDayChart
+          trend={
+            stats.sevenDayTrend
+          }
+        />
       </div>
 
-      <div className={styles.insightArea}>
-        <InsightOfTheDay insight={insight} />
+      <div
+        className={styles.topArea}
+      >
+        <TopItemsList
+          items={stats.topItems}
+        />
       </div>
 
-      <div className={styles.footerArea}>
-        <div className={styles.summaryCard}>
-          <h3 className={styles.summaryTitle}>Ringkasan hari ini</h3>
-          <p className={styles.summaryText}>{summary}</p>
+      <div
+        className={
+          styles.insightArea
+        }
+      >
+        <InsightOfTheDay
+          insight={insight}
+        />
+      </div>
+
+      <div
+        className={
+          styles.footerArea
+        }
+      >
+        <div
+          className={
+            styles.summaryCard
+          }
+        >
+          <h3
+            className={
+              styles.summaryTitle
+            }
+          >
+            Ringkasan hari ini
+          </h3>
+
+          <p
+            className={
+              styles.summaryText
+            }
+          >
+            {summary}
+          </p>
+
           <a
             className={styles.waButton}
-            href={waHref}
+            href={whatsappUrl}
             target="_blank"
             rel="noreferrer"
           >

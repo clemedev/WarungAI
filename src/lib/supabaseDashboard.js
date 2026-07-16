@@ -1,0 +1,358 @@
+import {
+  getSales,
+} from './supabaseSales.js';
+
+import {
+  getExpenses,
+} from './supabaseExpenses.js';
+
+import {
+  lastNDates,
+  todayISO,
+} from './dates.js';
+
+function round2(value) {
+  return Math.round(
+    (Number(value) + Number.EPSILON) * 100,
+  ) / 100;
+}
+
+function formatRM(value) {
+  return `RM${round2(value).toFixed(2)}`;
+}
+
+function calculateTopItems(
+  sales,
+  dates,
+  limit = 3,
+) {
+  const dateSet = new Set(dates);
+  const totals = new Map();
+
+  for (const sale of sales) {
+    if (!dateSet.has(sale.date)) {
+      continue;
+    }
+
+    const key =
+      sale.productId ??
+      sale.productName;
+
+    const current = totals.get(key) ?? {
+      productId:
+        sale.productId ?? null,
+      name:
+        sale.productName ??
+        'Produk tidak dikenali',
+      quantity: 0,
+    };
+
+    current.quantity +=
+      Number(sale.quantity) || 0;
+
+    totals.set(key, current);
+  }
+
+  return [...totals.values()]
+    .sort(
+      (first, second) =>
+        second.quantity -
+        first.quantity,
+    )
+    .slice(0, limit);
+}
+
+function calculatePaymentSplit(
+  sales,
+  date,
+) {
+  const split = {
+    cash: 0,
+    qr: 0,
+  };
+
+  for (const sale of sales) {
+    if (sale.date !== date) {
+      continue;
+    }
+
+    const key =
+      sale.paymentMethod === 'qr'
+        ? 'qr'
+        : 'cash';
+
+    split[key] +=
+      Number(sale.total) || 0;
+  }
+
+  return {
+    cash: round2(split.cash),
+    qr: round2(split.qr),
+  };
+}
+
+function createDailySummary({
+  date,
+  sales,
+  expenses,
+  topItem,
+  totalSales,
+  netProfit,
+}) {
+  const daySales = sales.filter(
+    (sale) => sale.date === date,
+  );
+
+  if (daySales.length === 0) {
+    return 'Tiada jualan direkod hari ini lagi.';
+  }
+
+  const expenseTotal = expenses
+    .filter(
+      (expense) =>
+        expense.date === date,
+    )
+    .reduce(
+      (sum, expense) =>
+        sum +
+        (Number(expense.amount) || 0),
+      0,
+    );
+
+  const parts = [
+    `Jualan hari ini: ${formatRM(totalSales)} (${daySales.length} transaksi).`,
+    `Untung bersih: ${formatRM(netProfit)}.`,
+  ];
+
+  if (topItem) {
+    parts.push(
+      `Paling laris: ${topItem.name} (${topItem.quantity} unit).`,
+    );
+  }
+
+  if (expenseTotal > 0) {
+    parts.push(
+      `Perbelanjaan: ${formatRM(expenseTotal)}.`,
+    );
+  }
+
+  return parts.join(' ');
+}
+
+function createInsight({
+  sales,
+  week,
+  topItem,
+}) {
+  const today = todayISO();
+
+  const todaySales = sales.filter(
+    (sale) => sale.date === today,
+  );
+
+  const scope =
+    todaySales.length > 0
+      ? todaySales
+      : sales.filter((sale) =>
+          week.includes(sale.date),
+        );
+
+  const productTotals = new Map();
+
+  for (const sale of scope) {
+    const key =
+      sale.productId ??
+      sale.productName;
+
+    const current =
+      productTotals.get(key) ?? {
+        name:
+          sale.productName ??
+          'Produk tidak dikenali',
+        quantity: 0,
+        revenue: 0,
+        cost: 0,
+      };
+
+    current.quantity +=
+      Number(sale.quantity) || 0;
+
+    current.revenue +=
+      Number(sale.total) || 0;
+
+    current.cost +=
+      Number(sale.totalCost) || 0;
+
+    productTotals.set(key, current);
+  }
+
+  for (const item of productTotals.values()) {
+    if (item.quantity <= 0) {
+      continue;
+    }
+
+    const averagePrice =
+      item.revenue /
+      item.quantity;
+
+    const averageCost =
+      item.cost /
+      item.quantity;
+
+    if (averagePrice < averageCost) {
+      return (
+        `⚠️ ${item.name} dijual bawah kos — ` +
+        `purata ${formatRM(averagePrice)} seunit ` +
+        `berbanding kos ${formatRM(averageCost)}.`
+      );
+    }
+  }
+
+  if (topItem) {
+    return (
+      `🔥 ${topItem.name} paling laris minggu ini ` +
+      `(${topItem.quantity} unit). Pastikan stok mencukupi.`
+    );
+  }
+
+  return null;
+}
+
+export async function getDashboardData(
+  dailyTarget = 200,
+) {
+  const [sales, expenses] =
+    await Promise.all([
+      getSales(),
+      getExpenses(),
+    ]);
+
+  const today = todayISO();
+  const week = lastNDates(7);
+
+  const todaySales = sales.filter(
+    (sale) => sale.date === today,
+  );
+
+  const todayExpenses =
+    expenses.filter(
+      (expense) =>
+        expense.date === today,
+    );
+
+  const todayTotal =
+    todaySales.reduce(
+      (sum, sale) =>
+        sum +
+        (Number(sale.total) || 0),
+      0,
+    );
+
+  const todayGrossProfit =
+    todaySales.reduce(
+      (sum, sale) =>
+        sum +
+        (Number(
+          sale.grossProfit,
+        ) || 0),
+      0,
+    );
+
+  const todayExpenseTotal =
+    todayExpenses.reduce(
+      (sum, expense) =>
+        sum +
+        (Number(
+          expense.amount,
+        ) || 0),
+      0,
+    );
+
+  const todayProfit = round2(
+    todayGrossProfit -
+      todayExpenseTotal,
+  );
+
+  const sevenDayTrend =
+    week.map((date) => ({
+      date,
+      total: round2(
+        sales
+          .filter(
+            (sale) =>
+              sale.date === date,
+          )
+          .reduce(
+            (sum, sale) =>
+              sum +
+              (Number(
+                sale.total,
+              ) || 0),
+            0,
+          ),
+      ),
+    }));
+
+  const topItems =
+    calculateTopItems(
+      sales,
+      week,
+      3,
+    );
+
+  const [todayTopItem] =
+    calculateTopItems(
+      sales,
+      [today],
+      1,
+    );
+
+  const split =
+    calculatePaymentSplit(
+      sales,
+      today,
+    );
+
+  const targetProgress =
+    dailyTarget > 0
+      ? Math.min(
+          1,
+          round2(
+            todayTotal /
+              dailyTarget,
+          ),
+        )
+      : 0;
+
+  const summary =
+    createDailySummary({
+      date: today,
+      sales,
+      expenses,
+      topItem: todayTopItem,
+      totalSales: round2(todayTotal),
+      netProfit: todayProfit,
+    });
+
+  const insight =
+    createInsight({
+      sales,
+      week,
+      topItem: topItems[0],
+    });
+
+  return {
+    stats: {
+      todayTotal:
+        round2(todayTotal),
+      todayProfit,
+      sevenDayTrend,
+      topItems,
+      targetProgress,
+    },
+    summary,
+    insight,
+    split,
+    dailyTarget,
+  };
+}

@@ -1,121 +1,627 @@
 .card {
-  background: #1a7f4b;
-  color: #fff;
-  border-radius: 14px;
-  padding: 1rem 1.1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
+  position: relative;
+  isolation: isolate;
+
+  overflow: hidden;
+  padding: clamp(1.15rem, 3vw, 1.8rem);
+
+  color: #ffffff;
+  background:
+    linear-gradient(
+      135deg,
+      #0d4f31 0%,
+      #176b43 50%,
+      #1e8052 100%
+    );
+  border:
+    1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    0 18px 50px rgba(15, 81, 50, 0.22),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.1);
 }
 
-.numbers {
+.card::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+
+  background-image:
+    linear-gradient(
+      rgba(255, 255, 255, 0.025) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.025) 1px,
+      transparent 1px
+    );
+  background-size: 28px 28px;
+
+  content: "";
+  mask-image:
+    linear-gradient(
+      to bottom,
+      black,
+      transparent 75%
+    );
+}
+
+.glow {
+  position: absolute;
+  top: -8rem;
+  right: -7rem;
+  z-index: -1;
+
+  width: 20rem;
+  height: 20rem;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(244, 183, 64, 0.3),
+      transparent 68%
+    );
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.header {
   display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 1rem;
+
+  margin-bottom: 1.4rem;
 }
 
-.stat {
-  flex: 1;
+.eyebrow {
+  margin: 0 0 0.3rem;
+
+  color: #c6ead6;
+
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+
+  color: #ffffff;
+
+  font-size: clamp(1.18rem, 3vw, 1.55rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.subtitle {
+  max-width: 510px;
+  margin: 0.42rem 0 0;
+
+  color: rgba(255, 255, 255, 0.68);
+
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.liveBadge {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.45rem;
+
+  padding: 0.42rem 0.65rem;
+
+  color: #e7fbed;
+  background:
+    rgba(255, 255, 255, 0.09);
+  border:
+    1px solid rgba(255, 255, 255, 0.13);
+  border-radius: var(--radius-pill);
+  backdrop-filter: blur(12px);
+
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.liveDot {
+  width: 7px;
+  height: 7px;
+
+  background: #75e59c;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 4px
+      rgba(117, 229, 156, 0.14),
+    0 0 12px
+      rgba(117, 229, 156, 0.75);
+
+  animation: livePulse 1.8s infinite;
+}
+
+@keyframes livePulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.8rem;
+
+  margin-bottom: 0.85rem;
+}
+
+.metric {
+  min-width: 0;
+  padding: 1rem;
+
+  background:
+    rgba(255, 255, 255, 0.09);
+  border:
+    1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  transition:
+    transform var(--transition-normal),
+    background-color var(--transition-normal);
+}
+
+.metric:hover {
+  background:
+    rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+.profitMetric {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(117, 229, 156, 0.14),
+      rgba(255, 255, 255, 0.07)
+    );
+}
+
+.lossMetric {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 142, 128, 0.15),
+      rgba(255, 255, 255, 0.07)
+    );
+}
+
+.metricTop {
   display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
+  align-items: center;
+  gap: 0.5rem;
+
+  margin-bottom: 0.7rem;
 }
 
-.label {
-  font-size: 0.78rem;
-  opacity: 0.85;
+.metricIcon {
+  display: inline-grid;
+  place-items: center;
+
+  width: 28px;
+  height: 28px;
+
+  color: #ffe29c;
+  background:
+    rgba(244, 183, 64, 0.15);
+  border:
+    1px solid rgba(244, 183, 64, 0.2);
+  border-radius: 9px;
+
+  font-size: 0.85rem;
+  font-weight: 900;
 }
 
-.value {
-  font-size: 1.45rem;
+.metricLabel {
+  color: rgba(255, 255, 255, 0.74);
+
+  font-size: 0.76rem;
   font-weight: 700;
+}
+
+.metricValue {
+  display: block;
+  margin-bottom: 0.3rem;
+
+  color: #ffffff;
+
+  font-size: clamp(1.65rem, 5vw, 2.5rem);
+  font-weight: 850;
+  letter-spacing: -0.055em;
+  line-height: 1;
 }
 
 .profit {
-  color: #d3f7e2;
+  color: #bff3d1;
 }
 
 .loss {
-  color: #ffc4bc;
+  color: #ffc3ba;
 }
 
-.targetRow {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
+.metricHint {
+  color: rgba(255, 255, 255, 0.59);
+
+  font-size: 0.7rem;
 }
 
-.targetHead {
+.metricHint strong {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.targetPanel {
+  padding: 1rem;
+
+  background:
+    rgba(8, 47, 28, 0.28);
+  border:
+    1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+}
+
+.targetHeader {
   display: flex;
+  align-items: flex-end;
   justify-content: space-between;
+  gap: 1rem;
+
+  margin-bottom: 0.8rem;
+}
+
+.targetLabel {
+  display: block;
+  margin-bottom: 0.22rem;
+
+  color: rgba(255, 255, 255, 0.64);
+
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.targetAmount {
+  display: flex;
   align-items: center;
+  gap: 0.22rem;
+
+  color: #ffffff;
+
+  font-size: 0.9rem;
+  font-weight: 800;
 }
 
 .targetInput {
-  width: 4.5rem;
-  font: inherit;
-  font-size: 0.8rem;
-  border: none;
-  border-radius: 6px;
-  padding: 0.15rem 0.35rem;
-  margin-left: 0.2rem;
-}
+  width: 6rem;
+  min-height: 34px;
+  padding: 0.25rem 0.45rem;
 
-.pct {
-  font-weight: 700;
+  color: #ffffff;
+  background:
+    rgba(255, 255, 255, 0.1);
+  border:
+    1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+
   font-size: 0.9rem;
+  font-weight: 750;
 }
 
-.bar {
-  height: 10px;
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 999px;
+.targetInput:hover,
+.targetInput:focus {
+  background:
+    rgba(255, 255, 255, 0.14);
+  border-color:
+    rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 0 0 3px
+      rgba(255, 255, 255, 0.08);
+}
+
+.targetResult {
+  text-align: right;
+}
+
+.targetResult strong {
+  display: block;
+
+  color: #ffe29c;
+
+  font-size: 1.15rem;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.targetResult span {
+  color: rgba(255, 255, 255, 0.56);
+
+  font-size: 0.65rem;
+}
+
+.progressTrack {
+  position: relative;
+
+  height: 11px;
   overflow: hidden;
+
+  background:
+    rgba(255, 255, 255, 0.12);
+  border:
+    1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-pill);
 }
 
-.fill {
+.progressFill {
+  position: relative;
+
   height: 100%;
-  background: #ffd75e;
-  border-radius: 999px;
-  transition: width 0.4s ease;
+  min-width: 0;
+
+  background:
+    linear-gradient(
+      90deg,
+      #f4b740,
+      #ffe293
+    );
+  border-radius: inherit;
+  box-shadow:
+    0 0 18px rgba(244, 183, 64, 0.38);
+
+  transition:
+    width 500ms cubic-bezier(
+      0.2,
+      0.8,
+      0.2,
+      1
+    );
 }
 
-.split {
-  margin: 0;
-  font-size: 0.8rem;
-  opacity: 0.9;
+.progressGlow {
+  position: absolute;
+  inset: 0 0 0 auto;
+
+  width: 24px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.75)
+    );
+  filter: blur(3px);
 }
 
-/* ---------------------------------------------------------------
-   Desktop: the card now sits at ~700-900px wide instead of a
-   360px phone column. Rather than stretching the same three
-   stacked rows across all that width (long, sparse-looking bars),
-   put the headline numbers and the target/split block side by
-   side, so the card reads as one cohesive panel instead of a
-   tall thin phone widget lost in whitespace.
-   ------------------------------------------------------------- */
-@media (min-width: 880px) {
+.progressFooter {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+
+  margin-top: 0.45rem;
+
+  color: rgba(255, 255, 255, 0.52);
+
+  font-size: 0.64rem;
+}
+
+.paymentSection {
+  margin-top: 1.05rem;
+}
+
+.paymentHeading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+
+  margin-bottom: 0.65rem;
+}
+
+.sectionLabel {
+  color: rgba(255, 255, 255, 0.8);
+
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.paymentHeading p {
+  margin: 0.1rem 0 0;
+
+  color: rgba(255, 255, 255, 0.48);
+
+  font-size: 0.65rem;
+}
+
+.transactionTotal {
+  color: rgba(255, 255, 255, 0.82);
+
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.paymentGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.65rem;
+}
+
+.paymentCard {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.65rem;
+
+  min-width: 0;
+  padding: 0.72rem;
+
+  background:
+    rgba(255, 255, 255, 0.07);
+  border:
+    1px solid rgba(255, 255, 255, 0.09);
+  border-radius: var(--radius-md);
+}
+
+.paymentIconCash,
+.paymentIconQr {
+  display: grid;
+  place-items: center;
+
+  width: 34px;
+  height: 34px;
+
+  border-radius: 10px;
+
+  font-size: 0.64rem;
+  font-weight: 900;
+}
+
+.paymentIconCash {
+  color: #ffe29c;
+  background:
+    rgba(244, 183, 64, 0.15);
+  border:
+    1px solid rgba(244, 183, 64, 0.18);
+}
+
+.paymentIconQr {
+  color: #c9e4ff;
+  background:
+    rgba(112, 178, 245, 0.14);
+  border:
+    1px solid rgba(112, 178, 245, 0.18);
+}
+
+.paymentInfo {
+  min-width: 0;
+}
+
+.paymentInfo span {
+  display: block;
+
+  color: rgba(255, 255, 255, 0.53);
+
+  font-size: 0.64rem;
+}
+
+.paymentInfo strong {
+  display: block;
+  overflow: hidden;
+
+  color: #ffffff;
+
+  font-size: 0.85rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.paymentPercent {
+  color: rgba(255, 255, 255, 0.55);
+
+  font-size: 0.68rem;
+  font-weight: 750;
+}
+
+@media (max-width: 560px) {
   .card {
+    padding: 1.05rem;
+    border-radius: 18px;
+  }
+
+  .header {
+    margin-bottom: 1rem;
+  }
+
+  .subtitle {
+    max-width: 88%;
+  }
+
+  .liveBadge {
+    padding: 0.38rem 0.5rem;
+    font-size: 0.64rem;
+  }
+
+  .metrics {
+    gap: 0.55rem;
+  }
+
+  .metric {
+    padding: 0.82rem;
+  }
+
+  .metricValue {
+    font-size: clamp(
+      1.45rem,
+      7.4vw,
+      1.9rem
+    );
+  }
+
+  .metricHint {
+    font-size: 0.63rem;
+  }
+
+  .paymentGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 390px) {
+  .title {
+    font-size: 1.08rem;
+  }
+
+  .subtitle {
+    display: none;
+  }
+
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .metric {
     display: grid;
-    grid-template-columns: 1fr 1.1fr;
-    column-gap: 2rem;
-    row-gap: 0.4rem;
+    grid-template-columns: 1fr auto;
+    column-gap: 0.75rem;
+  }
+
+  .metricTop {
+    grid-column: 1 / -1;
+    margin-bottom: 0.45rem;
+  }
+
+  .metricValue {
+    margin: 0;
+  }
+
+  .metricHint {
+    align-self: end;
+    text-align: right;
+  }
+
+  .targetHeader {
     align-items: center;
-    padding: 1.4rem 1.75rem;
   }
 
-  .numbers {
-    gap: 1.75rem;
+  .progressFooter {
+    font-size: 0.6rem;
   }
+}
 
-  .value {
-    font-size: 1.9rem;
-  }
-
-  .targetRow {
-    gap: 0.4rem;
-  }
-
-  .split {
-    grid-column: 2;
+@media (prefers-reduced-motion: reduce) {
+  .liveDot {
+    animation: none;
   }
 }

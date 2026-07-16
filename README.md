@@ -784,24 +784,10 @@ The project focuses on practical AI-enabled tools that improve productivity and 
 
 ---
 
-## Team Responsibilities
-
-Update this section with your actual team members:
-
-```text
-Member 1 — Product design and frontend experience
-Member 2 — Supabase, database design, and security
-Member 3 — OCR, voice, parsing, and financial logic
-Member 4 — Integration, testing, deployment, and presentation
-```
-
----
 
 ## License
 
-Add the team’s chosen license before wider public distribution.
-
-MIT is a common choice for hackathon projects, but the final license should be agreed upon by all team members.
+No license, all inspiration, product, or solution is owned by (c) clemedev. More information, please contact me via LinkedIn.
 
 ---
 

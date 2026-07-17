@@ -318,3 +318,21 @@ Low Stock Count compares the existing current-stock and warning-threshold values
 ### How to demo it
 
 Open Analitik in Demo Stall Mode and point to Low Stock Count. Explain that the owner can see stock risk alongside weekly performance, rather than noticing a shortage only when a customer orders the item.
+
+## Feature log — 10-Minute Undo Sale Safeguard
+
+### What changed
+
+- Added an **Undo this sale** action after a sale is saved.
+- The action remains available for 10 minutes and works in both normal accounts and Demo Stall Mode.
+- Multi-item saves from Busy Mode and receipt scanning are treated as one temporary undo batch.
+
+### How it works
+
+WarungAI remembers the saved sale IDs in the browser for 10 minutes. Tapping Undo deletes every saved item in that batch through the existing delete flow. Each deletion restores the relevant stock, then Overview, Records, Daily Closing, and Analytics refresh from the updated data. If one item cannot be reversed, the app keeps the action available so the owner can retry rather than claiming the whole undo succeeded.
+
+This is a speed-and-correction safeguard for recent entry mistakes. It does not add customer tracking, change the Supabase schema, or turn historical item lines into permanent grouped orders.
+
+### How to demo it
+
+In Demo Stall Mode, use Busy Mode to save two or more products. Point to the **Undo this sale** action at the bottom of the screen. Tap it, then open Inventory and Analytics to show that stock and totals have returned to their previous values. Explain that a stall owner can correct a rushed entry in one action without hunting down each line item.

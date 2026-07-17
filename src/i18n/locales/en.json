@@ -87,7 +87,12 @@
   },
   "toast": {
     "salesSaved_one": "✓ {{count}} sale saved",
-    "salesSaved_other": "✓ {{count}} sales saved"
+    "salesSaved_other": "✓ {{count}} sales saved",
+    "undoAvailable": "Sale saved. Undo is available for 10 minutes.",
+    "undo": "Undo this sale",
+    "undoing": "Undoing...",
+    "undoCompleted": "✓ {{count}} sale item restored",
+    "undoPartial": "Some items could not be undone. Try again."
   },
   "theme": {
     "useLight": "Switch to light mode",

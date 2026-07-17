@@ -72,7 +72,7 @@ export function saveDemoSale(sale) {
   if (!Number.isInteger(quantity) || quantity <= 0 || quantity > product.currentStock) {
     throw new Error(`Stok ${product.name} tidak mencukupi.`);
   }
-  const record = makeSale(`demo-sale-${Date.now()}`, sale.date ?? todayISO(), product, quantity, sale.paymentMethod, total / quantity);
+  const record = makeSale(`demo-sale-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, sale.date ?? todayISO(), product, quantity, sale.paymentMethod, total / quantity);
   data.sales.unshift(record); product.currentStock = Math.max(0, product.currentStock - quantity); writeData(data); return record;
 }
 export function saveDemoExpense(expense) { const data = readData(); const record = { ...expense, id: `demo-expense-${Date.now()}`, amount: Number(expense.amount), date: expense.date ?? todayISO() }; data.expenses.unshift(record); writeData(data); return record; }

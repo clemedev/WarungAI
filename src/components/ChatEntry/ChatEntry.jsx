@@ -89,7 +89,10 @@ export default function ChatEntry({
 
       setDraft(null);
       setText('');
-      await onSaved?.(1);
+      await onSaved?.({
+        count: 1,
+        saleIds: [saved.id],
+      });
     } catch (caughtError) {
       setError(
         caughtError instanceof Error

@@ -86,7 +86,12 @@
     "productHint": "售价、成本与库存"
   },
   "toast": {
-    "salesSaved_other": "✓ 已记录 {{count}} 笔销售"
+    "salesSaved_other": "✓ 已记录 {{count}} 笔销售",
+    "undoAvailable": "销售已保存，可在 10 分钟内撤销。",
+    "undo": "撤销此销售",
+    "undoing": "正在撤销...",
+    "undoCompleted": "✓ 已恢复 {{count}} 个销售项目",
+    "undoPartial": "部分项目无法撤销，请再试一次。"
   },
   "theme": {
     "useLight": "切换到浅色模式",

@@ -55,11 +55,12 @@ export default function QuickSaleGrid({ products, onSaved }) {
 
     setSaving(true);
     setError('');
-    const savedIds = [];
+    const savedSaleIds = [];
+    const savedProductIds = [];
 
     try {
       for (const item of items) {
-        await saveSale({
+        const savedSale = await saveSale({
           date: todayISO(),
           productId: item.id,
           quantity: item.quantity,
@@ -67,15 +68,19 @@ export default function QuickSaleGrid({ products, onSaved }) {
           paymentMethod,
           source: 'manual',
         });
-        savedIds.push(item.id);
+        savedSaleIds.push(savedSale.id);
+        savedProductIds.push(item.id);
       }
 
       setQuantities({});
-      await onSaved?.(savedIds.length);
+      await onSaved?.({
+        count: savedSaleIds.length,
+        saleIds: savedSaleIds,
+      });
     } catch (caughtError) {
       setQuantities((current) => {
         const remaining = { ...current };
-        savedIds.forEach((id) => delete remaining[id]);
+        savedProductIds.forEach((id) => delete remaining[id]);
         return remaining;
       });
       setError(
@@ -83,8 +88,11 @@ export default function QuickSaleGrid({ products, onSaved }) {
           ? caughtError.message
           : t('busy.saveFailed'),
       );
-      if (savedIds.length > 0) {
-        await onSaved?.(savedIds.length);
+      if (savedSaleIds.length > 0) {
+        await onSaved?.({
+          count: savedSaleIds.length,
+          saleIds: savedSaleIds,
+        });
       }
     } finally {
       setSaving(false);

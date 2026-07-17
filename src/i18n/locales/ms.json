@@ -86,7 +86,12 @@
     "productHint": "Harga, kos dan stok"
   },
   "toast": {
-    "salesSaved_other": "✓ {{count}} jualan berjaya disimpan"
+    "salesSaved_other": "✓ {{count}} jualan berjaya disimpan",
+    "undoAvailable": "Jualan disimpan. Buat asal tersedia selama 10 minit.",
+    "undo": "Buat asal jualan ini",
+    "undoing": "Sedang buat asal...",
+    "undoCompleted": "✓ {{count}} item jualan dipulihkan",
+    "undoPartial": "Sesetengah item tidak dapat dibuat asal. Cuba lagi."
   },
   "theme": {
     "useLight": "Gunakan mod cerah",

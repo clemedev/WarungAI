@@ -129,23 +129,33 @@ export default function SaleReceiptScanner({ products, onSaved }) {
     setSaving(true);
     setError('');
 
+    const savedSaleIds = [];
+
     try {
-      await Promise.all(
-        good.map((row) =>
-          saveSale({
+      for (const row of good) {
+        const savedSale = await saveSale({
             date: todayISO(),
             productId: row.productId,
             quantity: Number(row.quantity),
             total: Number(row.total),
             source: 'ocr',
             paymentMethod: 'cash',
-          }),
-        ),
-      );
+          });
+        savedSaleIds.push(savedSale.id);
+      }
 
       reset();
-      await onSaved?.(good.length);
+      await onSaved?.({
+        count: savedSaleIds.length,
+        saleIds: savedSaleIds,
+      });
     } catch (caughtError) {
+      if (savedSaleIds.length > 0) {
+        await onSaved?.({
+          count: savedSaleIds.length,
+          saleIds: savedSaleIds,
+        });
+      }
       setError(
         caughtError instanceof Error
           ? caughtError.message

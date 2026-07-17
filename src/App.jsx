@@ -18,6 +18,10 @@ import QuickSaleGrid from './components/QuickSaleGrid/QuickSaleGrid';
 import DailyClosing from './components/DailyClosing/DailyClosing';
 
 import {
+  deleteSale,
+} from './lib/supabaseSales.js';
+
+import {
   getProducts,
 } from './lib/supabaseProducts.js';
 
@@ -56,6 +60,32 @@ const DEMO_USER = {
   name: 'Warung Kak Lina',
   email: 'demo@warungai.local',
 };
+
+const UNDO_WINDOW_MS = 10 * 60 * 1000;
+const UNDO_SALE_STORAGE_KEY = 'warungai.undo-sale';
+
+function readUndoSale() {
+  try {
+    const saved = JSON.parse(
+      localStorage.getItem(UNDO_SALE_STORAGE_KEY),
+    );
+
+    if (
+      !saved ||
+      !Array.isArray(saved.saleIds) ||
+      saved.saleIds.length === 0 ||
+      Number(saved.expiresAt) <= Date.now()
+    ) {
+      localStorage.removeItem(UNDO_SALE_STORAGE_KEY);
+      return null;
+    }
+
+    return saved;
+  } catch {
+    localStorage.removeItem(UNDO_SALE_STORAGE_KEY);
+    return null;
+  }
+}
 
 // These features are only needed after a user opens their corresponding
 // screen. Lazy loading keeps Tesseract and Chart.js out of the first bundle.
@@ -266,6 +296,15 @@ export default function App() {
   const [toast, setToast] =
     useState('');
 
+  const [undoSale, setUndoSale] =
+    useState(() => readUndoSale());
+
+  const [undoingSale, setUndoingSale] =
+    useState(false);
+
+  const [undoNotice, setUndoNotice] =
+    useState('');
+
   const [
     createMenuOpen,
     setCreateMenuOpen,
@@ -311,6 +350,40 @@ export default function App() {
       setProducts([]);
     }
   }
+
+  function updateUndoSale(nextUndoSale) {
+    setUndoSale(nextUndoSale);
+
+    if (nextUndoSale) {
+      localStorage.setItem(
+        UNDO_SALE_STORAGE_KEY,
+        JSON.stringify(nextUndoSale),
+      );
+    } else {
+      localStorage.removeItem(UNDO_SALE_STORAGE_KEY);
+    }
+  }
+
+  useEffect(() => {
+    if (!undoSale) {
+      return undefined;
+    }
+
+    const remaining = Number(undoSale.expiresAt) - Date.now();
+
+    if (remaining <= 0) {
+      updateUndoSale(null);
+      setUndoNotice('');
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      updateUndoSale(null);
+      setUndoNotice('');
+    }, remaining);
+
+    return () => window.clearTimeout(timer);
+  }, [undoSale]);
 
   useEffect(() => {
     if (!createMenuOpen) {
@@ -416,6 +489,8 @@ export default function App() {
 
   async function handleTryDemo() {
     startDemoStall();
+    updateUndoSale(null);
+    setUndoNotice('');
     setDemoMode(true);
     setUser(DEMO_USER);
     await loadProducts();
@@ -425,6 +500,8 @@ export default function App() {
   async function handleSignOut() {
     if (demoMode) {
       clearDemoStall();
+      updateUndoSale(null);
+      setUndoNotice('');
       setDemoMode(false);
       setWalkthroughOpen(false);
       setUser(null);
@@ -445,6 +522,8 @@ export default function App() {
     }
 
     setLocalStorageIdentity(null);
+    updateUndoSale(null);
+    setUndoNotice('');
     setUser(null);
     setProducts([]);
     setView('overview');
@@ -463,10 +542,28 @@ export default function App() {
     );
   }
 
-  async function handleSaved(count) {
+  async function handleSaved(result) {
+    const count =
+      typeof result === 'number'
+        ? result
+        : Number(result?.count) || 0;
+
+    const saleIds = Array.isArray(result?.saleIds)
+      ? result.saleIds.filter(Boolean)
+      : [];
+
     setToast(
       t('toast.salesSaved', { count }),
     );
+
+    if (saleIds.length > 0) {
+      updateUndoSale({
+        saleIds,
+        count,
+        expiresAt: Date.now() + UNDO_WINDOW_MS,
+      });
+      setUndoNotice('');
+    }
 
     setSalesVersion(
       (version) => version + 1,
@@ -489,6 +586,51 @@ export default function App() {
     setSalesVersion((version) => version + 1);
     setActivityVersion((version) => version + 1);
     await loadProducts();
+  }
+
+  async function handleUndoSale() {
+    if (undoingSale || !undoSale) {
+      return;
+    }
+
+    if (Number(undoSale.expiresAt) <= Date.now()) {
+      updateUndoSale(null);
+      setUndoNotice('');
+      return;
+    }
+
+    setUndoingSale(true);
+    setUndoNotice(t('toast.undoing'));
+    const failedIds = [];
+
+    for (const saleId of undoSale.saleIds) {
+      try {
+        await deleteSale(saleId);
+      } catch {
+        failedIds.push(saleId);
+      }
+    }
+
+    const restoredCount = undoSale.saleIds.length - failedIds.length;
+
+    if (restoredCount > 0) {
+      await handleSalesChanged();
+    }
+
+    if (failedIds.length > 0) {
+      updateUndoSale({
+        saleIds: failedIds,
+        count: failedIds.length,
+        expiresAt: Date.now() + UNDO_WINDOW_MS,
+      });
+      setUndoNotice(t('toast.undoPartial'));
+    } else {
+      updateUndoSale(null);
+      setUndoNotice('');
+      setToast(t('toast.undoCompleted', { count: restoredCount }));
+    }
+
+    setUndoingSale(false);
   }
 
   function openSale() {
@@ -1318,12 +1460,32 @@ export default function App() {
         </div>
       )}
 
-      {toast && (
+      {(toast || undoSale) && (
         <div
-          className={styles.toast}
+          className={
+            undoSale
+              ? `${styles.toast} ${styles.toastWithAction}`
+              : styles.toast
+          }
           role="status"
         >
-          {toast}
+          <span>
+            {undoSale
+              ? undoNotice || t('toast.undoAvailable', { count: undoSale.count })
+              : toast}
+          </span>
+
+          {undoSale && (
+            <button
+              type="button"
+              onClick={handleUndoSale}
+              disabled={undoingSale}
+            >
+              {undoingSale
+                ? t('toast.undoing')
+                : t('toast.undo')}
+            </button>
+          )}
         </div>
       )}
     </div>

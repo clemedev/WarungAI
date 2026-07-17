@@ -769,6 +769,40 @@
   text-align: center;
 }
 
+.toastWithAction {
+  top: calc(
+    1rem + env(safe-area-inset-top)
+  );
+  bottom: auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+
+  text-align: left;
+}
+
+.toastWithAction button {
+  flex-shrink: 0;
+
+  min-height: 36px;
+  padding: 0.45rem 0.75rem;
+
+  color: #093c23;
+  background: #ffe19a;
+  border: 0;
+  border-radius: var(--radius-pill);
+
+  font: inherit;
+  font-weight: 850;
+}
+
+.toastWithAction button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
 .loadingScreen {
   display: grid;
   place-items: center;
@@ -1306,6 +1340,11 @@
     width: max-content;
     max-width: 440px;
     margin: 0;
+  }
+
+  .toastWithAction {
+    top: 1.25rem;
+    bottom: auto;
   }
 }
 

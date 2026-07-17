@@ -11,6 +11,7 @@ import ProductList from './components/ProductList/ProductList';
 import ExpenseTracker from './components/ExpenseTracker/ExpenseTracker';
 import LoginScreen from './components/LoginScreen/LoginScreen';
 import SalesList from './components/SalesList/SalesList';
+import OverviewMetrics from './components/OverviewMetrics/OverviewMetrics';
 
 import {
   getProducts,
@@ -212,6 +213,11 @@ export default function App() {
     setSalesVersion,
   ] = useState(0);
 
+  const [
+    activityVersion,
+    setActivityVersion,
+  ] = useState(0);
+
   const [toast, setToast] =
     useState('');
 
@@ -361,6 +367,10 @@ export default function App() {
     );
 
     setSalesVersion(
+      (version) => version + 1,
+    );
+
+    setActivityVersion(
       (version) => version + 1,
     );
 
@@ -542,11 +552,18 @@ export default function App() {
             </header>
 
             {view === 'overview' && (
-              <div
-                className={
-                  styles.overviewLayout
-                }
-              >
+              <>
+                <OverviewMetrics
+                  refreshKey={
+                    activityVersion
+                  }
+                />
+
+                <div
+                  className={
+                    styles.overviewLayout
+                  }
+                >
                 <section
                   className={
                     styles.capturePanel
@@ -765,7 +782,8 @@ export default function App() {
                     }
                   />
                 </section>
-              </div>
+                </div>
+              </>
             )}
 
             {view === 'records' && (
@@ -827,7 +845,14 @@ export default function App() {
 
                 {recordType ===
                   'expenses' && (
-                  <ExpenseTracker />
+                  <ExpenseTracker
+                    onChange={() =>
+                      setActivityVersion(
+                        (version) =>
+                          version + 1,
+                      )
+                    }
+                  />
                 )}
               </div>
             )}

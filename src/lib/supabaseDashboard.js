@@ -346,6 +346,10 @@ export async function getDashboardData(
       todayTotal:
         round2(todayTotal),
       todayProfit,
+      todayExpenseTotal:
+        round2(todayExpenseTotal),
+      todayTransactionCount:
+        todaySales.length,
       sevenDayTrend,
       topItems,
       targetProgress,

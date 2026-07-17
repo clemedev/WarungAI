@@ -13,6 +13,8 @@ import {
   todayISO,
 } from '../../lib/dates.js';
 
+import { useTranslation } from 'react-i18next';
+
 import ReceiptScanner from '../ReceiptScanner/ReceiptScanner';
 
 import styles from './ExpenseTracker.module.css';
@@ -20,38 +22,41 @@ import styles from './ExpenseTracker.module.css';
 const CATEGORIES = [
   {
     value: 'bahan',
-    label: 'Bahan mentah (ingredients)',
+    key: 'scanner.catBahan',
   },
   {
     value: 'gas',
-    label: 'Gas',
+    key: 'scanner.catGas',
   },
   {
     value: 'pembungkusan',
-    label: 'Pembungkusan (packaging)',
+    key: 'scanner.catPembungkusan',
   },
   {
     value: 'sewa',
-    label: 'Sewa / utiliti',
+    key: 'scanner.catSewa',
   },
   {
     value: 'lain',
-    label: 'Lain-lain',
+    key: 'scanner.catLain',
   },
 ];
 
-function categoryLabel(value) {
+/** Locale key for a stored category value, or null if it is unknown. */
+function categoryKey(value) {
   return (
     CATEGORIES.find(
       (category) =>
         category.value === value,
-    )?.label ?? value
+    )?.key ?? null
   );
 }
 
 export default function ExpenseTracker({
   onChange,
 }) {
+  const { t } = useTranslation();
+
   const [expenses, setExpenses] =
     useState([]);
 
@@ -96,7 +101,7 @@ export default function ExpenseTracker({
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : 'Gagal mendapatkan perbelanjaan.',
+          : t('expense.loadFailed'),
       );
     } finally {
       setLoading(false);
@@ -133,7 +138,7 @@ export default function ExpenseTracker({
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : 'Gagal menyimpan perbelanjaan.',
+          : t('expense.saveFailed'),
       );
     } finally {
       setSaving(false);
@@ -143,7 +148,9 @@ export default function ExpenseTracker({
   async function handleDelete(expense) {
     const confirmed =
       window.confirm(
-        `Padam perbelanjaan RM${expense.amount.toFixed(2)}?`,
+        t('expense.confirmDelete', {
+          amount: `RM${expense.amount.toFixed(2)}`,
+        }),
       );
 
     if (!confirmed) {
@@ -160,7 +167,7 @@ export default function ExpenseTracker({
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : 'Gagal memadam perbelanjaan.',
+          : t('expense.deleteFailed'),
       );
     } finally {
       setSaving(false);
@@ -212,11 +219,11 @@ export default function ExpenseTracker({
         onSubmit={handleSubmit}
       >
         <h3 className={styles.title}>
-          Tambah perbelanjaan hari ini
+          {t('expense.formTitle')}
         </h3>
 
         <label className={styles.field}>
-          Kategori
+          {t('expense.category')}
 
           <select
             value={category}
@@ -238,7 +245,9 @@ export default function ExpenseTracker({
                   }
                 >
                   {
-                    categoryOption.label
+                    t(
+                      categoryOption.key,
+                    )
                   }
                 </option>
               ),
@@ -247,7 +256,7 @@ export default function ExpenseTracker({
         </label>
 
         <label className={styles.field}>
-          Jumlah (RM)
+          {t('expense.amount')}
 
           <input
             type="number"
@@ -267,11 +276,13 @@ export default function ExpenseTracker({
         </label>
 
         <label className={styles.field}>
-          Nota (pilihan)
+          {t('expense.note')}
 
           <input
             type="text"
-            placeholder="cth: tong gas baru"
+            placeholder={t(
+              'expense.notePlaceholder',
+            )}
             value={note}
             onChange={(event) =>
               setNote(
@@ -296,13 +307,13 @@ export default function ExpenseTracker({
           }
         >
           {saving
-            ? 'Menyimpan...'
-            : '+ Simpan perbelanjaan'}
+            ? t('expense.saving')
+            : t('expense.save')}
         </button>
       </form>
 
       <p className={styles.todayTotal}>
-        Perbelanjaan hari ini:{' '}
+        {t('expense.todayTotal')}{' '}
         <strong>
           RM{todayTotal.toFixed(2)}
         </strong>
@@ -310,12 +321,11 @@ export default function ExpenseTracker({
 
       {loading ? (
         <p className={styles.empty}>
-          Memuatkan perbelanjaan...
+          {t('expense.loading')}
         </p>
       ) : recent.length === 0 ? (
         <p className={styles.empty}>
-          Tiada perbelanjaan direkod
-          lagi.
+          {t('expense.empty')}
         </p>
       ) : (
         <ul className={styles.list}>
@@ -339,9 +349,15 @@ export default function ExpenseTracker({
                 <span
                   className={styles.meta}
                 >
-                  {categoryLabel(
+                  {categoryKey(
                     expense.category,
-                  )}
+                  )
+                    ? t(
+                        categoryKey(
+                          expense.category,
+                        ),
+                      )
+                    : expense.category}
 
                   {expense.note
                     ? ` — ${expense.note}`
@@ -360,8 +376,15 @@ export default function ExpenseTracker({
                   handleDelete(expense)
                 }
                 disabled={saving}
-                aria-label={`Padam perbelanjaan RM${expense.amount.toFixed(2)}`}
-                title="Padam perbelanjaan"
+                aria-label={t(
+                  'expense.deleteAria',
+                  {
+                    amount: `RM${expense.amount.toFixed(2)}`,
+                  },
+                )}
+                title={t(
+                  'expense.deleteTitle',
+                )}
               >
                 🗑️
               </button>

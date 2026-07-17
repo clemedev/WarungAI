@@ -3,6 +3,8 @@ import {
   useState,
 } from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import {
   deleteSale,
   getSales,
@@ -15,29 +17,30 @@ import {
 
 import styles from './SalesList.module.css';
 
-const SOURCE_LABEL = {
-  manual: '✍️ Manual',
-  chat: '💬 Taip',
-  voice: '🎤 Suara',
-  ocr: '📷 Resit',
-  receipt: '📷 Resit',
+/** Maps a stored source value to its locale key. */
+const SOURCE_KEY = {
+  manual: 'salesList.srcManual',
+  chat: 'salesList.srcChat',
+  voice: 'salesList.srcVoice',
+  ocr: 'salesList.srcReceipt',
+  receipt: 'salesList.srcReceipt',
 };
 
 /** Date-window presets; fromDate undefined = the whole ledger. */
 const RANGES = [
   {
     id: 'today',
-    label: 'Hari ini',
+    labelKey: 'salesList.rangeToday',
     fromDate: () => todayISO(),
   },
   {
     id: 'week',
-    label: '7 hari',
+    labelKey: 'salesList.rangeWeek',
     fromDate: () => lastNDates(7)[0],
   },
   {
     id: 'all',
-    label: 'Semua',
+    labelKey: 'salesList.rangeAll',
     fromDate: () => undefined,
   },
 ];
@@ -46,6 +49,8 @@ export default function SalesList({
   refreshKey,
   onChange,
 }) {
+  const { t } = useTranslation();
+
   const [sales, setSales] =
     useState([]);
 
@@ -85,7 +90,7 @@ export default function SalesList({
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : 'Gagal mendapatkan sejarah jualan.',
+          : t('salesList.loadFailed'),
       );
     } finally {
       setLoading(false);
@@ -105,7 +110,9 @@ export default function SalesList({
   async function handleDelete(sale) {
     const confirmed =
       window.confirm(
-        `Padam jualan ${sale.productName}?`,
+        t('salesList.confirmDelete', {
+          name: sale.productName,
+        }),
       );
 
     if (!confirmed) {
@@ -123,7 +130,7 @@ export default function SalesList({
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : 'Gagal memadam jualan.',
+          : t('salesList.deleteFailed'),
       );
     } finally {
       setDeletingId(null);
@@ -134,11 +141,11 @@ export default function SalesList({
     return (
       <div className={styles.card}>
         <h3 className={styles.title}>
-          Sejarah jualan
+          {t('salesList.title')}
         </h3>
 
         <p className={styles.empty}>
-          Memuatkan jualan...
+          {t('salesList.loading')}
         </p>
       </div>
     );
@@ -148,13 +155,13 @@ export default function SalesList({
     <div className={styles.card}>
       <div className={styles.head}>
         <h3 className={styles.title}>
-          Sejarah jualan
+          {t('salesList.title')}
         </h3>
 
         <div
           className={styles.ranges}
           role="group"
-          aria-label="Julat sejarah jualan"
+          aria-label={t('salesList.rangeAria')}
         >
           {RANGES.map((item) => (
             <button
@@ -169,7 +176,7 @@ export default function SalesList({
                 handleRange(item.id)
               }
             >
-              {item.label}
+              {t(item.labelKey)}
             </button>
           ))}
         </div>
@@ -183,7 +190,7 @@ export default function SalesList({
 
       {sales.length === 0 ? (
         <p className={styles.empty}>
-          Tiada jualan dalam julat ini.
+          {t('salesList.emptyRange')}
         </p>
       ) : (
         <ul className={styles.list}>
@@ -210,15 +217,21 @@ export default function SalesList({
                     RM
                     {sale.total.toFixed(2)}
                     {' · '}
-                    {SOURCE_LABEL[
+                    {SOURCE_KEY[
                       sale.source
-                    ] ?? sale.source}
+                    ]
+                      ? t(
+                          SOURCE_KEY[
+                            sale.source
+                          ],
+                        )
+                      : sale.source}
 
                     {' · '}
                     {sale.paymentMethod ===
                     'qr'
-                      ? 'QR'
-                      : 'Tunai'}
+                      ? t('salesList.qr')
+                      : t('salesList.cash')}
 
                     {sale.date !== today
                       ? ` · ${sale.date}`
@@ -228,15 +241,17 @@ export default function SalesList({
                   <span
                     className={styles.meta}
                   >
-                    Kos RM
-                    {sale.totalCost.toFixed(
-                      2,
-                    )}
+                    {t('salesList.cost', {
+                      amount: `RM${sale.totalCost.toFixed(
+                        2,
+                      )}`,
+                    })}
                     {' · '}
-                    Untung RM
-                    {sale.grossProfit.toFixed(
-                      2,
-                    )}
+                    {t('salesList.profit', {
+                      amount: `RM${sale.grossProfit.toFixed(
+                        2,
+                      )}`,
+                    })}
                   </span>
                 </div>
 
@@ -249,8 +264,13 @@ export default function SalesList({
                   disabled={
                     deletingId === sale.id
                   }
-                  aria-label={`Padam jualan ${sale.productName}`}
-                  title="Padam jualan"
+                  aria-label={t(
+                    'salesList.deleteAria',
+                    { name: sale.productName },
+                  )}
+                  title={t(
+                    'salesList.deleteTitle',
+                  )}
                 >
                   {deletingId === sale.id
                     ? '...'

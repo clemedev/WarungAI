@@ -71,7 +71,7 @@ export default function OverviewMetrics({
         setError(
           caughtError instanceof Error
             ? caughtError.message
-            : 'Gagal memuatkan ringkasan.',
+            : t('metrics.loadFailed'),
         );
       } finally {
         if (active) {

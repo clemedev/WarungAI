@@ -3,6 +3,8 @@ import {
   useState,
 } from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import {
   archiveProduct,
   getProducts,
@@ -23,6 +25,8 @@ const EMPTY_FORM = {
 export default function ProductList({
   onChange,
 }) {
+  const { t } = useTranslation();
+
   const [products, setProducts] =
     useState([]);
 
@@ -77,7 +81,7 @@ export default function ProductList({
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : 'Gagal mendapatkan senarai produk.',
+          : t('product.loadFailed'),
       );
     } finally {
       setLoading(false);
@@ -124,7 +128,7 @@ export default function ProductList({
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : 'Gagal menyimpan produk.',
+          : t('product.saveFailed'),
       );
     } finally {
       setSaving(false);
@@ -181,7 +185,7 @@ export default function ProductList({
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : 'Gagal mengarkib produk.',
+          : t('product.archiveFailed'),
       );
     } finally {
       setSaving(false);
@@ -196,14 +200,16 @@ export default function ProductList({
       >
         <h3 className={styles.title}>
           {editing
-            ? 'Kemaskini produk'
-            : 'Tambah produk'}
+            ? t('product.editTitle')
+            : t('product.addTitle')}
         </h3>
 
         <input
           className={styles.input}
           type="text"
-          placeholder="Nama produk (cth: Nasi Lemak)"
+          placeholder={t(
+            'product.namePlaceholder',
+          )}
           value={form.name}
           onChange={(event) =>
             setForm({
@@ -223,7 +229,7 @@ export default function ProductList({
               styles.priceField
             }
           >
-            Harga jual (RM)
+            {t('product.sellPrice')}
 
             <input
               type="number"
@@ -249,7 +255,7 @@ export default function ProductList({
               styles.priceField
             }
           >
-            Harga kos (RM)
+            {t('product.costPrice')}
 
             <input
               type="number"
@@ -279,7 +285,7 @@ export default function ProductList({
               styles.priceField
             }
           >
-            Stok semasa
+            {t('product.currentStock')}
 
             <input
               type="number"
@@ -303,7 +309,9 @@ export default function ProductList({
               styles.priceField
             }
           >
-            Amaran stok rendah
+            {t(
+              'product.lowStockThreshold',
+            )}
 
             <input
               type="number"
@@ -344,10 +352,10 @@ export default function ProductList({
             }
           >
             {saving
-              ? 'Menyimpan...'
+              ? t('product.saving')
               : editing
-                ? 'Simpan perubahan'
-                : '+ Tambah'}
+                ? t('product.saveChanges')
+                : t('product.add')}
           </button>
 
           {editing && (
@@ -361,7 +369,7 @@ export default function ProductList({
               }
               disabled={saving}
             >
-              Batal
+              {t('product.cancel')}
             </button>
           )}
         </div>
@@ -369,13 +377,11 @@ export default function ProductList({
 
       {loading ? (
         <p className={styles.empty}>
-          Memuatkan produk...
+          {t('product.loading')}
         </p>
       ) : products.length === 0 ? (
         <p className={styles.empty}>
-          Tiada produk lagi. Tambah menu
-          anda di atas untuk mula merekod
-          jualan.
+          {t('product.empty')}
         </p>
       ) : (
         <ul className={styles.list}>
@@ -431,13 +437,15 @@ export default function ProductList({
                       styles.prices
                     }
                   >
-                    Stok:{' '}
-                    {product.currentStock}
+                    {t('product.stock', {
+                      count:
+                        product.currentStock,
+                    })}
                     {' · '}
-                    Amaran pada{' '}
-                    {
-                      product.lowStockThreshold
-                    }
+                    {t('product.warnAt', {
+                      threshold:
+                        product.lowStockThreshold,
+                    })}
                   </span>
                 </div>
 
@@ -455,8 +463,13 @@ export default function ProductList({
                       handleEdit(product)
                     }
                     disabled={saving}
-                    aria-label={`Kemaskini ${product.name}`}
-                    title="Kemaskini produk"
+                    aria-label={t(
+                      'product.editAria',
+                      { name: product.name },
+                    )}
+                    title={t(
+                      'product.editTitle2',
+                    )}
                   >
                     ✏️
                   </button>
@@ -472,8 +485,13 @@ export default function ProductList({
                       )
                     }
                     disabled={saving}
-                    aria-label={`Arkibkan ${product.name}`}
-                    title="Arkibkan produk"
+                    aria-label={t(
+                      'product.archiveAria',
+                      { name: product.name },
+                    )}
+                    title={t(
+                      'product.archiveTitle',
+                    )}
                   >
                     🗄️
                   </button>

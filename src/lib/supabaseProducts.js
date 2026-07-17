@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { adjustDemoStock, archiveDemoProduct, getDemoProducts, isDemoStallEnabled, saveDemoProduct } from './demoStall.js';
 
 function mapProduct(row) {
   return {
@@ -32,6 +33,7 @@ async function requireUser() {
 }
 
 export async function getProducts() {
+  if (isDemoStallEnabled()) return getDemoProducts();
   await requireUser();
 
   const { data, error } = await supabase
@@ -52,6 +54,7 @@ export async function getProducts() {
 }
 
 export async function saveProduct(product) {
+  if (isDemoStallEnabled()) return saveDemoProduct(product);
   const user = await requireUser();
 
   const name =
@@ -158,7 +161,77 @@ export async function saveProduct(product) {
   return mapProduct(data);
 }
 
+/**
+ * Move a product's stock by `delta` (negative consumes, positive returns).
+ *
+ * Stock lives outside the atomic sale RPC: `create_single_item_sale` writes
+ * the sale and its item but never touches `current_stock` (see BACKEND.md,
+ * "Atomic Sale Creation"). Fixing that properly means editing the SQL
+ * function, which needs database access we do not have — so the adjustment
+ * happens here instead, immediately after the sale is written.
+ *
+ * Two consequences callers must respect:
+ *
+ * - It is NOT atomic with the sale. Callers must never let a stock failure
+ *   fail a sale that is already committed: the money is the record that
+ *   matters, and stock can always be corrected by editing the product.
+ * - Two devices selling the same product at once can lose an update, since
+ *   this reads then writes. Fine for a single stall; if multi-device use
+ *   ever appears, this belongs in an RPC doing `current_stock - quantity`
+ *   in one statement.
+ */
+export async function adjustStock(productId, delta) {
+  if (isDemoStallEnabled()) return adjustDemoStock(productId, delta);
+  await requireUser();
+
+  const amount = Number(delta);
+
+  if (!productId || !Number.isFinite(amount) || amount === 0) {
+    return null;
+  }
+
+  const { data: product, error: readError } =
+    await supabase
+      .from('products')
+      .select('current_stock')
+      .eq('id', productId)
+      .single();
+
+  if (readError) {
+    throw new Error(
+      `Gagal membaca stok: ${readError.message}`,
+    );
+  }
+
+  // Clamp at zero: a sale recorded for untracked stock should read as
+  // "none left", never as a negative count.
+  const nextStock = Math.max(
+    0,
+    Number(product?.current_stock ?? 0) +
+      amount,
+  );
+
+  const { error: writeError } =
+    await supabase
+      .from('products')
+      .update({
+        current_stock: nextStock,
+        updated_at:
+          new Date().toISOString(),
+      })
+      .eq('id', productId);
+
+  if (writeError) {
+    throw new Error(
+      `Gagal mengemas kini stok: ${writeError.message}`,
+    );
+  }
+
+  return nextStock;
+}
+
 export async function archiveProduct(id) {
+  if (isDemoStallEnabled()) return archiveDemoProduct(id);
   await requireUser();
 
   if (!id) {

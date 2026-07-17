@@ -3,6 +3,8 @@ import {
   useState,
 } from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import {
   getDashboardData,
 } from '../../lib/supabaseDashboard.js';
@@ -23,6 +25,8 @@ function formatCurrency(value) {
 export default function OverviewMetrics({
   refreshKey,
 }) {
+  const { t } = useTranslation();
+
   const [metrics, setMetrics] =
     useState(EMPTY_METRICS);
 
@@ -67,7 +71,7 @@ export default function OverviewMetrics({
         setError(
           caughtError instanceof Error
             ? caughtError.message
-            : 'Gagal memuatkan ringkasan.',
+            : t('metrics.loadFailed'),
         );
       } finally {
         if (active) {
@@ -120,24 +124,26 @@ export default function OverviewMetrics({
     {
       id: 'sales',
       icon: '↗',
-      label: 'Jualan hari ini',
+      label: t('metrics.salesLabel'),
       value: formatCurrency(
         metrics.sales,
       ),
-      detail: 'Jumlah hasil disahkan',
+      detail: t(
+        'metrics.salesDetail',
+      ),
       tone: 'sales',
     },
     {
       id: 'profit',
       icon: '◆',
-      label: 'Untung bersih',
+      label: t('metrics.profitLabel'),
       value: formatCurrency(
         metrics.profit,
       ),
       detail:
         metrics.profit >= 0
-          ? 'Selepas kos dan belanja'
-          : 'Kerugian hari ini',
+          ? t('metrics.profitDetail')
+          : t('metrics.lossDetail'),
       tone:
         metrics.profit >= 0
           ? 'profit'
@@ -146,24 +152,27 @@ export default function OverviewMetrics({
     {
       id: 'expenses',
       icon: '−',
-      label: 'Perbelanjaan',
+      label: t('metrics.expensesLabel'),
       value: formatCurrency(
         metrics.expenses,
       ),
-      detail: 'Kos operasi hari ini',
+      detail: t(
+        'metrics.expensesDetail',
+      ),
       tone: 'expense',
     },
     {
       id: 'transactions',
       icon: '≡',
-      label: 'Transaksi',
+      label: t(
+        'metrics.transactionsLabel',
+      ),
       value: String(
         metrics.transactions,
       ),
-      detail:
-        metrics.transactions === 1
-          ? 'Jualan direkod'
-          : 'Jualan direkod',
+      detail: t(
+        'metrics.transactionsDetail',
+      ),
       tone: 'transactions',
     },
   ];

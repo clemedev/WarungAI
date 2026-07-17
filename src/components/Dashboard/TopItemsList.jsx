@@ -1,25 +1,52 @@
+import { useTranslation } from 'react-i18next';
 import styles from './TopItemsList.module.css';
 
-const MEDALS = ['🥇', '🥈', '🥉'];
-
-/** Top 3 selling items over the last 7 days. */
+/** Top selling items over the last 7 days, ranked with relative-volume bars. */
 export default function TopItemsList({ items }) {
+  const { t } = useTranslation();
+
+  const maxQuantity = items.reduce(
+    (max, item) => Math.max(max, item.quantity),
+    0,
+  ) || 1;
+
   return (
     <div className={styles.card}>
-      <h3 className={styles.title}>Paling laris (7 hari)</h3>
+      <h3 className={styles.title}>{t('top.title')}</h3>
       {items.length === 0 ? (
-        <p className={styles.empty}>Belum ada jualan minggu ini.</p>
+        <p className={styles.empty}>{t('top.empty')}</p>
       ) : (
-        <ol className={styles.list}>
+        <ul className={styles.list}>
           {items.map((item, i) => (
             <li key={item.productId} className={styles.item}>
-              <span>
-                {MEDALS[i] ?? '·'} {item.name}
+              <span
+                className={`${styles.rank} ${
+                  i === 0 ? styles.rankTop : ''
+                }`}
+              >
+                {i + 1}
               </span>
-              <strong>{item.quantity} unit</strong>
+              <div className={styles.body}>
+                <div className={styles.row}>
+                  <span className={styles.name}>{item.name}</span>
+                  <span className={styles.qty}>
+                    {t('top.units', {
+                      count: item.quantity,
+                    })}
+                  </span>
+                </div>
+                <div className={styles.bar}>
+                  <div
+                    className={styles.fill}
+                    style={{
+                      width: `${(item.quantity / maxQuantity) * 100}%`,
+                    }}
+                  />
+                </div>
+              </div>
             </li>
           ))}
-        </ol>
+        </ul>
       )}
     </div>
   );

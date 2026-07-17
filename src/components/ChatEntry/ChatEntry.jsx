@@ -3,6 +3,8 @@ import {
   useState,
 } from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import {
   parseNaturalLanguageEntry,
 } from '../../lib/nlEntryParser.js';
@@ -20,26 +22,14 @@ export default function ChatEntry({
   products,
   onSaved,
 }) {
-  const [text, setText] =
-    useState('');
-
-  const [draft, setDraft] =
-    useState(null);
-
-  const [source, setSource] =
-    useState('chat');
-
-  const [history, setHistory] =
-    useState([]);
-
-  const [voiceText, setVoiceText] =
-    useState(null);
-
-  const [saving, setSaving] =
-    useState(false);
-
-  const [error, setError] =
-    useState('');
+  const { t } = useTranslation();
+  const [text, setText] = useState('');
+  const [draft, setDraft] = useState(null);
+  const [source, setSource] = useState('chat');
+  const [history, setHistory] = useState([]);
+  const [voiceText, setVoiceText] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!voiceText) {
@@ -47,14 +37,9 @@ export default function ChatEntry({
     }
 
     setText(voiceText);
-
     setDraft(
-      parseNaturalLanguageEntry(
-        voiceText,
-        products,
-      ),
+      parseNaturalLanguageEntry(voiceText, products),
     );
-
     setSource('voice');
     setVoiceText(null);
     setError('');
@@ -64,23 +49,14 @@ export default function ChatEntry({
     event.preventDefault();
 
     const cleanText = text.trim();
-
-    if (
-      !cleanText ||
-      saving
-    ) {
+    if (!cleanText || saving) {
       return;
     }
 
     setError('');
-
     setDraft(
-      parseNaturalLanguageEntry(
-        cleanText,
-        products,
-      ),
+      parseNaturalLanguageEntry(cleanText, products),
     );
-
     setSource('chat');
   }
 
@@ -93,43 +69,32 @@ export default function ChatEntry({
     setError('');
 
     try {
-      const saved =
-        await saveSale(sale);
-
+      const saved = await saveSale(sale);
       const productName =
         saved.productName ??
         products.find(
-          (product) =>
-            product.id ===
-            saved.productId,
+          (product) => product.id === saved.productId,
         )?.name ??
-        'Produk tidak dikenali';
+        t('chat.unknownProduct');
 
-      const label =
-        `${saved.quantity} × ` +
-        `${productName} — ` +
-        `RM${saved.total.toFixed(2)} ` +
-        `(${saved.source})`;
-
-      setHistory(
-        (currentHistory) => [
-          {
-            id: saved.id,
-            label,
-          },
-          ...currentHistory,
-        ],
-      );
+      setHistory((currentHistory) => [
+        {
+          id: saved.id,
+          label:
+            `${saved.quantity} × ${productName} — ` +
+            `RM${saved.total.toFixed(2)}`,
+        },
+        ...currentHistory,
+      ]);
 
       setDraft(null);
       setText('');
-
-      onSaved?.(1);
+      await onSaved?.(1);
     } catch (caughtError) {
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : 'Gagal menyimpan jualan.',
+          : t('chat.saveFailed'),
       );
     } finally {
       setSaving(false);
@@ -137,61 +102,48 @@ export default function ChatEntry({
   }
 
   function handleCancel() {
-    if (saving) {
-      return;
+    if (!saving) {
+      setDraft(null);
+      setError('');
     }
-
-    setDraft(null);
-    setError('');
   }
 
   return (
     <div className={styles.wrap}>
       {products.length === 0 && (
-        <p className={styles.notice}>
-          Tiada produk lagi — tambah produk
-          dulu supaya jualan boleh
-          dipadankan.
+        <p className={styles.notice} role="status">
+          {t('chat.noProducts')}
         </p>
       )}
 
       {error && (
-        <p className={styles.notice}>
+        <p className={styles.notice} role="alert">
           {error}
         </p>
       )}
 
-      <form
-        className={styles.inputRow}
-        onSubmit={handleSubmit}
-      >
+      <form className={styles.inputRow} onSubmit={handleSubmit}>
         <input
           className={styles.input}
           type="text"
-          placeholder='cth: "Jual 3 nasi lemak RM12"'
+          placeholder={t('chat.placeholder')}
+          aria-label={t('chat.entryAria')}
           value={text}
-          onChange={(event) =>
-            setText(event.target.value)
-          }
+          onChange={(event) => setText(event.target.value)}
           disabled={saving}
         />
 
         <VoiceEntry
           onTranscript={setVoiceText}
+          disabled={saving || products.length === 0}
         />
 
         <button
           className={styles.send}
           type="submit"
-          disabled={
-            !text.trim() ||
-            saving ||
-            products.length === 0
-          }
+          disabled={!text.trim() || saving || products.length === 0}
         >
-          {saving
-            ? 'Menyimpan...'
-            : 'Hantar'}
+          {saving ? t('chat.saving') : t('chat.send')}
         </button>
       </form>
 
@@ -207,25 +159,15 @@ export default function ChatEntry({
       )}
 
       {history.length > 0 && (
-        <div className={styles.history}>
-          <h4
-            className={
-              styles.historyTitle
-            }
-          >
-            Disimpan sesi ini
+        <div className={styles.history} aria-live="polite">
+          <h4 className={styles.historyTitle}>
+            {t('chat.savedThisSession')}
           </h4>
 
           <ul>
-            {history.map(
-              (historyItem) => (
-                <li
-                  key={historyItem.id}
-                >
-                  ✅ {historyItem.label}
-                </li>
-              ),
-            )}
+            {history.map((historyItem) => (
+              <li key={historyItem.id}>✅ {historyItem.label}</li>
+            ))}
           </ul>
         </div>
       )}

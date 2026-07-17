@@ -4,9 +4,13 @@ import {
   useState,
 } from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import {
   getDashboardData,
 } from '../../lib/supabaseDashboard.js';
+
+import { getDateLocale } from '../../i18n/config.js';
 
 import {
   getSettings,
@@ -17,20 +21,22 @@ import SalesSummaryCard from './SalesSummaryCard';
 import SevenDayChart from './SevenDayChart';
 import TopItemsList from './TopItemsList';
 import InsightOfTheDay from './InsightOfTheDay';
+import LowStockCard from './LowStockCard';
 
 import styles from './Dashboard.module.css';
 
 const EMPTY_DATA = {
   stats: {
     todayTotal: 0,
+    todaySpend: 0,
     todayProfit: 0,
     sevenDayTrend: [],
     topItems: [],
     targetProgress: 0,
   },
-  summary:
-    'Tiada jualan direkod hari ini lagi.',
+  summary: { hasSales: false },
   insight: null,
+  lowStockItems: [],
   split: {
     cash: 0,
     qr: 0,
@@ -38,7 +44,13 @@ const EMPTY_DATA = {
   dailyTarget: 200,
 };
 
+function formatRM(value) {
+  return `RM${Number(value ?? 0).toFixed(2)}`;
+}
+
 export default function Dashboard() {
+  const { t, i18n } = useTranslation();
+
   const [data, setData] =
     useState(EMPTY_DATA);
 
@@ -67,13 +79,13 @@ export default function Dashboard() {
         setError(
           caughtError instanceof Error
             ? caughtError.message
-            : 'Gagal memuatkan papan pemuka.',
+            : t('dashboard.loadFailed'),
         );
       } finally {
         setLoading(false);
       }
     },
-    [],
+    [t],
   );
 
   useEffect(() => {
@@ -107,7 +119,7 @@ export default function Dashboard() {
     return (
       <div className={styles.wrap}>
         <p className={styles.empty}>
-          Memuatkan papan pemuka...
+          {t('dashboard.loading')}
         </p>
       </div>
     );
@@ -117,6 +129,7 @@ export default function Dashboard() {
     stats,
     summary,
     insight,
+    lowStockItems,
     split,
     dailyTarget,
   } = data;
@@ -126,10 +139,48 @@ export default function Dashboard() {
       (day) => day.total > 0,
     );
 
+  // The lib hands back numbers; the sentence is assembled here so it can
+  // follow the language picker.
+  const summaryText = !summary?.hasSales
+    ? t('dashboard.summaryNone')
+    : [
+        t('dashboard.summarySales', {
+          amount: formatRM(
+            summary.totalSales,
+          ),
+          count:
+            summary.transactionCount,
+        }),
+        t('dashboard.summaryProfit', {
+          amount: formatRM(
+            summary.netProfit,
+          ),
+        }),
+        summary.topItem &&
+          t('dashboard.summaryTop', {
+            name: summary.topItem.name,
+            count:
+              summary.topItem.quantity,
+          }),
+        summary.expenseTotal > 0 &&
+          t(
+            'dashboard.summaryExpense',
+            {
+              amount: formatRM(
+                summary.expenseTotal,
+              ),
+            },
+          ),
+      ]
+        .filter(Boolean)
+        .join(' ');
+
   const whatsappText =
     `📊 WarungAI — ` +
-    `${new Date().toLocaleDateString('ms-MY')}\n` +
-    summary;
+    `${new Date().toLocaleDateString(
+      getDateLocale(i18n.language),
+    )}\n` +
+    summaryText;
 
   const whatsappUrl =
     `https://wa.me/?text=` +
@@ -173,10 +224,20 @@ export default function Dashboard() {
           }
         >
           <p className={styles.empty}>
-            Belum ada jualan minggu ini.
-            Rekod jualan pertama anda di
-            tab “➕ Jualan”!
+            {t('dashboard.noSalesWeek')}
           </p>
+        </div>
+      )}
+
+      {lowStockItems?.length > 0 && (
+        <div
+          className={
+            styles.lowStockArea
+          }
+        >
+          <LowStockCard
+            items={lowStockItems}
+          />
         </div>
       )}
 
@@ -223,7 +284,7 @@ export default function Dashboard() {
               styles.summaryTitle
             }
           >
-            Ringkasan hari ini
+            {t('dashboard.summaryTitle')}
           </h3>
 
           <p
@@ -231,7 +292,7 @@ export default function Dashboard() {
               styles.summaryText
             }
           >
-            {summary}
+            {summaryText}
           </p>
 
           <a
@@ -240,7 +301,7 @@ export default function Dashboard() {
             target="_blank"
             rel="noreferrer"
           >
-            📤 Kongsi ke WhatsApp
+            {t('dashboard.shareWhatsApp')}
           </a>
         </div>
       </div>

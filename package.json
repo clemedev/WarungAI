@@ -7,19 +7,26 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node scripts/test-parsers.mjs && node scripts/test-insights.mjs"
+    "test": "node scripts/test-parsers.mjs && node scripts/test-insights.mjs && node scripts/test-weekly-insights.mjs && node scripts/test-tomorrow-preparation.mjs && node scripts/test-i18n.mjs && vitest run",
+    "test:ui": "vitest"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.6",
     "chart.js": "^4.5.1",
+    "i18next": "^26.3.6",
     "react": "^18.3.1",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "^18.3.1",
+    "react-i18next": "^17.0.10",
     "tesseract.js": "^5.1.1"
   },
   "devDependencies": {
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^29.1.1",
     "vite": "^5.4.11",
-    "vite-plugin-pwa": "^1.3.0"
+    "vite-plugin-pwa": "^1.3.0",
+    "vitest": "^4.1.10"
   }
 }

@@ -1,0 +1,86 @@
+.wrap {
+  display: inline-flex;
+  align-items: center;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-width: 58px;
+  min-height: 42px;
+  padding: 0.45rem 0.65rem;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 0.76rem;
+  font-weight: 750;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.toggle:hover {
+  border-color: var(--color-primary-border);
+  transform: translateY(-1px);
+}
+
+.toggle:focus-visible {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(23, 107, 67, 0.13);
+}
+
+.icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+/* The sidebar stays deep green in both application themes. */
+.darkSurface {
+  color: #eaf7ef;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.darkSurface:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+.darkSurface:focus-visible {
+  border-color: rgba(150, 226, 184, 0.6);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+:global(html[data-theme="dark"]) .toggle {
+  color: var(--color-text);
+  background: rgba(16, 34, 24, 0.82);
+  border-color: rgba(150, 191, 169, 0.2);
+}
+
+:global(html[data-theme="dark"]) .toggle:hover {
+  background: rgba(21, 43, 31, 0.92);
+  border-color: rgba(116, 205, 154, 0.32);
+}
+
+:global(html[data-theme="dark"]) .toggle:focus-visible {
+  border-color: #57c78b;
+  box-shadow: 0 0 0 3px rgba(87, 199, 139, 0.15);
+}
+
+:global(html[data-theme="dark"]) .darkSurface {
+  color: #eaf7ef;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(171, 220, 192, 0.16);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle {
+    transition: none;
+  }
+}

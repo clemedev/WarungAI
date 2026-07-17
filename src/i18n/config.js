@@ -1,0 +1,76 @@
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import ms from './locales/ms.json';
+import en from './locales/en.json';
+import zh from './locales/zh.json';
+import {
+  getNextLanguage,
+  SUPPORTED_LANGS,
+} from './languages.js';
+
+const DEFAULT_LANG = 'ms';
+const LANG_KEY = 'warungai.lang';
+
+function getSavedLang() {
+  try {
+    const saved = localStorage.getItem(LANG_KEY);
+    return SUPPORTED_LANGS.includes(saved) ? saved : DEFAULT_LANG;
+  } catch {
+    return DEFAULT_LANG;
+  }
+}
+
+const resources = {
+  ms: { translation: ms },
+  en: { translation: en },
+  zh: { translation: zh },
+};
+
+i18n.use(initReactI18next).init({
+  resources,
+  lng: getSavedLang(),
+  fallbackLng: DEFAULT_LANG,
+  interpolation: {
+    escapeValue: false,
+  },
+});
+
+export function changeLanguage(lang) {
+  if (SUPPORTED_LANGS.includes(lang)) {
+    i18n.changeLanguage(lang);
+    try {
+      localStorage.setItem(LANG_KEY, lang);
+    } catch {
+      // storage unavailable
+    }
+  }
+}
+
+export function getCurrentLanguage() {
+  return i18n.language;
+}
+
+export { getNextLanguage } from './languages.js';
+
+/**
+ * BCP 47 tag for Intl formatting. Regions are Malaysia-first on purpose:
+ * an en/zh-speaking warung owner is still in Malaysia, so dates and
+ * numbers should read the local way, not US/China conventions.
+ */
+const DATE_LOCALES = {
+  ms: 'ms-MY',
+  en: 'en-MY',
+  zh: 'zh-MY',
+};
+
+export function getDateLocale(lang = i18n.language) {
+  return DATE_LOCALES[lang] ?? DATE_LOCALES[DEFAULT_LANG];
+}
+
+export const LANGUAGES = [
+  { code: 'ms', name: 'Bahasa Melayu' },
+  { code: 'en', name: 'English' },
+  { code: 'zh', name: '中文' },
+];
+
+export default i18n;

@@ -7,18 +7,26 @@ import {
 } from './supabaseExpenses.js';
 
 import {
+  getProducts,
+} from './supabaseProducts.js';
+
+import {
   lastNDates,
   todayISO,
 } from './dates.js';
+
+import {
+  createWeeklyInsights,
+} from './weeklyInsights.js';
+
+import {
+  createTomorrowPreparation,
+} from './tomorrowPreparation.js';
 
 function round2(value) {
   return Math.round(
     (Number(value) + Number.EPSILON) * 100,
   ) / 100;
-}
-
-function formatRM(value) {
-  return `RM${round2(value).toFixed(2)}`;
 }
 
 function calculateTopItems(
@@ -91,6 +99,11 @@ function calculatePaymentSplit(
   };
 }
 
+/**
+ * Returns the numbers behind the daily summary, NOT a sentence — the
+ * wording and currency formatting are the view's job, so the text can
+ * follow the language picker. See `dashboard.summary*` in the locales.
+ */
 function createDailySummary({
   date,
   sales,
@@ -104,7 +117,7 @@ function createDailySummary({
   );
 
   if (daySales.length === 0) {
-    return 'Tiada jualan direkod hari ini lagi.';
+    return { hasSales: false };
   }
 
   const expenseTotal = expenses
@@ -119,26 +132,26 @@ function createDailySummary({
       0,
     );
 
-  const parts = [
-    `Jualan hari ini: ${formatRM(totalSales)} (${daySales.length} transaksi).`,
-    `Untung bersih: ${formatRM(netProfit)}.`,
-  ];
-
-  if (topItem) {
-    parts.push(
-      `Paling laris: ${topItem.name} (${topItem.quantity} unit).`,
-    );
-  }
-
-  if (expenseTotal > 0) {
-    parts.push(
-      `Perbelanjaan: ${formatRM(expenseTotal)}.`,
-    );
-  }
-
-  return parts.join(' ');
+  return {
+    hasSales: true,
+    totalSales,
+    transactionCount: daySales.length,
+    netProfit,
+    topItem: topItem
+      ? {
+          name: topItem.name,
+          quantity: topItem.quantity,
+        }
+      : null,
+    expenseTotal,
+  };
 }
 
+/**
+ * Rule-based tip as `{ type, ...params }` rather than prose, so the view
+ * can translate it and style it off `type` instead of sniffing the text
+ * for a warning emoji. See `dashboard.insight*` in the locales.
+ */
 function createInsight({
   sales,
   week,
@@ -200,19 +213,21 @@ function createInsight({
       item.quantity;
 
     if (averagePrice < averageCost) {
-      return (
-        `⚠️ ${item.name} dijual bawah kos — ` +
-        `purata ${formatRM(averagePrice)} seunit ` +
-        `berbanding kos ${formatRM(averageCost)}.`
-      );
+      return {
+        type: 'belowCost',
+        name: item.name,
+        averagePrice,
+        averageCost,
+      };
     }
   }
 
   if (topItem) {
-    return (
-      `🔥 ${topItem.name} paling laris minggu ini ` +
-      `(${topItem.quantity} unit). Pastikan stok mencukupi.`
-    );
+    return {
+      type: 'topSeller',
+      name: topItem.name,
+      quantity: topItem.quantity,
+    };
   }
 
   return null;
@@ -221,14 +236,22 @@ function createInsight({
 export async function getDashboardData(
   dailyTarget = 200,
 ) {
-  const [sales, expenses] =
-    await Promise.all([
-      getSales(),
-      getExpenses(),
-    ]);
-
   const today = todayISO();
   const week = lastNDates(7);
+
+  // Everything on the dashboard is derived from the last 7 days — scope
+  // the queries to that window instead of downloading the whole ledger.
+  // lastNDates is oldest-first, so week[0] is the window start.
+  const [sales, expenses, products] =
+    await Promise.all([
+      getSales({
+        fromDate: week[0],
+      }),
+      getExpenses({
+        fromDate: week[0],
+      }),
+      getProducts(),
+    ]);
 
   const todaySales = sales.filter(
     (sale) => sale.date === today,
@@ -313,16 +336,30 @@ export async function getDashboardData(
       today,
     );
 
+  // Deliberately uncapped. Clamping at 1 hid the best news the app has to
+  // report — a 140% day rendered as a flat "100%". The progress *bar* still
+  // clamps its width; the number tells the truth.
   const targetProgress =
     dailyTarget > 0
-      ? Math.min(
-          1,
-          round2(
-            todayTotal /
-              dailyTarget,
-          ),
+      ? round2(
+          todayTotal / dailyTarget,
         )
       : 0;
+
+  // The low-stock threshold was stored, edited, and displayed but never
+  // compared against anything — so a vendor could sell out and still read
+  // "Stok: 12". This is that comparison.
+  const lowStockItems = products
+    .filter(
+      (product) =>
+        product.currentStock <=
+        product.lowStockThreshold,
+    )
+    .sort(
+      (first, second) =>
+        first.currentStock -
+        second.currentStock,
+    );
 
   const summary =
     createDailySummary({
@@ -345,6 +382,9 @@ export async function getDashboardData(
     stats: {
       todayTotal:
         round2(todayTotal),
+      todaySpend: round2(
+        todayExpenseTotal,
+      ),
       todayProfit,
       todayExpenseTotal:
         round2(todayExpenseTotal),
@@ -356,7 +396,59 @@ export async function getDashboardData(
     },
     summary,
     insight,
+    lowStockItems,
     split,
     dailyTarget,
+  };
+}
+
+/**
+ * Loads the last two calendar weeks using the existing date-scoped queries.
+ * No schema changes are required: all insight values are calculated from
+ * current sales, expenses, and active products.
+ */
+export async function getWeeklyInsights() {
+  const fortnight = lastNDates(14);
+  const previousWeek = fortnight.slice(0, 7);
+  const currentWeek = fortnight.slice(7);
+
+  const [sales, expenses, products] = await Promise.all([
+    getSales({
+      fromDate: fortnight[0],
+      toDate: fortnight[fortnight.length - 1],
+    }),
+    getExpenses({
+      fromDate: fortnight[0],
+      toDate: fortnight[fortnight.length - 1],
+    }),
+    getProducts(),
+  ]);
+
+  return createWeeklyInsights({
+    sales,
+    expenses,
+    products,
+    currentWeek,
+    previousWeek,
+  });
+}
+
+export async function getTomorrowPreparation() {
+  const history = lastNDates(57);
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowWeekday = tomorrow.getDay();
+  const matchingDates = history.filter((date) =>
+    new Date(`${date}T00:00:00`).getDay() === tomorrowWeekday,
+  );
+
+  const [sales, products] = await Promise.all([
+    getSales({ fromDate: history[0], toDate: history[history.length - 1] }),
+    getProducts(),
+  ]);
+
+  return {
+    ...createTomorrowPreparation({ sales, products, matchingDates }),
+    tomorrowDate: tomorrow,
   };
 }

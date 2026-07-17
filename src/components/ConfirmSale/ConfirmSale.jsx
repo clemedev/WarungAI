@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { todayISO } from '../../lib/dates';
 import styles from './ConfirmSale.module.css';
 
@@ -14,7 +15,15 @@ import styles from './ConfirmSale.module.css';
  *   onCancel: () => void,
  * }} props
  */
-export default function ConfirmSale({ draft, products, source, onSave, onCancel }) {
+export default function ConfirmSale({
+  draft,
+  products,
+  source,
+  onSave,
+  onCancel,
+  isSaving = false,
+}) {
+  const { t } = useTranslation();
   const [productId, setProductId] = useState(draft.productId ?? '');
   const [quantity, setQuantity] = useState(draft.quantity ?? 1);
   const [total, setTotal] = useState(draft.total ?? '');
@@ -26,7 +35,11 @@ export default function ConfirmSale({ draft, products, source, onSave, onCancel 
     setTotal(draft.total ?? '');
   }, [draft]);
 
-  const canSave = productId && quantity > 0 && Number(total) > 0;
+  const canSave =
+    productId &&
+    quantity > 0 &&
+    Number(total) > 0 &&
+    !isSaving;
 
   function handleProductChange(id) {
     setProductId(id);
@@ -48,22 +61,24 @@ export default function ConfirmSale({ draft, products, source, onSave, onCancel 
 
   return (
     <div className={styles.card}>
-      <h3 className={styles.title}>Sahkan jualan (confirm sale)</h3>
+      <h3 className={styles.title}>{t('confirm.title')}</h3>
 
       {draft.needsReview && !draft.productId && (
         <p className={styles.warning}>
-          Tak jumpa produk padan untuk “{draft.productName || draft.raw}”. Sila
-          pilih sendiri. (No matching product found — pick one below.)
+          {t('confirm.noMatch', {
+            name: draft.productName || draft.raw,
+          })}
         </p>
       )}
 
       <label className={styles.field}>
-        Produk
+        {t('confirm.product')}
         <select
           value={productId}
           onChange={(e) => handleProductChange(e.target.value)}
+          disabled={isSaving}
         >
-          <option value="">— pilih produk —</option>
+          <option value="">{t('confirm.pickProduct')}</option>
           {products.map((p) => (
             <option key={p.id} value={p.id}>
               {p.name} (RM{p.sellPrice.toFixed(2)})
@@ -73,43 +88,56 @@ export default function ConfirmSale({ draft, products, source, onSave, onCancel 
       </label>
 
       <label className={styles.field}>
-        Kuantiti
+        {t('confirm.quantity')}
         <input
           type="number"
           min="1"
           value={quantity}
           onChange={(e) => setQuantity(e.target.value)}
+          disabled={isSaving}
         />
       </label>
 
       <label className={styles.field}>
-        Jumlah (RM)
+        {t('confirm.total')}
         <input
           type="number"
           min="0"
           step="0.01"
           value={total}
           onChange={(e) => setTotal(e.target.value)}
+          disabled={isSaving}
         />
       </label>
 
       <label className={styles.field}>
-        Bayaran
+        {t('confirm.payment')}
         <select
           value={paymentMethod}
           onChange={(e) => setPaymentMethod(e.target.value)}
+          disabled={isSaving}
         >
-          <option value="cash">Tunai (cash)</option>
-          <option value="qr">QR</option>
+          <option value="cash">{t('confirm.cash')}</option>
+          <option value="qr">{t('confirm.qr')}</option>
         </select>
       </label>
 
       <div className={styles.actions}>
-        <button className={styles.save} disabled={!canSave} onClick={handleSave}>
-          Simpan
+        <button
+          type="button"
+          className={styles.save}
+          disabled={!canSave}
+          onClick={handleSave}
+        >
+          {isSaving ? t('chat.saving') : t('confirm.save')}
         </button>
-        <button className={styles.cancel} onClick={onCancel}>
-          Batal
+        <button
+          type="button"
+          className={styles.cancel}
+          onClick={onCancel}
+          disabled={isSaving}
+        >
+          {t('confirm.cancel')}
         </button>
       </div>
     </div>

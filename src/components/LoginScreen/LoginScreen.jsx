@@ -1,11 +1,15 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   signIn,
   signUp,
 } from '../../lib/supabaseAuth.js';
+import LanguageSwitcher from '../LanguageSwitcher/LanguageSwitcher';
+import ThemeToggle from '../ThemeToggle/ThemeToggle.jsx';
 import styles from './LoginScreen.module.css';
 
-export default function LoginScreen({ onAuthed }) {
+export default function LoginScreen({ onAuthed, onTryDemo }) {
+  const { t } = useTranslation();
   const [mode, setMode] = useState('signin');
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
@@ -26,17 +30,17 @@ export default function LoginScreen({ onAuthed }) {
     const cleanDisplayName = displayName.trim();
 
     if (!cleanEmail) {
-      setError('Sila masukkan alamat e-mel.');
+      setError(t('login.errEmail'));
       return;
     }
 
     if (password.length < 8) {
-      setError('Kata laluan mesti sekurang-kurangnya 8 aksara.');
+      setError(t('login.errPassword'));
       return;
     }
 
     if (mode === 'register' && !cleanDisplayName) {
-      setError('Sila masukkan nama kedai atau penjual.');
+      setError(t('login.errName'));
       return;
     }
 
@@ -59,7 +63,7 @@ export default function LoginScreen({ onAuthed }) {
 
       if (!user) {
         throw new Error(
-          'Akaun dicipta. Sila semak e-mel anda sebelum log masuk.',
+          t('login.errVerify'),
         );
       }
 
@@ -75,7 +79,7 @@ export default function LoginScreen({ onAuthed }) {
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : 'Log masuk gagal. Sila cuba lagi.',
+          : t('login.errGeneric'),
       );
     } finally {
       setBusy(false);
@@ -85,12 +89,19 @@ export default function LoginScreen({ onAuthed }) {
   return (
     <div className={styles.wrap}>
       <div className={styles.card}>
+        {/* Language must be changeable before sign-in, otherwise a
+            non-Malay speaker cannot read the form they need to fill. */}
+        <div className={styles.langRow}>
+          <LanguageSwitcher />
+          <ThemeToggle compact />
+        </div>
+
         <h1 className={styles.logo}>
           🍛 WarungAI
         </h1>
 
         <p className={styles.tagline}>
-          Rekod jualan dalam beberapa saat
+          {t('login.tagline')}
         </p>
 
         <div className={styles.modeTabs}>
@@ -104,7 +115,7 @@ export default function LoginScreen({ onAuthed }) {
             onClick={() => changeMode('signin')}
             disabled={busy}
           >
-            Log masuk
+            {t('login.signin')}
           </button>
 
           <button
@@ -117,7 +128,7 @@ export default function LoginScreen({ onAuthed }) {
             onClick={() => changeMode('register')}
             disabled={busy}
           >
-            Daftar baru
+            {t('login.register')}
           </button>
         </div>
 
@@ -127,10 +138,12 @@ export default function LoginScreen({ onAuthed }) {
         >
           {mode === 'register' && (
             <label className={styles.field}>
-              Nama kedai / penjual
+              {t('login.nameLabel')}
               <input
                 type="text"
-                placeholder="cth: Warung Pak Ali"
+                placeholder={t(
+                  'login.namePlaceholder',
+                )}
                 value={displayName}
                 onChange={(event) =>
                   setDisplayName(event.target.value)
@@ -143,10 +156,12 @@ export default function LoginScreen({ onAuthed }) {
           )}
 
           <label className={styles.field}>
-            Alamat e-mel
+            {t('login.emailLabel')}
             <input
               type="email"
-              placeholder="cth: anda@email.com"
+              placeholder={t(
+                'login.emailPlaceholder',
+              )}
               value={email}
               onChange={(event) =>
                 setEmail(event.target.value)
@@ -159,10 +174,12 @@ export default function LoginScreen({ onAuthed }) {
           </label>
 
           <label className={styles.field}>
-            Kata laluan
+            {t('login.passwordLabel')}
             <input
               type="password"
-              placeholder="Sekurang-kurangnya 8 aksara"
+              placeholder={t(
+                'login.passwordPlaceholder',
+              )}
               value={password}
               onChange={(event) =>
                 setPassword(event.target.value)
@@ -190,17 +207,27 @@ export default function LoginScreen({ onAuthed }) {
             disabled={busy}
           >
             {busy
-              ? 'Sila tunggu...'
+              ? t('login.busy')
               : mode === 'register'
-                ? 'Daftar & mula'
-                : 'Log masuk'}
+                ? t('login.submitRegister')
+                : t('login.signin')}
           </button>
         </form>
 
         <p className={styles.note}>
-          Akaun anda dilindungi oleh Supabase Authentication.
-          Data perniagaan akan dipisahkan mengikut pengguna.
+          {t('login.note')}
         </p>
+
+        <button
+          type="button"
+          className={styles.demoButton}
+          onClick={onTryDemo}
+          disabled={busy}
+        >
+          {t('demo.try')}
+        </button>
+
+        <p className={styles.demoNote}>{t('demo.note')}</p>
       </div>
     </div>
   );

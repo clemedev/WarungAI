@@ -1,22 +1,31 @@
 import {
+  lazy,
+  useRef,
+  Suspense,
   useEffect,
   useMemo,
   useState,
 } from 'react';
 
-import Dashboard from './components/Dashboard/Dashboard';
-import ReceiptScanner from './components/ReceiptScanner/ReceiptScanner';
+import { useTranslation } from 'react-i18next';
+
 import ChatEntry from './components/ChatEntry/ChatEntry';
-import ProductList from './components/ProductList/ProductList';
-import ExpenseTracker from './components/ExpenseTracker/ExpenseTracker';
 import LoginScreen from './components/LoginScreen/LoginScreen';
-import SalesList from './components/SalesList/SalesList';
 import ThemeToggle from './components/ThemeToggle/ThemeToggle.jsx';
+import LanguageSwitcher from './components/LanguageSwitcher/LanguageSwitcher';
 import OverviewMetrics from './components/OverviewMetrics/OverviewMetrics';
+import QuickSaleGrid from './components/QuickSaleGrid/QuickSaleGrid';
+import DailyClosing from './components/DailyClosing/DailyClosing';
 
 import {
   getProducts,
 } from './lib/supabaseProducts.js';
+
+import {
+  clearDemoStall,
+  isDemoStallEnabled,
+  startDemoStall,
+} from './lib/demoStall.js';
 
 import {
   getCurrentUser,
@@ -24,42 +33,55 @@ import {
   signOut,
 } from './lib/supabaseAuth.js';
 
+import i18n, {
+  getDateLocale,
+} from './i18n/config.js';
+
 import styles from './App.module.css';
 
+/**
+ * Nav model. Labels/descriptions are not stored here — they live in the
+ * locale files under `views.<id>` and are resolved at render, so they
+ * follow the language picker.
+ */
 const VIEWS = [
-  {
-    id: 'overview',
-    icon: '⌂',
-    label: 'Ringkasan',
-    shortLabel: 'Utama',
-    description:
-      'Rekod aktiviti dan lihat keadaan perniagaan hari ini.',
-  },
-  {
-    id: 'records',
-    icon: '≡',
-    label: 'Rekod',
-    shortLabel: 'Rekod',
-    description:
-      'Semak sejarah jualan dan perbelanjaan perniagaan.',
-  },
-  {
-    id: 'inventory',
-    icon: '◫',
-    label: 'Inventori',
-    shortLabel: 'Stok',
-    description:
-      'Urus produk, harga, kos, margin dan stok semasa.',
-  },
-  {
-    id: 'insights',
-    icon: '↗',
-    label: 'Analitik',
-    shortLabel: 'Analitik',
-    description:
-      'Fahami prestasi, trend dan peluang perniagaan.',
-  },
+  { id: 'overview', icon: '⌂' },
+  { id: 'records', icon: '≡' },
+  { id: 'inventory', icon: '◫' },
+  { id: 'insights', icon: '↗' },
 ];
+
+const DEMO_USER = {
+  id: 'demo-stall',
+  name: 'Warung Kak Lina',
+  email: 'demo@warungai.local',
+};
+
+// These features are only needed after a user opens their corresponding
+// screen. Lazy loading keeps Tesseract and Chart.js out of the first bundle.
+const SaleReceiptScanner = lazy(() =>
+  import('./components/ReceiptScanner/SaleReceiptScanner'),
+);
+
+const SalesList = lazy(() =>
+  import('./components/SalesList/SalesList'),
+);
+
+const ExpenseTracker = lazy(() =>
+  import('./components/ExpenseTracker/ExpenseTracker'),
+);
+
+const ProductList = lazy(() =>
+  import('./components/ProductList/ProductList'),
+);
+
+const WeeklyInsights = lazy(() =>
+  import('./components/WeeklyInsights/WeeklyInsights'),
+);
+
+const DemoWalkthrough = lazy(() =>
+  import('./components/DemoWalkthrough/DemoWalkthrough'),
+);
 
 function mapSupabaseUser(user) {
   if (!user) {
@@ -72,7 +94,9 @@ function mapSupabaseUser(user) {
     name:
       user.user_metadata?.display_name ??
       user.email ??
-      'Pengguna WarungAI',
+      // Module scope, so the i18n instance is used directly rather than
+      // the hook. Only reached when a user has neither name nor email.
+      i18n.t('app.defaultUserName'),
   };
 }
 
@@ -154,21 +178,24 @@ function getInitials(name) {
     .toUpperCase();
 }
 
-function getGreeting() {
+/** Returns a locale key, not a phrase — resolved by the caller via t(). */
+function getGreetingKey() {
   const hour = new Date().getHours();
 
   if (hour < 12) {
-    return 'Selamat pagi';
+    return 'greeting.morning';
   }
 
   if (hour < 18) {
-    return 'Selamat petang';
+    return 'greeting.afternoon';
   }
 
-  return 'Selamat malam';
+  return 'greeting.evening';
 }
 
 function LoadingScreen() {
+  const { t } = useTranslation();
+
   return (
     <div className={styles.loadingScreen}>
       <div className={styles.loadingContent}>
@@ -178,9 +205,7 @@ function LoadingScreen() {
 
         <h1>WarungAI</h1>
 
-        <p>
-          Menyediakan ruang kerja anda...
-        </p>
+        <p>{t('app.loading')}</p>
 
         <div className={styles.loadingTrack}>
           <span />
@@ -190,12 +215,31 @@ function LoadingScreen() {
   );
 }
 
+function FeatureFallback() {
+  const { t } = useTranslation();
+
+  return (
+    <p className={styles.featureLoading} role="status">
+      {t('app.loading')}
+    </p>
+  );
+}
+
 export default function App() {
+  const { t, i18n: i18nInstance } =
+    useTranslation();
+
   const [user, setUser] =
     useState(null);
 
   const [authLoading, setAuthLoading] =
     useState(true);
+
+  const [demoMode, setDemoMode] =
+    useState(() => isDemoStallEnabled());
+
+  const [walkthroughOpen, setWalkthroughOpen] =
+    useState(false);
 
   const [view, setView] =
     useState('overview');
@@ -227,6 +271,9 @@ export default function App() {
     setCreateMenuOpen,
   ] = useState(false);
 
+  const createMenuRef = useRef(null);
+  const createMenuTriggerRef = useRef(null);
+
   const currentView = useMemo(
     () =>
       VIEWS.find(
@@ -235,10 +282,13 @@ export default function App() {
     [view],
   );
 
+  // Re-formats when the language changes, so the date is not stuck in Malay.
   const formattedDate = useMemo(
     () =>
       new Intl.DateTimeFormat(
-        'ms-MY',
+        getDateLocale(
+          i18nInstance.language,
+        ),
         {
           weekday: 'long',
           day: 'numeric',
@@ -246,7 +296,7 @@ export default function App() {
           year: 'numeric',
         },
       ).format(new Date()),
-    [],
+    [i18nInstance.language],
   );
 
   async function loadProducts() {
@@ -261,9 +311,35 @@ export default function App() {
   }
 
   useEffect(() => {
+    if (!createMenuOpen) {
+      createMenuTriggerRef.current?.focus();
+      return undefined;
+    }
+
+    const sheet = createMenuRef.current;
+    sheet?.querySelector('button')?.focus();
+
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        setCreateMenuOpen(false);
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [createMenuOpen]);
+
+  useEffect(() => {
     let active = true;
 
     async function restoreUser() {
+      if (isDemoStallEnabled()) {
+        setUser(DEMO_USER);
+        await loadProducts();
+        if (active) setAuthLoading(false);
+        return;
+      }
+
       const currentUser =
         await getCurrentUser();
 
@@ -293,6 +369,9 @@ export default function App() {
     const unsubscribe =
       onAuthStateChange(
         async (nextUser) => {
+          if (isDemoStallEnabled()) {
+            return;
+          }
           if (!active) {
             return;
           }
@@ -330,14 +409,31 @@ export default function App() {
     await loadProducts();
   }
 
+  async function handleTryDemo() {
+    startDemoStall();
+    setDemoMode(true);
+    setUser(DEMO_USER);
+    await loadProducts();
+    setWalkthroughOpen(true);
+  }
+
   async function handleSignOut() {
+    if (demoMode) {
+      clearDemoStall();
+      setDemoMode(false);
+      setWalkthroughOpen(false);
+      setUser(null);
+      setProducts([]);
+      return;
+    }
+
     try {
       await signOut();
     } catch (error) {
       setToast(
         error instanceof Error
           ? error.message
-          : 'Log keluar gagal.',
+          : t('app.signOutFailed'),
       );
 
       return;
@@ -362,9 +458,9 @@ export default function App() {
     );
   }
 
-  function handleSaved(count) {
+  async function handleSaved(count) {
     setToast(
-      `✓ ${count} jualan berjaya disimpan`,
+      t('toast.salesSaved', { count }),
     );
 
     setSalesVersion(
@@ -375,15 +471,30 @@ export default function App() {
       (version) => version + 1,
     );
 
+    // A sale also consumes stock. Reload the shared product list so Busy
+    // Mode immediately reflects (for example) 8 Nasi Lemak → 6 left.
+    await loadProducts();
+
     window.setTimeout(() => {
       setToast('');
     }, 3000);
+  }
+
+  async function handleSalesChanged() {
+    setSalesVersion((version) => version + 1);
+    setActivityVersion((version) => version + 1);
+    await loadProducts();
   }
 
   function openSale() {
     setView('overview');
     setComposer('chat');
     setCreateMenuOpen(false);
+  }
+
+  function openCreateMenu(event) {
+    createMenuTriggerRef.current = event.currentTarget;
+    setCreateMenuOpen(true);
   }
 
   function openReceipt() {
@@ -411,6 +522,7 @@ export default function App() {
     return (
       <LoginScreen
         onAuthed={handleAuthed}
+        onTryDemo={handleTryDemo}
       />
     );
   }
@@ -425,7 +537,9 @@ export default function App() {
 
           <div className={styles.brandCopy}>
             <strong>WarungAI</strong>
-            <span>Business workspace</span>
+            <span>
+              {t('app.workspaceTag')}
+            </span>
           </div>
         </div>
 
@@ -435,13 +549,17 @@ export default function App() {
           />
         </div>
 
+        <div className={styles.sidebarLanguage}>
+          <LanguageSwitcher darkSurface />
+        </div>
+
         <p className={styles.navHeading}>
-          Ruang kerja
+          {t('app.navHeading')}
         </p>
 
         <nav
           className={styles.desktopNav}
-          aria-label="Navigasi utama"
+          aria-label={t('app.navAria')}
         >
           {VIEWS.map((item) => (
             <button
@@ -463,7 +581,11 @@ export default function App() {
                 {item.icon}
               </span>
 
-              <span>{item.label}</span>
+              <span>
+                {t(
+                  `views.${item.id}.label`,
+                )}
+              </span>
             </button>
           ))}
         </nav>
@@ -471,12 +593,10 @@ export default function App() {
         <button
           type="button"
           className={styles.sidebarCreate}
-          onClick={() =>
-            setCreateMenuOpen(true)
-          }
+          onClick={openCreateMenu}
         >
           <span>+</span>
-          Rekod aktiviti
+          {t('app.recordActivity')}
         </button>
 
         <div className={styles.sidebarSpacer} />
@@ -497,11 +617,20 @@ export default function App() {
           className={styles.signOut}
           onClick={handleSignOut}
         >
-          ↪ Log keluar
+          ↪ {t('app.signOut')}
         </button>
       </aside>
 
       <section className={styles.application}>
+        {demoMode && (
+          <div className={styles.demoBanner} role="status">
+            <span>{t('demo.banner')}</span>
+            <span className={styles.demoActions}>
+              <button type="button" onClick={() => setWalkthroughOpen(true)}>{t('demo.walkthrough')}</button>
+              <button type="button" onClick={handleSignOut}>{t('demo.exit')}</button>
+            </span>
+          </div>
+        )}
         <header className={styles.mobileHeader}>
           <div className={styles.mobileBrand}>
             <span>🍛</span>
@@ -509,15 +638,17 @@ export default function App() {
           </div>
 
           <div className={styles.mobileControls}>
+            <LanguageSwitcher />
+
             <ThemeToggle compact />
 
             <button
               type="button"
               className={styles.mobileProfile}
-              onClick={() =>
-                setCreateMenuOpen(true)
-              }
-              aria-label="Buka menu tindakan"
+              onClick={openCreateMenu}
+              aria-label={t(
+                'app.openMenuAria',
+              )}
             >
               {getInitials(user.name)}
             </button>
@@ -529,12 +660,14 @@ export default function App() {
             <header className={styles.pageHeader}>
               <div>
                 <p className={styles.greeting}>
-                  {getGreeting()},{' '}
+                  {t(getGreetingKey())},{' '}
                   <strong>{user.name}</strong>
                 </p>
 
                 <h1 className={styles.pageTitle}>
-                  {currentView.label}
+                  {t(
+                    `views.${currentView.id}.label`,
+                  )}
                 </h1>
 
                 <p
@@ -542,7 +675,9 @@ export default function App() {
                     styles.pageDescription
                   }
                 >
-                  {currentView.description}
+                  {t(
+                    `views.${currentView.id}.description`,
+                  )}
                 </p>
               </div>
 
@@ -561,6 +696,11 @@ export default function App() {
                   }
                 />
 
+                <DailyClosing
+                  refreshKey={activityVersion}
+                  onManageStock={() => setView('inventory')}
+                />
+
                 <div
                   className={
                     styles.overviewLayout
@@ -577,13 +717,16 @@ export default function App() {
                     }
                   >
                     <div>
-                      <p>Catatan pintar</p>
+                      <p>
+                        {t(
+                          'capture.eyebrow',
+                        )}
+                      </p>
                       <h2>
-                        Apa berlaku hari ini?
+                        {t('capture.title')}
                       </h2>
                       <span>
-                        Taip seperti anda
-                        bercakap biasa.
+                        {t('capture.hint')}
                       </span>
                     </div>
 
@@ -592,7 +735,7 @@ export default function App() {
                         styles.captureStatus
                       }
                     >
-                      AI-assisted
+                      {t('capture.badge')}
                     </div>
                   </div>
 
@@ -612,7 +755,7 @@ export default function App() {
                         setComposer('chat')
                       }
                     >
-                      ✦ Teks / suara
+                      ✦ {t('capture.tabChat')}
                     </button>
 
                     <button
@@ -629,7 +772,22 @@ export default function App() {
                         )
                       }
                     >
-                      ▣ Imbas resit
+                      ▣{' '}
+                      {t(
+                        'capture.tabReceipt',
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      className={
+                        composer === 'quick'
+                          ? styles.captureTabActive
+                          : styles.captureTab
+                      }
+                      onClick={() => setComposer('quick')}
+                    >
+                      ⚡ {t('capture.tabBusy')}
                     </button>
                   </div>
 
@@ -650,11 +808,20 @@ export default function App() {
 
                     {composer ===
                       'receipt' && (
-                      <ReceiptScanner
+                      <Suspense
+                        fallback={<FeatureFallback />}
+                      >
+                        <SaleReceiptScanner
+                          products={products}
+                          onSaved={handleSaved}
+                        />
+                      </Suspense>
+                    )}
+
+                    {composer === 'quick' && (
+                      <QuickSaleGrid
                         products={products}
-                        onSaved={
-                          handleSaved
-                        }
+                        onSaved={handleSaved}
                       />
                     )}
                   </div>
@@ -670,10 +837,10 @@ export default function App() {
                       styles.todayEyebrow
                     }
                   >
-                    Hari ini
+                    {t('quick.eyebrow')}
                   </p>
 
-                  <h2>Gerak pantas</h2>
+                  <h2>{t('quick.title')}</h2>
 
                   <div
                     className={
@@ -687,10 +854,14 @@ export default function App() {
                       <span>+</span>
                       <div>
                         <strong>
-                          Jualan baharu
+                          {t(
+                            'quick.saleTitle',
+                          )}
                         </strong>
                         <small>
-                          Taip atau suara
+                          {t(
+                            'quick.saleHint',
+                          )}
                         </small>
                       </div>
                     </button>
@@ -702,10 +873,14 @@ export default function App() {
                       <span>▣</span>
                       <div>
                         <strong>
-                          Imbas resit
+                          {t(
+                            'quick.receiptTitle',
+                          )}
                         </strong>
                         <small>
-                          Ekstrak item
+                          {t(
+                            'quick.receiptHint',
+                          )}
                         </small>
                       </div>
                     </button>
@@ -717,10 +892,14 @@ export default function App() {
                       <span>−</span>
                       <div>
                         <strong>
-                          Tambah belanja
+                          {t(
+                            'quick.expenseTitle',
+                          )}
                         </strong>
                         <small>
-                          Catat kos operasi
+                          {t(
+                            'quick.expenseHint',
+                          )}
                         </small>
                       </div>
                     </button>
@@ -732,10 +911,14 @@ export default function App() {
                       <span>◫</span>
                       <div>
                         <strong>
-                          Tambah produk
+                          {t(
+                            'quick.productTitle',
+                          )}
                         </strong>
                         <small>
-                          Harga dan stok
+                          {t(
+                            'quick.productHint',
+                          )}
                         </small>
                       </div>
                     </button>
@@ -753,9 +936,11 @@ export default function App() {
                     }
                   >
                     <div>
-                      <p>Aktiviti terkini</p>
+                      <p>
+                        {t('recent.eyebrow')}
+                      </p>
                       <h2>
-                        Jualan terbaharu
+                        {t('recent.title')}
                       </h2>
                     </div>
 
@@ -768,23 +953,29 @@ export default function App() {
                         );
                       }}
                     >
-                      Lihat semua
+                      {t('recent.viewAll')}
                     </button>
                   </div>
 
-                  <SalesList
-                    refreshKey={
-                      salesVersion
-                    }
-                    onChange={() =>
-                      setSalesVersion(
-                        (version) =>
-                          version + 1,
-                      )
-                    }
-                  />
-                </section>
-                </div>
+                  <Suspense fallback={<FeatureFallback />}>
+                    <SalesList
+                      refreshKey={salesVersion}
+                      onChange={handleSalesChanged}
+                    />
+                  </Suspense>
+      </section>
+      {demoMode && walkthroughOpen && (
+        <Suspense fallback={null}>
+          <DemoWalkthrough
+            onClose={() => setWalkthroughOpen(false)}
+            onNavigate={({ view: nextView, composer: nextComposer }) => {
+              setView(nextView);
+              if (nextComposer) setComposer(nextComposer);
+            }}
+          />
+        </Suspense>
+      )}
+    </div>
               </>
             )}
 
@@ -810,7 +1001,7 @@ export default function App() {
                       setRecordType('sales')
                     }
                   >
-                    Jualan
+                    {t('records.sales')}
                   </button>
 
                   <button
@@ -827,34 +1018,34 @@ export default function App() {
                       )
                     }
                   >
-                    Perbelanjaan
+                    {t('records.expenses')}
                   </button>
                 </div>
 
                 {recordType === 'sales' && (
-                  <SalesList
-                    refreshKey={
-                      salesVersion
-                    }
-                    onChange={() =>
-                      setSalesVersion(
-                        (version) =>
-                          version + 1,
-                      )
-                    }
-                  />
+                  <Suspense
+                    fallback={<FeatureFallback />}
+                  >
+                    <SalesList
+                      refreshKey={salesVersion}
+                      onChange={handleSalesChanged}
+                    />
+                  </Suspense>
                 )}
 
                 {recordType ===
                   'expenses' && (
-                  <ExpenseTracker
-                    onChange={() =>
-                      setActivityVersion(
-                        (version) =>
-                          version + 1,
-                      )
-                    }
-                  />
+                  <Suspense
+                    fallback={<FeatureFallback />}
+                  >
+                    <ExpenseTracker
+                      onChange={() =>
+                        setActivityVersion(
+                          (version) => version + 1,
+                        )
+                      }
+                    />
+                  </Suspense>
                 )}
               </div>
             )}
@@ -865,11 +1056,9 @@ export default function App() {
                   styles.inventoryLayout
                 }
               >
-                <ProductList
-                  onChange={
-                    refreshProducts
-                  }
-                />
+                <Suspense fallback={<FeatureFallback />}>
+                  <ProductList onChange={refreshProducts} />
+                </Suspense>
               </div>
             )}
 
@@ -879,7 +1068,11 @@ export default function App() {
                   styles.insightsLayout
                 }
               >
-                <Dashboard />
+                <Suspense fallback={<FeatureFallback />}>
+                  <WeeklyInsights
+                    refreshKey={activityVersion}
+                  />
+                </Suspense>
               </div>
             )}
           </div>
@@ -888,7 +1081,7 @@ export default function App() {
 
       <nav
         className={styles.mobileNav}
-        aria-label="Navigasi mudah alih"
+        aria-label={t('app.mobileNavAria')}
       >
         {VIEWS.slice(0, 2).map(
           (item) => (
@@ -906,7 +1099,9 @@ export default function App() {
             >
               <span>{item.icon}</span>
               <small>
-                {item.shortLabel}
+                {t(
+                  `views.${item.id}.short`,
+                )}
               </small>
             </button>
           ),
@@ -915,10 +1110,10 @@ export default function App() {
         <button
           type="button"
           className={styles.mobileCreate}
-          onClick={() =>
-            setCreateMenuOpen(true)
-          }
-          aria-label="Rekod aktiviti baharu"
+          onClick={openCreateMenu}
+          aria-label={t(
+            'app.newActivityAria',
+          )}
         >
           +
         </button>
@@ -939,7 +1134,9 @@ export default function App() {
             >
               <span>{item.icon}</span>
               <small>
-                {item.shortLabel}
+                {t(
+                  `views.${item.id}.short`,
+                )}
               </small>
             </button>
           ),
@@ -960,6 +1157,7 @@ export default function App() {
           }}
         >
           <section
+            ref={createMenuRef}
             className={styles.createSheet}
             role="dialog"
             aria-modal="true"
@@ -977,9 +1175,11 @@ export default function App() {
               }
             >
               <div>
-                <p>Rekod aktiviti</p>
+                <p>
+                  {t('createSheet.eyebrow')}
+                </p>
                 <h2 id="create-title">
-                  Apa yang berlaku?
+                  {t('createSheet.title')}
                 </h2>
               </div>
 
@@ -990,7 +1190,9 @@ export default function App() {
                     false,
                   )
                 }
-                aria-label="Tutup"
+                aria-label={t(
+                  'createSheet.close',
+                )}
               >
                 ×
               </button>
@@ -1008,10 +1210,14 @@ export default function App() {
                 <span>+</span>
                 <div>
                   <strong>
-                    Rekod jualan
+                    {t(
+                      'createSheet.saleTitle',
+                    )}
                   </strong>
                   <small>
-                    Taip atau gunakan suara
+                    {t(
+                      'createSheet.saleHint',
+                    )}
                   </small>
                 </div>
               </button>
@@ -1023,10 +1229,14 @@ export default function App() {
                 <span>▣</span>
                 <div>
                   <strong>
-                    Imbas resit
+                    {t(
+                      'createSheet.receiptTitle',
+                    )}
                   </strong>
                   <small>
-                    Baca resit bercetak
+                    {t(
+                      'createSheet.receiptHint',
+                    )}
                   </small>
                 </div>
               </button>
@@ -1038,10 +1248,14 @@ export default function App() {
                 <span>−</span>
                 <div>
                   <strong>
-                    Tambah belanja
+                    {t(
+                      'createSheet.expenseTitle',
+                    )}
                   </strong>
                   <small>
-                    Rekod kos operasi
+                    {t(
+                      'createSheet.expenseHint',
+                    )}
                   </small>
                 </div>
               </button>
@@ -1053,10 +1267,14 @@ export default function App() {
                 <span>◫</span>
                 <div>
                   <strong>
-                    Tambah produk
+                    {t(
+                      'createSheet.productTitle',
+                    )}
                   </strong>
                   <small>
-                    Harga, kos dan stok
+                    {t(
+                      'createSheet.productHint',
+                    )}
                   </small>
                 </div>
               </button>

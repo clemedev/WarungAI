@@ -1,3 +1,8 @@
+import {
+  Trans,
+  useTranslation,
+} from 'react-i18next';
+
 import styles from './SalesSummaryCard.module.css';
 
 function formatCurrency(value) {
@@ -10,6 +15,8 @@ export default function SalesSummaryCard({
   dailyTarget,
   onTargetChange,
 }) {
+  const { t } = useTranslation();
+
   const sales = Number(
     stats.todayTotal ?? 0,
   );
@@ -68,16 +75,15 @@ export default function SalesSummaryCard({
       <header className={styles.header}>
         <div>
           <p className={styles.eyebrow}>
-            Prestasi hari ini
+            {t('summaryCard.eyebrow')}
           </p>
 
           <h2 className={styles.title}>
-            Ringkasan perniagaan
+            {t('summaryCard.title')}
           </h2>
 
           <p className={styles.subtitle}>
-            Angka terkini berdasarkan jualan
-            dan perbelanjaan yang disahkan.
+            {t('summaryCard.subtitle')}
           </p>
         </div>
 
@@ -87,7 +93,7 @@ export default function SalesSummaryCard({
             aria-hidden="true"
           />
 
-          Data langsung
+          {t('summaryCard.live')}
         </div>
       </header>
 
@@ -102,7 +108,7 @@ export default function SalesSummaryCard({
             </span>
 
             <span className={styles.metricLabel}>
-              Jualan hari ini
+              {t('summaryCard.salesLabel')}
             </span>
           </div>
 
@@ -111,7 +117,7 @@ export default function SalesSummaryCard({
           </strong>
 
           <span className={styles.metricHint}>
-            Jumlah hasil yang direkod
+            {t('summaryCard.salesHint')}
           </span>
         </article>
 
@@ -131,7 +137,7 @@ export default function SalesSummaryCard({
             </span>
 
             <span className={styles.metricLabel}>
-              Untung bersih
+              {t('summaryCard.profitLabel')}
             </span>
           </div>
 
@@ -146,11 +152,16 @@ export default function SalesSummaryCard({
           </strong>
 
           <span className={styles.metricHint}>
-            Margin{' '}
-            <strong>
-              {profitMargin.toFixed(1)}%
-            </strong>{' '}
-            daripada jualan
+            <Trans
+              i18nKey="summaryCard.margin"
+              values={{
+                value:
+                  profitMargin.toFixed(1),
+              }}
+              components={{
+                bold: <strong />,
+              }}
+            />
           </span>
         </article>
       </div>
@@ -159,7 +170,7 @@ export default function SalesSummaryCard({
         <div className={styles.targetHeader}>
           <div>
             <span className={styles.targetLabel}>
-              Sasaran jualan harian
+              {t('summaryCard.targetLabel')}
             </span>
 
             <div className={styles.targetAmount}>
@@ -172,7 +183,9 @@ export default function SalesSummaryCard({
                 step="1"
                 inputMode="decimal"
                 value={dailyTarget}
-                aria-label="Sasaran jualan harian"
+                aria-label={t(
+                  'summaryCard.targetAria',
+                )}
                 onChange={(event) =>
                   onTargetChange(
                     Number(
@@ -189,8 +202,12 @@ export default function SalesSummaryCard({
 
             <span>
               {percentage >= 100
-                ? 'Sasaran dicapai'
-                : 'Telah dicapai'}
+                ? t(
+                    'summaryCard.targetReached',
+                  )
+                : t(
+                    'summaryCard.targetAchieved',
+                  )}
             </span>
           </div>
         </div>
@@ -198,7 +215,9 @@ export default function SalesSummaryCard({
         <div
           className={styles.progressTrack}
           role="progressbar"
-          aria-label="Kemajuan sasaran harian"
+          aria-label={t(
+            'summaryCard.progressAria',
+          )}
           aria-valuemin="0"
           aria-valuemax="100"
           aria-valuenow={progressWidth}
@@ -217,28 +236,41 @@ export default function SalesSummaryCard({
 
         <div className={styles.progressFooter}>
           <span>
-            {formatCurrency(sales)} direkod
+            {t('summaryCard.recorded', {
+              amount:
+                formatCurrency(sales),
+            })}
           </span>
 
           <span>
             {percentage >= 100
-              ? `Lebih ${formatCurrency(
-                  Math.max(
-                    0,
-                    sales -
-                      Number(
-                        dailyTarget ?? 0,
+              ? t('summaryCard.over', {
+                  amount: formatCurrency(
+                    Math.max(
+                      0,
+                      sales -
+                        Number(
+                          dailyTarget ??
+                            0,
+                        ),
+                    ),
+                  ),
+                })
+              : t(
+                  'summaryCard.remaining',
+                  {
+                    amount:
+                      formatCurrency(
+                        Math.max(
+                          0,
+                          Number(
+                            dailyTarget ??
+                              0,
+                          ) - sales,
+                        ),
                       ),
-                  ),
-                )}`
-              : `Baki ${formatCurrency(
-                  Math.max(
-                    0,
-                    Number(
-                      dailyTarget ?? 0,
-                    ) - sales,
-                  ),
-                )}`}
+                  },
+                )}
           </span>
         </div>
       </div>
@@ -247,12 +279,11 @@ export default function SalesSummaryCard({
         <div className={styles.paymentHeading}>
           <div>
             <span className={styles.sectionLabel}>
-              Kaedah bayaran
+              {t('summaryCard.paymentLabel')}
             </span>
 
             <p>
-              Pecahan hasil tunai dan QR
-              hari ini
+              {t('summaryCard.paymentHint')}
             </p>
           </div>
 
@@ -273,7 +304,9 @@ export default function SalesSummaryCard({
             </div>
 
             <div className={styles.paymentInfo}>
-              <span>Tunai</span>
+              <span>
+                {t('summaryCard.cash')}
+              </span>
 
               <strong>
                 {formatCurrency(cash)}
@@ -296,7 +329,9 @@ export default function SalesSummaryCard({
             </div>
 
             <div className={styles.paymentInfo}>
-              <span>Bayaran QR</span>
+              <span>
+                {t('summaryCard.qr')}
+              </span>
 
               <strong>
                 {formatCurrency(qr)}

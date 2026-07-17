@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1080" viewBox="0 0 720 1080" role="img" aria-labelledby="title desc">
+  <title id="title">Handwritten Warung Kak Lina receipt</title>
+  <desc id="desc">A readable receipt with Nasi Lemak, Teh Tarik, Kopi O, and a total of RM23.50.</desc>
+  <defs>
+    <filter id="paper" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="2" seed="4" result="noise"/>
+      <feColorMatrix in="noise" type="saturate" values="0" result="mono"/>
+      <feComponentTransfer in="mono" result="softNoise"><feFuncA type="table" tableValues="0 0.045"/></feComponentTransfer>
+      <feBlend in="SourceGraphic" in2="softNoise" mode="multiply"/>
+    </filter>
+  </defs>
+  <rect width="720" height="1080" fill="#b89b72"/>
+  <rect x="86" y="54" width="548" height="972" rx="7" fill="#fffdf5" filter="url(#paper)" transform="rotate(-1.2 360 540)"/>
+  <g transform="rotate(-1.2 360 540)" fill="#1d3557" font-family="Comic Sans MS, Segoe Print, cursive">
+    <text x="360" y="170" text-anchor="middle" font-size="39" font-weight="700">WARUNG KAK LINA</text>
+    <text x="360" y="213" text-anchor="middle" font-size="22">Jalan Makan Sedap, KL</text>
+    <path d="M140 246 C245 237 460 251 578 244" fill="none" stroke="#1d3557" stroke-width="3"/>
+    <text x="145" y="312" font-size="29">Nasi Lemak x3</text>
+    <text x="492" y="312" font-size="29">15.00</text>
+    <text x="145" y="382" font-size="29">Teh Tarik x2</text>
+    <text x="507" y="382" font-size="29">6.00</text>
+    <text x="145" y="452" font-size="29">Kopi O x1</text>
+    <text x="492" y="452" font-size="29">2.50</text>
+    <path d="M140 492 C255 501 470 484 580 495" fill="none" stroke="#1d3557" stroke-width="3" stroke-dasharray="9 8"/>
+    <text x="145" y="564" font-size="33" font-weight="700">JUMLAH</text>
+    <text x="458" y="564" font-size="33" font-weight="700">RM23.50</text>
+    <text x="145" y="635" font-size="25">Tunai</text>
+    <path d="M140 676 C280 671 436 681 580 675" fill="none" stroke="#1d3557" stroke-width="2"/>
+    <text x="360" y="750" text-anchor="middle" font-size="24">Terima kasih!</text>
+    <text x="360" y="800" text-anchor="middle" font-size="19">12 Jul 2026  •  12:45 pm</text>
+  </g>
+</svg>

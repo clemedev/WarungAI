@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { deleteDemoExpense, getDemoExpenses, isDemoStallEnabled, saveDemoExpense } from './demoStall.js';
 
 const VALID_CATEGORIES = [
   'bahan',
@@ -36,12 +37,36 @@ async function requireUser() {
   return user;
 }
 
-export async function getExpenses() {
+/**
+ * Fetch expenses, optionally scoped to a date window (YYYY-MM-DD,
+ * inclusive) — same contract as getSales.
+ */
+export async function getExpenses({
+  fromDate,
+  toDate,
+} = {}) {
+  if (isDemoStallEnabled()) return getDemoExpenses({ fromDate, toDate });
   await requireUser();
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('expenses')
-    .select('*')
+    .select('*');
+
+  if (fromDate) {
+    query = query.gte(
+      'expense_date',
+      fromDate,
+    );
+  }
+
+  if (toDate) {
+    query = query.lte(
+      'expense_date',
+      toDate,
+    );
+  }
+
+  const { data, error } = await query
     .order('expense_date', {
       ascending: false,
     })
@@ -59,11 +84,19 @@ export async function getExpenses() {
 }
 
 export async function saveExpense(expense) {
+  if (isDemoStallEnabled()) return saveDemoExpense(expense);
   const user = await requireUser();
 
   const category = String(
     expense?.category ?? '',
   ).trim();
+
+  // The expenses table accepts 'manual' and 'receipt' (BACKEND.md,
+  // "Supported sources"); receipt-scanned expenses pass the latter.
+  const source =
+    expense?.source === 'receipt'
+      ? 'receipt'
+      : 'manual';
 
   const amount = Number(
     expense?.amount,
@@ -110,7 +143,7 @@ export async function saveExpense(expense) {
       amount,
       note: note || null,
       expense_date: date,
-      source: 'manual',
+      source,
     })
     .select()
     .single();
@@ -125,6 +158,7 @@ export async function saveExpense(expense) {
 }
 
 export async function deleteExpense(id) {
+  if (isDemoStallEnabled()) return deleteDemoExpense(id);
   await requireUser();
 
   if (!id) {

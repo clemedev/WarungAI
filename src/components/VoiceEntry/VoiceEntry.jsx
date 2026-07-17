@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './VoiceEntry.module.css';
 
 const SpeechRecognition =
@@ -14,15 +15,29 @@ const SpeechRecognition =
  * Not supported in all browsers (works in Chrome/Edge/Safari; not Firefox) —
  * the button hides itself when unavailable.
  */
-export default function VoiceEntry({ onTranscript }) {
+export default function VoiceEntry({
+  onTranscript,
+  disabled = false,
+}) {
+  const { t, i18n } = useTranslation();
   const recognitionRef = useRef(null);
   const [listening, setListening] = useState(false);
   const [error, setError] = useState('');
 
+  // Map i18n language codes to Web Speech API language tags
+  function getSpeechLang(lang) {
+    const map = {
+      ms: 'ms-MY',
+      en: 'en-US',
+      zh: 'zh-CN',
+    };
+    return map[lang] || 'ms-MY';
+  }
+
   useEffect(() => {
     if (!SpeechRecognition) return;
     const rec = new SpeechRecognition();
-    rec.lang = 'ms-MY'; // Bahasa Malaysia; engine still copes with EN food names
+    rec.lang = getSpeechLang(i18n.language);
     rec.interimResults = false;
     rec.maxAlternatives = 1;
 
@@ -32,9 +47,9 @@ export default function VoiceEntry({ onTranscript }) {
     };
     rec.onerror = (event) => {
       if (event.error === 'not-allowed') {
-        setError('Mikrofon tidak dibenarkan — semak kebenaran pelayar. (Mic permission denied.)');
+        setError(t('voice.micDenied'));
       } else if (event.error !== 'aborted' && event.error !== 'no-speech') {
-        setError(`Suara gagal: ${event.error}`);
+        setError(t('voice.failed', { error: event.error }));
       }
       setListening(false);
     };
@@ -43,11 +58,15 @@ export default function VoiceEntry({ onTranscript }) {
     recognitionRef.current = rec;
     return () => rec.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [i18n.language]);
 
   if (!SpeechRecognition) return null;
 
   function toggle() {
+    if (disabled) {
+      return;
+    }
+
     setError('');
     if (listening) {
       recognitionRef.current?.stop();
@@ -68,7 +87,10 @@ export default function VoiceEntry({ onTranscript }) {
         type="button"
         className={`${styles.mic} ${listening ? styles.listening : ''}`}
         onClick={toggle}
-        title={listening ? 'Berhenti mendengar' : 'Cakap jualan (speak the sale)'}
+        disabled={disabled}
+        aria-label={listening ? t('voice.stop') : t('voice.start')}
+        aria-pressed={listening}
+        title={listening ? t('voice.stop') : t('voice.start')}
       >
         {listening ? '⏹' : '🎤'}
       </button>

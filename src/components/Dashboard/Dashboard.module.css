@@ -222,6 +222,7 @@
     grid-template-areas:
       "summary summary"
       "empty empty"
+      "lowstock lowstock"
       "chart top"
       "insight insight"
       "footer footer";
@@ -232,6 +233,10 @@
 
   .summaryArea {
     grid-area: summary;
+  }
+
+  .lowStockArea {
+    grid-area: lowstock;
   }
 
   .emptyArea {

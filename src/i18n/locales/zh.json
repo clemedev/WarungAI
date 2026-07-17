@@ -1,0 +1,102 @@
+{
+  "nav": {
+    "dashboard": "仪表板",
+    "sales": "销售",
+    "scan": "扫描",
+    "products": "产品",
+    "expenses": "支出"
+  },
+  "common": {
+    "logout": "登出",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "cancel": "取消",
+    "save": "保存",
+    "delete": "删除",
+    "edit": "编辑",
+    "add": "添加",
+    "close": "关闭",
+    "back": "返回"
+  },
+  "dashboard": {
+    "title": "仪表板",
+    "todaysSales": "今日销售额",
+    "totalExpense": "总支出",
+    "netProfit": "净利润",
+    "dailyTarget": "每日销售目标",
+    "targetReached": "目标已达成",
+    "achieved": "已达成",
+    "paymentMethod": "付款方式",
+    "cash": "现金",
+    "qr": "二维码支付",
+    "liveData": "实时数据",
+    "lowStock": "库存不足",
+    "noLowStock": "所有产品库存充足"
+  },
+  "sales": {
+    "recordSale": "记录销售",
+    "salesHistory": "销售历史",
+    "noSales": "还未记录任何销售。",
+    "noSalesInRange": "此范围内无销售记录。",
+    "product": "产品",
+    "quantity": "数量",
+    "amount": "金额",
+    "source": "来源",
+    "manual": "手动",
+    "voice": "语音",
+    "receipt": "收据",
+    "type": "输入",
+    "dictate": "语音"
+  },
+  "expenses": {
+    "addExpense": "添加支出",
+    "expenseHistory": "支出历史",
+    "noExpenses": "未记录支出。",
+    "category": "类别",
+    "amount": "金额",
+    "note": "备注",
+    "ingredients": "原料",
+    "gas": "燃气",
+    "packaging": "包装",
+    "rent": "租金 / 公用事业",
+    "other": "其他",
+    "scanReceipt": "扫描供应商收据",
+    "today": "今天"
+  },
+  "scanner": {
+    "scanReceipt": "扫描收据",
+    "takePhoto": "拍摄收据照片或选择文件。",
+    "reading": "正在识别收据",
+    "review": "查看项目",
+    "detectTotal": "检测到收据总额",
+    "couldNotRead": "无法读取项目 — 请尝试更清晰的照片。",
+    "ocrFailed": "OCR 失败 — 请重试。",
+    "rawText": "原始 OCR 文本",
+    "tryAgain": "重试",
+    "itemsFrom": "来自收据",
+    "selectProduct": "选择产品"
+  },
+  "products": {
+    "productList": "产品列表",
+    "addProduct": "添加产品",
+    "name": "产品名称",
+    "sellPrice": "售价",
+    "costPrice": "成本",
+    "currentStock": "当前库存",
+    "lowStockThreshold": "低库存阈值",
+    "noProducts": "无产品。"
+  },
+  "voice": {
+    "startListening": "开始聆听",
+    "stopListening": "停止聆听",
+    "listening": "聆听中...",
+    "error": "语音识别出错"
+  },
+  "lang": {
+    "select": "选择语言",
+    "malay": "Bahasa Melayu",
+    "english": "English",
+    "chinese": "中文"
+  }
+}

@@ -7,6 +7,7 @@ import ProductList from './components/ProductList/ProductList';
 import ExpenseTracker from './components/ExpenseTracker/ExpenseTracker';
 import LoginScreen from './components/LoginScreen/LoginScreen';
 import SalesList from './components/SalesList/SalesList';
+import LanguageSwitcher from './components/LanguageSwitcher/LanguageSwitcher';
 
 import { getProducts } from './lib/storage';
 
@@ -460,6 +461,8 @@ export default function App() {
         <div
           className={styles.topActions}
         >
+          <LanguageSwitcher />
+
           <button
             type="button"
             className={

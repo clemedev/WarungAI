@@ -1,0 +1,102 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "sales": "Sales",
+    "scan": "Scan",
+    "products": "Products",
+    "expenses": "Expenses"
+  },
+  "common": {
+    "logout": "Log Out",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "close": "Close",
+    "back": "Back"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "todaysSales": "Today's Sales",
+    "totalExpense": "Total Expenses",
+    "netProfit": "Net Profit",
+    "dailyTarget": "Daily Sales Target",
+    "targetReached": "Target Reached",
+    "achieved": "Achieved",
+    "paymentMethod": "Payment Method",
+    "cash": "Cash",
+    "qr": "QR Payment",
+    "liveData": "Live Data",
+    "lowStock": "Low Stock",
+    "noLowStock": "All products have sufficient stock"
+  },
+  "sales": {
+    "recordSale": "Record Sale",
+    "salesHistory": "Sales History",
+    "noSales": "No sales recorded yet.",
+    "noSalesInRange": "No sales in this range.",
+    "product": "Product",
+    "quantity": "Quantity",
+    "amount": "Amount",
+    "source": "Source",
+    "manual": "Manual",
+    "voice": "Voice",
+    "receipt": "Receipt",
+    "type": "Type",
+    "dictate": "Voice"
+  },
+  "expenses": {
+    "addExpense": "Add Expense",
+    "expenseHistory": "Expense History",
+    "noExpenses": "No expenses recorded.",
+    "category": "Category",
+    "amount": "Amount",
+    "note": "Note",
+    "ingredients": "Ingredients",
+    "gas": "Gas",
+    "packaging": "Packaging",
+    "rent": "Rent / Utilities",
+    "other": "Other",
+    "scanReceipt": "Scan Supplier Receipt",
+    "today": "Today"
+  },
+  "scanner": {
+    "scanReceipt": "Scan Receipt",
+    "takePhoto": "Take a receipt photo or pick a file.",
+    "reading": "Reading receipt",
+    "review": "Review items",
+    "detectTotal": "Receipt total detected",
+    "couldNotRead": "Could not read items — try a clearer photo.",
+    "ocrFailed": "OCR failed — please try again.",
+    "rawText": "Raw OCR text",
+    "tryAgain": "Try Again",
+    "itemsFrom": "From receipt",
+    "selectProduct": "Select product"
+  },
+  "products": {
+    "productList": "Product List",
+    "addProduct": "Add Product",
+    "name": "Product Name",
+    "sellPrice": "Selling Price",
+    "costPrice": "Cost Price",
+    "currentStock": "Current Stock",
+    "lowStockThreshold": "Low Stock Threshold",
+    "noProducts": "No products."
+  },
+  "voice": {
+    "startListening": "Start Listening",
+    "stopListening": "Stop Listening",
+    "listening": "Listening...",
+    "error": "Error in voice recognition"
+  },
+  "lang": {
+    "select": "Select Language",
+    "malay": "Bahasa Melayu",
+    "english": "English",
+    "chinese": "中文"
+  }
+}

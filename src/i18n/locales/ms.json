@@ -1,0 +1,102 @@
+{
+  "nav": {
+    "dashboard": "Papan",
+    "sales": "Jualan",
+    "scan": "Imbas",
+    "products": "Produk",
+    "expenses": "Belanja"
+  },
+  "common": {
+    "logout": "Log keluar",
+    "loading": "Memuatkan...",
+    "error": "Ralat",
+    "success": "Berjaya",
+    "cancel": "Batal",
+    "save": "Simpan",
+    "delete": "Padam",
+    "edit": "Sunting",
+    "add": "Tambah",
+    "close": "Tutup",
+    "back": "Kembali"
+  },
+  "dashboard": {
+    "title": "Papan Pemuka",
+    "todaysSales": "Jualan Hari Ini",
+    "totalExpense": "Jumlah Belanja",
+    "netProfit": "Untung Bersih",
+    "dailyTarget": "Sasaran Jualan Harian",
+    "targetReached": "Sasaran Dicapai",
+    "achieved": "Telah Dicapai",
+    "paymentMethod": "Kaedah Bayaran",
+    "cash": "Tunai",
+    "qr": "Bayaran QR",
+    "liveData": "Data Langsung",
+    "lowStock": "Stok Rendah",
+    "noLowStock": "Semua produk stok mencukupi"
+  },
+  "sales": {
+    "recordSale": "Rekod Jualan",
+    "salesHistory": "Sejarah Jualan",
+    "noSales": "Tiada jualan direkod lagi.",
+    "noSalesInRange": "Tiada jualan dalam julat ini.",
+    "product": "Produk",
+    "quantity": "Kuantiti",
+    "amount": "Jumlah",
+    "source": "Sumber",
+    "manual": "Manual",
+    "voice": "Suara",
+    "receipt": "Resit",
+    "type": "Taip",
+    "dictate": "Suara"
+  },
+  "expenses": {
+    "addExpense": "Tambah Perbelanjaan",
+    "expenseHistory": "Sejarah Perbelanjaan",
+    "noExpenses": "Tiada perbelanjaan direkod.",
+    "category": "Kategori",
+    "amount": "Jumlah",
+    "note": "Nota",
+    "ingredients": "Bahan Mentah",
+    "gas": "Gas",
+    "packaging": "Pembungkusan",
+    "rent": "Sewa / Utiliti",
+    "other": "Lain-lain",
+    "scanReceipt": "Imbas Resit Pembekal",
+    "today": "Hari Ini"
+  },
+  "scanner": {
+    "scanReceipt": "Imbas Resit",
+    "takePhoto": "Ambil gambar resit atau pilih fail.",
+    "reading": "Membaca resit",
+    "review": "Semak item",
+    "detectTotal": "Jumlah resit dikesan",
+    "couldNotRead": "Tak dapat baca item dari resit ini — cuba gambar lebih jelas/terang.",
+    "ocrFailed": "OCR gagal — sila cuba lagi.",
+    "rawText": "Teks OCR mentah",
+    "tryAgain": "Cuba lagi",
+    "itemsFrom": "Dari resit",
+    "selectProduct": "Pilih produk"
+  },
+  "products": {
+    "productList": "Senarai Produk",
+    "addProduct": "Tambah Produk",
+    "name": "Nama Produk",
+    "sellPrice": "Harga Jual",
+    "costPrice": "Harga Kos",
+    "currentStock": "Stok Semasa",
+    "lowStockThreshold": "Paras Stok Rendah",
+    "noProducts": "Tiada produk."
+  },
+  "voice": {
+    "startListening": "Mula Mendengar",
+    "stopListening": "Henti Mendengar",
+    "listening": "Mendengar...",
+    "error": "Ralat dalam pengenalan suara"
+  },
+  "lang": {
+    "select": "Pilih Bahasa",
+    "malay": "Bahasa Melayu",
+    "english": "English",
+    "chinese": "中文"
+  }
+}

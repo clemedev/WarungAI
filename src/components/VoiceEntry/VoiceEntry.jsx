@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './VoiceEntry.module.css';
 
 const SpeechRecognition =
@@ -15,14 +16,25 @@ const SpeechRecognition =
  * the button hides itself when unavailable.
  */
 export default function VoiceEntry({ onTranscript }) {
+  const { i18n } = useTranslation();
   const recognitionRef = useRef(null);
   const [listening, setListening] = useState(false);
   const [error, setError] = useState('');
 
+  // Map i18n language codes to Web Speech API language tags
+  function getSpeechLang(lang) {
+    const map = {
+      ms: 'ms-MY',
+      en: 'en-US',
+      zh: 'zh-CN',
+    };
+    return map[lang] || 'ms-MY';
+  }
+
   useEffect(() => {
     if (!SpeechRecognition) return;
     const rec = new SpeechRecognition();
-    rec.lang = 'ms-MY'; // Bahasa Malaysia; engine still copes with EN food names
+    rec.lang = getSpeechLang(i18n.language);
     rec.interimResults = false;
     rec.maxAlternatives = 1;
 
@@ -43,7 +55,7 @@ export default function VoiceEntry({ onTranscript }) {
     recognitionRef.current = rec;
     return () => rec.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [i18n.language]);
 
   if (!SpeechRecognition) return null;
 

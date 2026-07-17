@@ -16,7 +16,7 @@ const SpeechRecognition =
  * the button hides itself when unavailable.
  */
 export default function VoiceEntry({ onTranscript }) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const recognitionRef = useRef(null);
   const [listening, setListening] = useState(false);
   const [error, setError] = useState('');
@@ -44,9 +44,9 @@ export default function VoiceEntry({ onTranscript }) {
     };
     rec.onerror = (event) => {
       if (event.error === 'not-allowed') {
-        setError('Mikrofon tidak dibenarkan — semak kebenaran pelayar. (Mic permission denied.)');
+        setError(t('voice.micDenied'));
       } else if (event.error !== 'aborted' && event.error !== 'no-speech') {
-        setError(`Suara gagal: ${event.error}`);
+        setError(t('voice.failed', { error: event.error }));
       }
       setListening(false);
     };
@@ -80,7 +80,7 @@ export default function VoiceEntry({ onTranscript }) {
         type="button"
         className={`${styles.mic} ${listening ? styles.listening : ''}`}
         onClick={toggle}
-        title={listening ? 'Berhenti mendengar' : 'Cakap jualan (speak the sale)'}
+        title={listening ? t('voice.stop') : t('voice.start')}
       >
         {listening ? '⏹' : '🎤'}
       </button>

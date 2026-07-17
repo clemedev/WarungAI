@@ -3,6 +3,8 @@ import {
   useState,
 } from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import {
   parseNaturalLanguageEntry,
 } from '../../lib/nlEntryParser.js';
@@ -20,6 +22,8 @@ export default function ChatEntry({
   products,
   onSaved,
 }) {
+  const { t } = useTranslation();
+
   const [text, setText] =
     useState('');
 
@@ -103,7 +107,7 @@ export default function ChatEntry({
             product.id ===
             saved.productId,
         )?.name ??
-        'Produk tidak dikenali';
+        t('chat.unknownProduct');
 
       const label =
         `${saved.quantity} × ` +
@@ -129,7 +133,7 @@ export default function ChatEntry({
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : 'Gagal menyimpan jualan.',
+          : t('chat.saveFailed'),
       );
     } finally {
       setSaving(false);
@@ -168,7 +172,9 @@ export default function ChatEntry({
         <input
           className={styles.input}
           type="text"
-          placeholder='cth: "Jual 3 nasi lemak RM12"'
+          placeholder={t(
+            'chat.placeholder',
+          )}
           value={text}
           onChange={(event) =>
             setText(event.target.value)
@@ -190,8 +196,8 @@ export default function ChatEntry({
           }
         >
           {saving
-            ? 'Menyimpan...'
-            : 'Hantar'}
+            ? t('chat.saving')
+            : t('chat.send')}
         </button>
       </form>
 

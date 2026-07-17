@@ -1,16 +1,18 @@
 import { useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Tesseract from 'tesseract.js';
 import { parseReceiptText } from '../../lib/ocrParser';
 import { saveExpense } from '../../lib/supabaseExpenses.js';
 import { todayISO } from '../../lib/dates';
 import styles from './ReceiptScanner.module.css';
 
+/** Values are the DB's category enum; labels come from the locales. */
 const CATEGORIES = [
-  { value: 'bahan', label: 'Bahan mentah (ingredients)' },
-  { value: 'gas', label: 'Gas' },
-  { value: 'pembungkusan', label: 'Pembungkusan (packaging)' },
-  { value: 'sewa', label: 'Sewa / utiliti' },
-  { value: 'lain', label: 'Lain-lain' },
+  { value: 'bahan', key: 'scanner.catBahan' },
+  { value: 'gas', key: 'scanner.catGas' },
+  { value: 'pembungkusan', key: 'scanner.catPembungkusan' },
+  { value: 'sewa', key: 'scanner.catSewa' },
+  { value: 'lain', key: 'scanner.catLain' },
 ];
 
 /**
@@ -27,6 +29,7 @@ const CATEGORIES = [
  * input is a normal file picker.
  */
 export default function ReceiptScanner({ onSaved }) {
+  const { t } = useTranslation();
   const fileInputRef = useRef(null);
   const [imageUrl, setImageUrl] = useState(null);
   const [status, setStatus] = useState('idle'); // idle | ocr | review | error
@@ -76,9 +79,7 @@ export default function ReceiptScanner({ onSaved }) {
 
       if (items.length === 0 && total === null) {
         setStatus('error');
-        setError(
-          'Tak dapat baca apa-apa dari resit ini — cuba gambar lebih jelas/terang, atau rekod perbelanjaan secara manual di bawah. (Could not read anything — try a clearer photo, or add the expense manually.)',
-        );
+        setError(t('scanner.expenseNothing'));
         return;
       }
 
@@ -101,9 +102,7 @@ export default function ReceiptScanner({ onSaved }) {
     } catch (err) {
       console.error('OCR failed:', err);
       setStatus('error');
-      setError(
-        'OCR gagal — sila cuba lagi. (OCR failed — check your connection and try again; Tesseract downloads language data on first use.)',
-      );
+      setError(t('scanner.ocrFailed'));
     }
   }
 
@@ -136,7 +135,7 @@ export default function ReceiptScanner({ onSaved }) {
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : 'Gagal menyimpan perbelanjaan daripada resit.',
+          : t('scanner.expenseSaveFailed'),
       );
     } finally {
       setSaving(false);
@@ -163,9 +162,7 @@ export default function ReceiptScanner({ onSaved }) {
       {status === 'idle' && (
         <>
           <p className={styles.hint}>
-            Ambil gambar resit pembekal — jumlahnya disimpan sebagai
-            perbelanjaan. (Snap a supplier receipt; its total is recorded as
-            an expense.)
+            {t('scanner.expenseHint')}
           </p>
           <input
             ref={fileInputRef}
@@ -179,14 +176,18 @@ export default function ReceiptScanner({ onSaved }) {
             className={styles.bigButton}
             onClick={() => fileInputRef.current?.click()}
           >
-            📷 Imbas Resit
+            {t('scanner.scanButton')}
           </button>
         </>
       )}
 
       {status === 'ocr' && (
         <div className={styles.progressWrap}>
-          <p>Membaca resit… {Math.round(progress * 100)}%</p>
+          <p>
+            {t('scanner.reading', {
+              percent: Math.round(progress * 100),
+            })}
+          </p>
           <progress value={progress} max="1" />
           {imageUrl && <img className={styles.preview} src={imageUrl} alt="resit" />}
         </div>
@@ -197,26 +198,28 @@ export default function ReceiptScanner({ onSaved }) {
           <p className={styles.error}>{error}</p>
           {rawText && (
             <details>
-              <summary>Teks OCR mentah (raw OCR text)</summary>
+              <summary>{t('scanner.rawText')}</summary>
               <pre className={styles.rawText}>{rawText}</pre>
             </details>
           )}
           <button className={styles.bigButton} onClick={reset}>
-            Cuba lagi
+            {t('scanner.tryAgain')}
           </button>
         </div>
       )}
 
       {status === 'review' && (
         <div className={styles.review}>
-          <h3 className={styles.title}>Semak perbelanjaan (review expense)</h3>
+          <h3 className={styles.title}>
+            {t('scanner.expenseReview')}
+          </h3>
 
           {rows.length > 0 && (
             <table className={styles.table}>
               <thead>
                 <tr>
                   <th></th>
-                  <th>Item dari resit</th>
+                  <th>{t('scanner.expenseItemCol')}</th>
                   <th>RM</th>
                 </tr>
               </thead>
@@ -243,21 +246,21 @@ export default function ReceiptScanner({ onSaved }) {
           )}
 
           <label className={styles.field}>
-            Kategori
+            {t('scanner.category')}
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             >
               {CATEGORIES.map((c) => (
                 <option key={c.value} value={c.value}>
-                  {c.label}
+                  {t(c.key)}
                 </option>
               ))}
             </select>
           </label>
 
           <label className={styles.field}>
-            Jumlah (RM)
+            {t('scanner.amount')}
             <input
               className={styles.numInput}
               type="number"
@@ -271,23 +274,25 @@ export default function ReceiptScanner({ onSaved }) {
 
           {rows.length > 0 && (
             <p className={styles.hint}>
-              Jumlah item bertanda: RM{includedTotal.toFixed(2)}
+              {t('scanner.tickedTotal', {
+                amount: `RM${includedTotal.toFixed(2)}`,
+              })}
               {' — '}
               <button
                 type="button"
                 className={styles.linkButton}
                 onClick={() => setAmount(includedTotal.toFixed(2))}
               >
-                guna jumlah ini
+                {t('scanner.useTotal')}
               </button>
             </p>
           )}
 
           <label className={styles.field}>
-            Nota (pilihan)
+            {t('scanner.note')}
             <input
               type="text"
-              placeholder="cth: barang dapur mingguan"
+              placeholder={t('scanner.notePlaceholder')}
               value={note}
               onChange={(e) => setNote(e.target.value)}
             />
@@ -296,7 +301,7 @@ export default function ReceiptScanner({ onSaved }) {
           {error && <p className={styles.error}>{error}</p>}
 
           <details>
-            <summary>Teks OCR mentah (raw OCR text)</summary>
+            <summary>{t('scanner.rawText')}</summary>
             <pre className={styles.rawText}>{rawText}</pre>
           </details>
 
@@ -306,10 +311,12 @@ export default function ReceiptScanner({ onSaved }) {
               disabled={!canSave}
               onClick={handleSave}
             >
-              {saving ? 'Menyimpan...' : 'Simpan perbelanjaan'}
+              {saving
+                ? t('scanner.saving')
+                : t('scanner.saveExpense')}
             </button>
             <button className={styles.cancelButton} onClick={reset}>
-              Batal
+              {t('scanner.cancel')}
             </button>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Tesseract from 'tesseract.js';
 import { parseReceiptText } from '../../lib/ocrParser';
 import { matchProduct } from '../../lib/nlEntryParser';
@@ -16,6 +17,7 @@ import styles from './ReceiptScanner.module.css';
  * input is a normal file picker.
  */
 export default function SaleReceiptScanner({ products, onSaved }) {
+  const { t } = useTranslation();
   const fileInputRef = useRef(null);
   const [imageUrl, setImageUrl] = useState(null);
   const [status, setStatus] = useState('idle'); // idle | ocr | review | error
@@ -51,7 +53,7 @@ export default function SaleReceiptScanner({ products, onSaved }) {
       if (items.length === 0) {
         setStatus('error');
         setError(
-          'Tak dapat baca item dari resit ini — cuba gambar lebih jelas/terang, atau taip jualan di tab Chat. (Could not read any items — try a clearer photo, or type the sale instead.)',
+          t('scanner.saleNothing'),
         );
         return;
       }
@@ -74,7 +76,7 @@ export default function SaleReceiptScanner({ products, onSaved }) {
       console.error('OCR failed:', err);
       setStatus('error');
       setError(
-        'OCR gagal — sila cuba lagi. (OCR failed — check your connection and try again; Tesseract downloads language data on first use.)',
+        t('scanner.ocrFailed'),
       );
     }
   }
@@ -100,7 +102,7 @@ export default function SaleReceiptScanner({ products, onSaved }) {
 
     if (good.length === 0) {
       setError(
-        'Tiada item yang sah untuk disimpan.',
+        t('scanner.noValidItems'),
       );
       return;
     }
@@ -128,7 +130,7 @@ export default function SaleReceiptScanner({ products, onSaved }) {
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : 'Gagal menyimpan jualan daripada resit.',
+          : t('scanner.saleSaveFailed'),
       );
     } finally {
       setSaving(false);
@@ -152,8 +154,7 @@ export default function SaleReceiptScanner({ products, onSaved }) {
       {status === 'idle' && (
         <>
           <p className={styles.hint}>
-            Ambil gambar resit atau pilih fail. (Snap a receipt photo, or pick a
-            file on desktop.)
+            {t('scanner.saleHint')}
           </p>
           <input
             ref={fileInputRef}
@@ -167,14 +168,18 @@ export default function SaleReceiptScanner({ products, onSaved }) {
             className={styles.bigButton}
             onClick={() => fileInputRef.current?.click()}
           >
-            📷 Imbas Resit
+            {t('scanner.scanButton')}
           </button>
         </>
       )}
 
       {status === 'ocr' && (
         <div className={styles.progressWrap}>
-          <p>Membaca resit… {Math.round(progress * 100)}%</p>
+          <p>
+            {t('scanner.reading', {
+              percent: Math.round(progress * 100),
+            })}
+          </p>
           <progress value={progress} max="1" />
           {imageUrl && <img className={styles.preview} src={imageUrl} alt="resit" />}
         </div>
@@ -185,29 +190,33 @@ export default function SaleReceiptScanner({ products, onSaved }) {
           <p className={styles.error}>{error}</p>
           {rawText && (
             <details>
-              <summary>Teks OCR mentah (raw OCR text)</summary>
+              <summary>{t('scanner.rawText')}</summary>
               <pre className={styles.rawText}>{rawText}</pre>
             </details>
           )}
           <button className={styles.bigButton} onClick={reset}>
-            Cuba lagi
+            {t('scanner.tryAgain')}
           </button>
         </div>
       )}
 
       {status === 'review' && (
         <div className={styles.review}>
-          <h3 className={styles.title}>Semak item (review items)</h3>
+          <h3 className={styles.title}>{t('scanner.saleReview')}</h3>
           {receiptTotal !== null && (
-            <p className={styles.hint}>Jumlah resit dikesan: RM{receiptTotal.toFixed(2)}</p>
+            <p className={styles.hint}>
+              {t('scanner.detectedTotal', {
+                amount: `RM${receiptTotal.toFixed(2)}`,
+              })}
+            </p>
           )}
           <table className={styles.table}>
             <thead>
               <tr>
                 <th></th>
-                <th>Dari resit</th>
-                <th>Produk</th>
-                <th>Kuantiti</th>
+                <th>{t('scanner.fromReceipt')}</th>
+                <th>{t('scanner.productCol')}</th>
+                <th>{t('scanner.qtyCol')}</th>
                 <th>RM</th>
               </tr>
             </thead>
@@ -227,7 +236,7 @@ export default function SaleReceiptScanner({ products, onSaved }) {
                       value={r.productId}
                       onChange={(e) => updateRow(i, { productId: e.target.value })}
                     >
-                      <option value="">— pilih —</option>
+                      <option value="">{t('scanner.pick')}</option>
                       {products.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.name}
@@ -259,7 +268,7 @@ export default function SaleReceiptScanner({ products, onSaved }) {
             </tbody>
           </table>
           <details>
-            <summary>Teks OCR mentah (raw OCR text)</summary>
+            <summary>{t('scanner.rawText')}</summary>
             <pre className={styles.rawText}>{rawText}</pre>
           </details>
           <div className={styles.actions}>
@@ -269,11 +278,13 @@ export default function SaleReceiptScanner({ products, onSaved }) {
               onClick={handleSaveAll}
             >
               {saving
-                ? 'Menyimpan...'
-                : `Simpan ${savableCount} item`}
+                ? t('scanner.saving')
+                : t('scanner.saveItems', {
+                    count: savableCount,
+                  })}
             </button>
             <button className={styles.cancelButton} onClick={reset}>
-              Batal
+              {t('scanner.cancel')}
             </button>
           </div>
         </div>

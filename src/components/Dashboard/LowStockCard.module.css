@@ -1,33 +1,47 @@
 .card {
-  background: var(--color-surface);
+  padding: clamp(1rem, 3vw, 1.35rem);
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff,
+      #fdfbf8
+    );
   border: 1px solid var(--color-border);
-  border-left: 3px solid var(--color-accent);
-  border-radius: var(--radius-card);
-  padding: 1rem 1.1rem;
-  box-shadow: var(--shadow-card);
+  border-left: 3px solid var(--color-warning);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 .title {
-  margin: 0 0 0.7rem;
-  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.8rem;
   color: var(--color-text);
+  font-size: 0.94rem;
+  font-weight: 800;
 }
 
 .title::before {
-  content: '\2731';
-  margin-right: 0.4rem;
-  color: var(--color-accent);
-  font-size: 0.8em;
-  vertical-align: 0.1em;
+  display: grid;
+  place-items: center;
+  width: 29px;
+  height: 29px;
+  color: var(--color-warning);
+  background: var(--color-warning-light);
+  border: 1px solid rgba(154, 103, 0, 0.22);
+  border-radius: 9px;
+  font-size: 0.85rem;
+  content: "!";
 }
 
 .list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .item {
@@ -35,27 +49,66 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 0.75rem;
+  padding: 0.5rem 0.7rem;
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
 }
 
 .name {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--color-text);
   overflow: hidden;
+  color: var(--color-text);
+  font-size: 0.88rem;
+  font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .count {
   flex-shrink: 0;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--color-accent);
+  color: var(--color-warning);
+  font-size: 0.78rem;
+  font-weight: 750;
 }
 
 .countOut {
   flex-shrink: 0;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--color-loss);
+  color: var(--color-danger);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+/* ===== DARK GLASS OVERRIDES ===== */
+
+:global(html[data-theme="dark"]) .card {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(21, 44, 31, 0.84),
+      rgba(17, 37, 26, 0.68)
+    );
+  border-color: rgba(162, 211, 183, 0.16);
+  border-left-color: var(--color-warning);
+  box-shadow:
+    0 22px 60px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+:global(html[data-theme="dark"]) .title {
+  color: var(--color-text);
+}
+
+:global(html[data-theme="dark"]) .title::before {
+  color: var(--color-warning);
+  background: var(--color-warning-light);
+  border-color: rgba(245, 199, 105, 0.24);
+}
+
+:global(html[data-theme="dark"]) .item {
+  background: rgba(17, 37, 26, 0.58);
+  border-color: rgba(162, 211, 183, 0.16);
+}
+
+:global(html[data-theme="dark"]) .name {
+  color: var(--color-text);
 }

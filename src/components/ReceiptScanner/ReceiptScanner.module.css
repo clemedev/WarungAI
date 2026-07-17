@@ -342,3 +342,46 @@
 
 /* ===== END SHARED DARK GLASS OVERRIDES ===== */
 
+
+/* ===== EXPENSE REVIEW FIELDS ===== */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  color: var(--color-text);
+  font-size: 0.8rem;
+  font-weight: 750;
+}
+
+.field input,
+.field select {
+  font-weight: 400;
+}
+
+.linkButton {
+  padding: 0;
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  font: inherit;
+  font-weight: 750;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.linkButton:hover {
+  color: var(--color-primary-dark);
+}
+
+:global(html[data-theme="dark"]) .field {
+  color: var(--color-text);
+}
+
+:global(html[data-theme="dark"]) .linkButton {
+  color: #80dba6;
+}
+
+:global(html[data-theme="dark"]) .linkButton:hover {
+  color: #c1f1d3;
+}

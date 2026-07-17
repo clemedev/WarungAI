@@ -1,15 +1,23 @@
-import { useEffect, useState } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 import Dashboard from './components/Dashboard/Dashboard';
-import ChatEntry from './components/ChatEntry/ChatEntry';
 import SaleReceiptScanner from './components/ReceiptScanner/SaleReceiptScanner';
+import ChatEntry from './components/ChatEntry/ChatEntry';
 import ProductList from './components/ProductList/ProductList';
 import ExpenseTracker from './components/ExpenseTracker/ExpenseTracker';
 import LoginScreen from './components/LoginScreen/LoginScreen';
 import SalesList from './components/SalesList/SalesList';
+import ThemeToggle from './components/ThemeToggle/ThemeToggle.jsx';
 import LanguageSwitcher from './components/LanguageSwitcher/LanguageSwitcher';
+import OverviewMetrics from './components/OverviewMetrics/OverviewMetrics';
 
-import { getProducts } from './lib/storage';
+import {
+  getProducts,
+} from './lib/supabaseProducts.js';
 
 import {
   getCurrentUser,
@@ -19,110 +27,40 @@ import {
 
 import styles from './App.module.css';
 
-/**
- * Navigation model shared by the desktop sidebar and the mobile bottom
- * bar. `fab: true` marks the centre "Imbas" (scan) action — the raised
- * orange button on mobile, hidden from the desktop sidebar. Receipts
- * come from suppliers, so scanning records an *expense*: the FAB is a
- * shortcut into the Belanja tab, where the scanner lives.
- */
-const NAV = [
+const VIEWS = [
   {
-    id: 'dashboard',
-    label: 'Papan',
-    icon: '📊',
-    title: 'Papan pemuka',
+    id: 'overview',
+    icon: '⌂',
+    label: 'Ringkasan',
+    shortLabel: 'Utama',
+    description:
+      'Rekod aktiviti dan lihat keadaan perniagaan hari ini.',
   },
   {
-    id: 'sale',
-    label: 'Jualan',
-    icon: '➕',
-    title: 'Rekod jualan',
+    id: 'records',
+    icon: '≡',
+    label: 'Rekod',
+    shortLabel: 'Rekod',
+    description:
+      'Semak sejarah jualan dan perbelanjaan perniagaan.',
   },
   {
-    id: 'scan',
-    label: 'Imbas',
-    icon: '📷',
-    title: 'Imbas resit perbelanjaan',
-    fab: true,
+    id: 'inventory',
+    icon: '◫',
+    label: 'Inventori',
+    shortLabel: 'Stok',
+    description:
+      'Urus produk, harga, kos, margin dan stok semasa.',
   },
   {
-    id: 'products',
-    label: 'Produk',
-    icon: '🍜',
-    title: 'Senarai produk',
-  },
-  {
-    id: 'expenses',
-    label: 'Belanja',
-    icon: '🧾',
-    title: 'Perbelanjaan',
+    id: 'insights',
+    icon: '↗',
+    label: 'Analitik',
+    shortLabel: 'Analitik',
+    description:
+      'Fahami prestasi, trend dan peluang perniagaan.',
   },
 ];
-
-const PAGE_TITLES = {
-  dashboard: 'Papan pemuka',
-  sale: 'Rekod jualan',
-  products: 'Senarai produk',
-  expenses: 'Perbelanjaan',
-};
-
-function formatToday() {
-  return new Date().toLocaleDateString('ms-MY', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-}
-
-const THEME_KEY = 'warungai.theme';
-
-/**
- * Saved choice wins; otherwise follow the OS. Applied to <html> as a
- * data-theme attribute so the CSS variables in index.css can switch —
- * done at module load (before first paint) to avoid a light flash for
- * dark-theme users.
- */
-function initialTheme() {
-  try {
-    const saved =
-      localStorage.getItem(THEME_KEY);
-
-    if (
-      saved === 'light' ||
-      saved === 'dark'
-    ) {
-      return saved;
-    }
-  } catch {
-    // storage unavailable — fall through to the OS preference
-  }
-
-  return window.matchMedia?.(
-    '(prefers-color-scheme: dark)',
-  )?.matches
-    ? 'dark'
-    : 'light';
-}
-
-document.documentElement.dataset.theme =
-  initialTheme();
-
-/** Time-of-day greeting for the desktop top bar. */
-function greeting() {
-  const hour = new Date().getHours();
-
-  if (hour < 12) {
-    return 'Selamat pagi';
-  }
-
-  if (hour < 19) {
-    return 'Selamat petang';
-  }
-
-  return 'Selamat malam';
-}
 
 function mapSupabaseUser(user) {
   if (!user) {
@@ -139,16 +77,6 @@ function mapSupabaseUser(user) {
   };
 }
 
-/**
- * Temporary compatibility bridge.
- *
- * Products, sales, expenses, and settings still use the existing synchronous
- * localStorage adapter. That adapter expects a local vendor session ID.
- *
- * Until each data domain is migrated to Supabase, use the authenticated
- * Supabase user ID as the localStorage namespace. Supabase remains the actual
- * authentication system.
- */
 function setLocalStorageIdentity(user) {
   if (!user) {
     localStorage.removeItem(
@@ -161,20 +89,20 @@ function setLocalStorageIdentity(user) {
   const mappedUser =
     mapSupabaseUser(user);
 
-  let existingUsers = [];
+  let users = [];
 
   try {
-    const storedUsers = JSON.parse(
+    const savedUsers = JSON.parse(
       localStorage.getItem(
         'warungai.users',
       ),
     );
 
-    if (Array.isArray(storedUsers)) {
-      existingUsers = storedUsers;
+    if (Array.isArray(savedUsers)) {
+      users = savedUsers;
     }
   } catch {
-    existingUsers = [];
+    users = [];
   }
 
   const localUser = {
@@ -185,28 +113,81 @@ function setLocalStorageIdentity(user) {
   };
 
   const existingIndex =
-    existingUsers.findIndex(
+    users.findIndex(
       (item) =>
         item.id === localUser.id,
     );
 
   if (existingIndex >= 0) {
-    existingUsers[existingIndex] = {
-      ...existingUsers[existingIndex],
+    users[existingIndex] = {
+      ...users[existingIndex],
       ...localUser,
     };
   } else {
-    existingUsers.push(localUser);
+    users.push(localUser);
   }
 
   localStorage.setItem(
     'warungai.users',
-    JSON.stringify(existingUsers),
+    JSON.stringify(users),
   );
 
   localStorage.setItem(
     'warungai.sessionUserId',
     localUser.id,
+  );
+}
+
+function getInitials(name) {
+  const parts = String(name ?? '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (parts.length === 0) {
+    return 'W';
+  }
+
+  return parts
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase();
+}
+
+function getGreeting() {
+  const hour = new Date().getHours();
+
+  if (hour < 12) {
+    return 'Selamat pagi';
+  }
+
+  if (hour < 18) {
+    return 'Selamat petang';
+  }
+
+  return 'Selamat malam';
+}
+
+function LoadingScreen() {
+  return (
+    <div className={styles.loadingScreen}>
+      <div className={styles.loadingContent}>
+        <div className={styles.loadingLogo}>
+          🍛
+        </div>
+
+        <h1>WarungAI</h1>
+
+        <p>
+          Menyediakan ruang kerja anda...
+        </p>
+
+        <div className={styles.loadingTrack}>
+          <span />
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -217,49 +198,67 @@ export default function App() {
   const [authLoading, setAuthLoading] =
     useState(true);
 
-  const [tab, setTab] =
-    useState('dashboard');
+  const [view, setView] =
+    useState('overview');
 
-  // Jualan entry mode: 'chat' (type/voice) or 'scan' (order-chit OCR).
-  const [entryMode, setEntryMode] =
+  const [composer, setComposer] =
     useState('chat');
+
+  const [recordType, setRecordType] =
+    useState('sales');
 
   const [products, setProducts] =
     useState([]);
-
-  const [toast, setToast] =
-    useState('');
 
   const [
     salesVersion,
     setSalesVersion,
   ] = useState(0);
 
-  const [theme, setTheme] = useState(
+  const [
+    activityVersion,
+    setActivityVersion,
+  ] = useState(0);
+
+  const [toast, setToast] =
+    useState('');
+
+  const [
+    createMenuOpen,
+    setCreateMenuOpen,
+  ] = useState(false);
+
+  const currentView = useMemo(
     () =>
-      document.documentElement.dataset
-        .theme ?? 'light',
+      VIEWS.find(
+        (item) => item.id === view,
+      ) ?? VIEWS[0],
+    [view],
   );
 
-  function toggleTheme() {
-    const nextTheme =
-      theme === 'dark'
-        ? 'light'
-        : 'dark';
+  const formattedDate = useMemo(
+    () =>
+      new Intl.DateTimeFormat(
+        'ms-MY',
+        {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        },
+      ).format(new Date()),
+    [],
+  );
 
-    document.documentElement.dataset.theme =
-      nextTheme;
-
+  async function loadProducts() {
     try {
-      localStorage.setItem(
-        THEME_KEY,
-        nextTheme,
-      );
-    } catch {
-      // storage unavailable — theme still applies for this session
-    }
+      const nextProducts =
+        await getProducts();
 
-    setTheme(nextTheme);
+      setProducts(nextProducts);
+    } catch {
+      setProducts([]);
+    }
   }
 
   useEffect(() => {
@@ -278,23 +277,23 @@ export default function App() {
       );
 
       setUser(
-        mapSupabaseUser(
-          currentUser,
-        ),
+        mapSupabaseUser(currentUser),
       );
 
       if (currentUser) {
-        setProducts(getProducts());
+        await loadProducts();
       }
 
-      setAuthLoading(false);
+      if (active) {
+        setAuthLoading(false);
+      }
     }
 
     restoreUser();
 
     const unsubscribe =
       onAuthStateChange(
-        (nextUser) => {
+        async (nextUser) => {
           if (!active) {
             return;
           }
@@ -304,18 +303,18 @@ export default function App() {
           );
 
           setUser(
-            mapSupabaseUser(
-              nextUser,
-            ),
+            mapSupabaseUser(nextUser),
           );
 
-          setProducts(
-            nextUser
-              ? getProducts()
-              : [],
-          );
+          if (nextUser) {
+            await loadProducts();
+          } else {
+            setProducts([]);
+          }
 
-          setAuthLoading(false);
+          if (active) {
+            setAuthLoading(false);
+          }
         },
       );
 
@@ -325,11 +324,11 @@ export default function App() {
     };
   }, []);
 
-  function handleAuthed(
-    authedUser,
+  async function handleAuthed(
+    authenticatedUser,
   ) {
-    setUser(authedUser);
-    setProducts(getProducts());
+    setUser(authenticatedUser);
+    await loadProducts();
   }
 
   async function handleSignOut() {
@@ -348,11 +347,15 @@ export default function App() {
     setLocalStorageIdentity(null);
     setUser(null);
     setProducts([]);
-    setTab('dashboard');
-    setSalesVersion(0);
+    setView('overview');
+    setComposer('chat');
+    setRecordType('sales');
+    setCreateMenuOpen(false);
   }
 
-  function refreshProducts(nextProducts) {
+  function refreshProducts(
+    nextProducts,
+  ) {
     setProducts(
       Array.isArray(nextProducts)
         ? nextProducts
@@ -362,46 +365,47 @@ export default function App() {
 
   function handleSaved(count) {
     setToast(
-      `✅ ${count} jualan disimpan`,
+      `✓ ${count} jualan berjaya disimpan`,
+    );
+
+    setSalesVersion(
+      (version) => version + 1,
+    );
+
+    setActivityVersion(
+      (version) => version + 1,
     );
 
     window.setTimeout(() => {
       setToast('');
     }, 3000);
-
-    setSalesVersion(
-      (version) => version + 1,
-    );
   }
 
-  function navigate(item) {
-    // The scan FAB is a shortcut to the expense scanner in Belanja.
-    setTab(
-      item.id === 'scan'
-        ? 'expenses'
-        : item.id,
-    );
+  function openSale() {
+    setView('overview');
+    setComposer('chat');
+    setCreateMenuOpen(false);
   }
 
-  function isActive(item) {
-    if (item.id === 'scan') {
-      // The FAB is an action button, never shown as "current tab".
-      return false;
-    }
+  function openReceipt() {
+    setView('overview');
+    setComposer('receipt');
+    setCreateMenuOpen(false);
+  }
 
-    return tab === item.id;
+  function openExpense() {
+    setView('records');
+    setRecordType('expenses');
+    setCreateMenuOpen(false);
+  }
+
+  function openProduct() {
+    setView('inventory');
+    setCreateMenuOpen(false);
   }
 
   if (authLoading) {
-    return (
-      <div className={styles.app}>
-        <main className={styles.main}>
-          <p>
-            Memeriksa sesi pengguna...
-          </p>
-        </main>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (!user) {
@@ -412,285 +416,666 @@ export default function App() {
     );
   }
 
-  const sidebarItems = NAV.filter(
-    (item) => !item.fab,
-  );
-
   return (
-    <div className={styles.app}>
-      {/*
-        Top bar. On mobile it is a cream strip holding just the brand
-        and a sign-out button. On desktop it turns dark and splits into
-        a 248px brand block (sitting directly above the sidebar) plus a
-        meta strip carrying the date and greeting — the two dark blocks
-        and the sidebar form the mockup's L around the content.
-      */}
-      <header className={styles.topBar}>
+    <div className={styles.shell}>
+      <aside className={styles.sidebar}>
         <div className={styles.brand}>
-          <span
-            className={styles.brandMark}
-          >
+          <div className={styles.brandMark}>
             🍛
-          </span>
+          </div>
 
-          <span
-            className={styles.brandName}
-          >
-            WarungAI
-          </span>
+          <div className={styles.brandCopy}>
+            <strong>WarungAI</strong>
+            <span>Business workspace</span>
+          </div>
         </div>
 
-        <div className={styles.topMeta}>
-          <span
-            className={styles.topMetaText}
-          >
-            <span
-              className={styles.topDate}
-            >
-              {formatToday()}
-            </span>
-
-            <span
-              className={styles.topGreeting}
-            >
-              {greeting()}, {user.name}
-            </span>
-          </span>
+        <div className={styles.themeControl}>
+          <ThemeToggle
+            darkSurface
+          />
         </div>
 
-        <div
-          className={styles.topActions}
+        <div className={styles.sidebarLanguage}>
+          <LanguageSwitcher darkSurface />
+        </div>
+
+        <p className={styles.navHeading}>
+          Ruang kerja
+        </p>
+
+        <nav
+          className={styles.desktopNav}
+          aria-label="Navigasi utama"
         >
-          <LanguageSwitcher />
-
-          <button
-            type="button"
-            className={
-              styles.themeToggle
-            }
-            onClick={toggleTheme}
-            title={
-              theme === 'dark'
-                ? 'Mod cerah'
-                : 'Mod gelap'
-            }
-            aria-label={
-              theme === 'dark'
-                ? 'Tukar ke mod cerah'
-                : 'Tukar ke mod gelap'
-            }
-          >
-            {theme === 'dark'
-              ? '☀️'
-              : '🌙'}
-          </button>
-
-          <button
-            type="button"
-            className={
-              styles.signOutIcon
-            }
-            onClick={handleSignOut}
-            title="Log keluar"
-            aria-label="Log keluar"
-          >
-            ⎋
-          </button>
-        </div>
-      </header>
-
-      <div className={styles.body}>
-        {/* Desktop-only sidebar (hidden < 880px) */}
-        <aside
-          className={styles.sidebar}
-        >
-          <nav
-            className={styles.tabs}
-          >
-            {sidebarItems.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={
-                  isActive(item)
-                    ? styles.tabActive
-                    : styles.tab
-                }
-                onClick={() =>
-                  navigate(item)
-                }
-                title={item.title}
-              >
-                <span
-                  className={styles.tabIcon}
-                >
-                  {item.icon}
-                </span>
-                {item.label}
-              </button>
-            ))}
-          </nav>
-
-          <button
-            type="button"
-            className={styles.signOut}
-            onClick={handleSignOut}
-          >
-            ⎋ Log keluar
-          </button>
-        </aside>
-
-        <main className={styles.main}>
-        <div className={styles.pageHead}>
-          <h2
-            className={styles.pageTitle}
-          >
-            {PAGE_TITLES[tab] ??
-              'Papan pemuka'}
-          </h2>
-
-          <span
-            className={styles.pageDate}
-          >
-            {formatToday()}
-          </span>
-        </div>
-
-        {tab === 'dashboard' && (
-          <div
-            className={
-              styles.wideContent
-            }
-          >
-            <Dashboard />
-          </div>
-        )}
-
-        {tab === 'sale' && (
-          <div
-            className={
-              styles.narrowContent
-            }
-          >
-            <div
-              className={
-                styles.saleWrap
-              }
-            >
-              <ChatEntry
-                products={products}
-                onSaved={handleSaved}
-              />
-
-              <SalesList
-                products={products}
-                refreshKey={
-                  salesVersion
-                }
-                onChange={() =>
-                  setSalesVersion(
-                    (version) =>
-                      version + 1,
-                  )
-                }
-              />
-            </div>
-          </div>
-        )}
-
-        {tab === 'products' && (
-          <div
-            className={
-              styles.narrowContent
-            }
-          >
-            <ProductList
-              onChange={
-                refreshProducts
-              }
-            />
-          </div>
-        )}
-
-        {tab === 'expenses' && (
-          <div
-            className={
-              styles.narrowContent
-            }
-          >
-            <ExpenseTracker />
-          </div>
-        )}
-        </main>
-      </div>
-
-      {/* Mobile-only bottom navigation (hidden ≥ 880px) */}
-      <nav
-        className={styles.bottomNav}
-      >
-        {NAV.map((item) =>
-          item.fab ? (
-            <button
-              key={item.id}
-              type="button"
-              className={styles.fab}
-              onClick={() =>
-                navigate(item)
-              }
-              title={item.title}
-              aria-label={item.title}
-            >
-              <span
-                className={
-                  styles.fabIcon
-                }
-              >
-                {item.icon}
-              </span>
-              <span
-                className={
-                  styles.fabLabel
-                }
-              >
-                {item.label}
-              </span>
-            </button>
-          ) : (
+          {VIEWS.map((item) => (
             <button
               key={item.id}
               type="button"
               className={
-                isActive(item)
-                  ? styles.navItemActive
+                view === item.id
+                  ? styles.navActive
                   : styles.navItem
               }
               onClick={() =>
-                navigate(item)
+                setView(item.id)
               }
-              title={item.title}
             >
               <span
-                className={
-                  styles.navIcon
-                }
+                className={styles.navSymbol}
+                aria-hidden="true"
               >
                 {item.icon}
               </span>
-              <span
+
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        <button
+          type="button"
+          className={styles.sidebarCreate}
+          onClick={() =>
+            setCreateMenuOpen(true)
+          }
+        >
+          <span>+</span>
+          Rekod aktiviti
+        </button>
+
+        <div className={styles.sidebarSpacer} />
+
+        <div className={styles.businessCard}>
+          <div className={styles.avatar}>
+            {getInitials(user.name)}
+          </div>
+
+          <div className={styles.businessDetails}>
+            <strong>{user.name}</strong>
+            <span>{user.email}</span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          className={styles.signOut}
+          onClick={handleSignOut}
+        >
+          ↪ Log keluar
+        </button>
+      </aside>
+
+      <section className={styles.application}>
+        <header className={styles.mobileHeader}>
+          <div className={styles.mobileBrand}>
+            <span>🍛</span>
+            <strong>WarungAI</strong>
+          </div>
+
+          <div className={styles.mobileControls}>
+            <LanguageSwitcher />
+
+            <ThemeToggle compact />
+
+            <button
+              type="button"
+              className={styles.mobileProfile}
+              onClick={() =>
+                setCreateMenuOpen(true)
+              }
+              aria-label="Buka menu tindakan"
+            >
+              {getInitials(user.name)}
+            </button>
+          </div>
+        </header>
+
+        <main className={styles.main}>
+          <div className={styles.workspace}>
+            <header className={styles.pageHeader}>
+              <div>
+                <p className={styles.greeting}>
+                  {getGreeting()},{' '}
+                  <strong>{user.name}</strong>
+                </p>
+
+                <h1 className={styles.pageTitle}>
+                  {currentView.label}
+                </h1>
+
+                <p
+                  className={
+                    styles.pageDescription
+                  }
+                >
+                  {currentView.description}
+                </p>
+              </div>
+
+              <div className={styles.headerMeta}>
+                <time className={styles.headerDate}>
+                  {formattedDate}
+                </time>
+              </div>
+            </header>
+
+            {view === 'overview' && (
+              <>
+                <OverviewMetrics
+                  refreshKey={
+                    activityVersion
+                  }
+                />
+
+                <div
+                  className={
+                    styles.overviewLayout
+                  }
+                >
+                <section
+                  className={
+                    styles.capturePanel
+                  }
+                >
+                  <div
+                    className={
+                      styles.captureHeader
+                    }
+                  >
+                    <div>
+                      <p>Catatan pintar</p>
+                      <h2>
+                        Apa berlaku hari ini?
+                      </h2>
+                      <span>
+                        Taip seperti anda
+                        bercakap biasa.
+                      </span>
+                    </div>
+
+                    <div
+                      className={
+                        styles.captureStatus
+                      }
+                    >
+                      AI-assisted
+                    </div>
+                  </div>
+
+                  <div
+                    className={
+                      styles.captureTabs
+                    }
+                  >
+                    <button
+                      type="button"
+                      className={
+                        composer === 'chat'
+                          ? styles.captureTabActive
+                          : styles.captureTab
+                      }
+                      onClick={() =>
+                        setComposer('chat')
+                      }
+                    >
+                      ✦ Teks / suara
+                    </button>
+
+                    <button
+                      type="button"
+                      className={
+                        composer ===
+                        'receipt'
+                          ? styles.captureTabActive
+                          : styles.captureTab
+                      }
+                      onClick={() =>
+                        setComposer(
+                          'receipt',
+                        )
+                      }
+                    >
+                      ▣ Imbas resit
+                    </button>
+                  </div>
+
+                  <div
+                    className={
+                      styles.captureBody
+                    }
+                  >
+                    {composer ===
+                      'chat' && (
+                      <ChatEntry
+                        products={products}
+                        onSaved={
+                          handleSaved
+                        }
+                      />
+                    )}
+
+                    {composer ===
+                      'receipt' && (
+                      <SaleReceiptScanner
+                        products={products}
+                        onSaved={
+                          handleSaved
+                        }
+                      />
+                    )}
+                  </div>
+                </section>
+
+                <aside
+                  className={
+                    styles.todayPanel
+                  }
+                >
+                  <p
+                    className={
+                      styles.todayEyebrow
+                    }
+                  >
+                    Hari ini
+                  </p>
+
+                  <h2>Gerak pantas</h2>
+
+                  <div
+                    className={
+                      styles.actionStack
+                    }
+                  >
+                    <button
+                      type="button"
+                      onClick={openSale}
+                    >
+                      <span>+</span>
+                      <div>
+                        <strong>
+                          Jualan baharu
+                        </strong>
+                        <small>
+                          Taip atau suara
+                        </small>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={openReceipt}
+                    >
+                      <span>▣</span>
+                      <div>
+                        <strong>
+                          Imbas resit
+                        </strong>
+                        <small>
+                          Ekstrak item
+                        </small>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={openExpense}
+                    >
+                      <span>−</span>
+                      <div>
+                        <strong>
+                          Tambah belanja
+                        </strong>
+                        <small>
+                          Catat kos operasi
+                        </small>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={openProduct}
+                    >
+                      <span>◫</span>
+                      <div>
+                        <strong>
+                          Tambah produk
+                        </strong>
+                        <small>
+                          Harga dan stok
+                        </small>
+                      </div>
+                    </button>
+                  </div>
+                </aside>
+
+                <section
+                  className={
+                    styles.recentPanel
+                  }
+                >
+                  <div
+                    className={
+                      styles.sectionHeading
+                    }
+                  >
+                    <div>
+                      <p>Aktiviti terkini</p>
+                      <h2>
+                        Jualan terbaharu
+                      </h2>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setView('records');
+                        setRecordType(
+                          'sales',
+                        );
+                      }}
+                    >
+                      Lihat semua
+                    </button>
+                  </div>
+
+                  <SalesList
+                    refreshKey={
+                      salesVersion
+                    }
+                    onChange={() =>
+                      setSalesVersion(
+                        (version) =>
+                          version + 1,
+                      )
+                    }
+                  />
+                </section>
+                </div>
+              </>
+            )}
+
+            {view === 'records' && (
+              <div
                 className={
-                  styles.navLabel
+                  styles.recordsLayout
                 }
               >
-                {item.label}
-              </span>
+                <div
+                  className={
+                    styles.recordTabs
+                  }
+                >
+                  <button
+                    type="button"
+                    className={
+                      recordType === 'sales'
+                        ? styles.recordTabActive
+                        : styles.recordTab
+                    }
+                    onClick={() =>
+                      setRecordType('sales')
+                    }
+                  >
+                    Jualan
+                  </button>
+
+                  <button
+                    type="button"
+                    className={
+                      recordType ===
+                      'expenses'
+                        ? styles.recordTabActive
+                        : styles.recordTab
+                    }
+                    onClick={() =>
+                      setRecordType(
+                        'expenses',
+                      )
+                    }
+                  >
+                    Perbelanjaan
+                  </button>
+                </div>
+
+                {recordType === 'sales' && (
+                  <SalesList
+                    refreshKey={
+                      salesVersion
+                    }
+                    onChange={() =>
+                      setSalesVersion(
+                        (version) =>
+                          version + 1,
+                      )
+                    }
+                  />
+                )}
+
+                {recordType ===
+                  'expenses' && (
+                  <ExpenseTracker
+                    onChange={() =>
+                      setActivityVersion(
+                        (version) =>
+                          version + 1,
+                      )
+                    }
+                  />
+                )}
+              </div>
+            )}
+
+            {view === 'inventory' && (
+              <div
+                className={
+                  styles.inventoryLayout
+                }
+              >
+                <ProductList
+                  onChange={
+                    refreshProducts
+                  }
+                />
+              </div>
+            )}
+
+            {view === 'insights' && (
+              <div
+                className={
+                  styles.insightsLayout
+                }
+              >
+                <Dashboard />
+              </div>
+            )}
+          </div>
+        </main>
+      </section>
+
+      <nav
+        className={styles.mobileNav}
+        aria-label="Navigasi mudah alih"
+      >
+        {VIEWS.slice(0, 2).map(
+          (item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={
+                view === item.id
+                  ? styles.mobileNavActive
+                  : styles.mobileNavItem
+              }
+              onClick={() =>
+                setView(item.id)
+              }
+            >
+              <span>{item.icon}</span>
+              <small>
+                {item.shortLabel}
+              </small>
+            </button>
+          ),
+        )}
+
+        <button
+          type="button"
+          className={styles.mobileCreate}
+          onClick={() =>
+            setCreateMenuOpen(true)
+          }
+          aria-label="Rekod aktiviti baharu"
+        >
+          +
+        </button>
+
+        {VIEWS.slice(2).map(
+          (item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={
+                view === item.id
+                  ? styles.mobileNavActive
+                  : styles.mobileNavItem
+              }
+              onClick={() =>
+                setView(item.id)
+              }
+            >
+              <span>{item.icon}</span>
+              <small>
+                {item.shortLabel}
+              </small>
             </button>
           ),
         )}
       </nav>
 
+      {createMenuOpen && (
+        <div
+          className={styles.createOverlay}
+          role="presentation"
+          onMouseDown={(event) => {
+            if (
+              event.target ===
+              event.currentTarget
+            ) {
+              setCreateMenuOpen(false);
+            }
+          }}
+        >
+          <section
+            className={styles.createSheet}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="create-title"
+          >
+            <div
+              className={
+                styles.sheetHandle
+              }
+            />
+
+            <header
+              className={
+                styles.createHeader
+              }
+            >
+              <div>
+                <p>Rekod aktiviti</p>
+                <h2 id="create-title">
+                  Apa yang berlaku?
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setCreateMenuOpen(
+                    false,
+                  )
+                }
+                aria-label="Tutup"
+              >
+                ×
+              </button>
+            </header>
+
+            <div
+              className={
+                styles.createOptions
+              }
+            >
+              <button
+                type="button"
+                onClick={openSale}
+              >
+                <span>+</span>
+                <div>
+                  <strong>
+                    Rekod jualan
+                  </strong>
+                  <small>
+                    Taip atau gunakan suara
+                  </small>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={openReceipt}
+              >
+                <span>▣</span>
+                <div>
+                  <strong>
+                    Imbas resit
+                  </strong>
+                  <small>
+                    Baca resit bercetak
+                  </small>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={openExpense}
+              >
+                <span>−</span>
+                <div>
+                  <strong>
+                    Tambah belanja
+                  </strong>
+                  <small>
+                    Rekod kos operasi
+                  </small>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={openProduct}
+              >
+                <span>◫</span>
+                <div>
+                  <strong>
+                    Tambah produk
+                  </strong>
+                  <small>
+                    Harga, kos dan stok
+                  </small>
+                </div>
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
       {toast && (
         <div
           className={styles.toast}
+          role="status"
         >
           {toast}
         </div>

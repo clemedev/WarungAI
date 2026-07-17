@@ -207,3 +207,66 @@
 
 /* ===== END SHARED DARK GLASS OVERRIDES ===== */
 
+
+/* ===== HISTORY RANGE FILTER ===== */
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.8rem;
+}
+
+.head .title {
+  margin: 0;
+}
+
+.ranges {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.range,
+.rangeActive {
+  padding: 0.32rem 0.7rem;
+  color: var(--color-text-muted);
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 750;
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.range:hover {
+  color: var(--color-text);
+  border-color: var(--color-border-strong);
+}
+
+.rangeActive {
+  color: var(--color-primary-dark);
+  background: var(--color-primary-light);
+  border-color: var(--color-primary-border);
+}
+
+:global(html[data-theme="dark"]) .range {
+  color: var(--color-text-muted);
+  background: rgba(17, 37, 26, 0.58);
+  border-color: rgba(162, 211, 183, 0.16);
+}
+
+:global(html[data-theme="dark"]) .range:hover {
+  color: var(--color-text);
+  border-color: rgba(112, 214, 156, 0.23);
+}
+
+:global(html[data-theme="dark"]) .rangeActive {
+  color: #c1f1d3;
+  background: rgba(50, 157, 94, 0.26);
+  border-color: rgba(116, 221, 161, 0.34);
+}

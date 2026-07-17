@@ -41,6 +41,71 @@ test('receipt: typical warung receipt with qty prefix and total', () => {
   assert.equal(total, 22.5);
 });
 
+// The formats below are what real Tesseract output looks like for the
+// sample receipt in sample_ocr/. Quantities used to be silently lost on
+// every layout that prints a unit price next to the quantity.
+
+test('receipt: sample_ocr.png as Tesseract actually reads it (1 -> "il")', () => {
+  const raw = [
+    'Jalan Kampung, 43000 Kajang,',
+    'Tel: 012-345 6789',
+    'Tarikh: 16/07/2026 09:15 Resit #: 000123',
+    'ITEM QTY RM',
+    'Nasi Lemak 3 12.00',
+    'Teh Tarik 2 6.00',
+    'Roti Canai il 2.50',
+    'Milo Ais il 3.00',
+    'Karipap 2 4.00',
+    'SUBJUMLAH 27.50',
+    'CAJ PERKHIDMATAN 0.50',
+    'JUMLAH 28.00',
+    'Tunai 28.00',
+    'TERIMA KASIH',
+  ].join('\n');
+  const { items, total } = parseReceiptText(raw);
+  assert.equal(items.length, 5);
+  assert.deepEqual(items.map((i) => [i.name, i.quantity]), [
+    ['Nasi Lemak', 3],
+    ['Teh Tarik', 2],
+    ['Roti Canai', 1],
+    ['Milo Ais', 1],
+    ['Karipap', 2],
+  ]);
+  assert.equal(total, 28);
+});
+
+test('receipt: "QTY x UNIT" keeps the quantity, not 1', () => {
+  const { items } = parseReceiptText('Nasi Lemak 3 x 4.00 12.00');
+  assert.deepEqual(items[0], { name: 'Nasi Lemak', quantity: 3, price: 12.0 });
+});
+
+test('receipt: "QTY @ UNIT" keeps the quantity, not 1', () => {
+  const { items } = parseReceiptText('Nasi Lemak 3 @ 4.00 12.00');
+  assert.deepEqual(items[0], { name: 'Nasi Lemak', quantity: 3, price: 12.0 });
+});
+
+test('receipt: plain NAME QTY UNIT TOTAL columns', () => {
+  const { items } = parseReceiptText('Teh Tarik 2 3.00 6.00');
+  assert.deepEqual(items[0], { name: 'Teh Tarik', quantity: 2, price: 6.0 });
+});
+
+test('receipt: leading qty with unit price does not pollute the name', () => {
+  const { items } = parseReceiptText('2 Nasi Lemak 6.00 12.00');
+  assert.deepEqual(items[0], { name: 'Nasi Lemak', quantity: 2, price: 12.0 });
+});
+
+test('receipt: a number is only treated as a unit price when qty x unit = total', () => {
+  // 3 x 9.99 != 12.00, so nothing is stripped and no quantity is invented.
+  const { items } = parseReceiptText('Nasi Lemak 3 x 9.99 12.00');
+  assert.equal(items[0].quantity, 1);
+  assert.equal(items[0].name, 'Nasi Lemak 3 x 9.99');
+});
+
+test('receipt: product names ending in digits survive ("100PLUS")', () => {
+  const { items } = parseReceiptText('100PLUS 2 6.00');
+  assert.deepEqual(items[0], { name: '100PLUS', quantity: 2, price: 6.0 });
+});
+
 test('receipt: BM total line "JUMLAH" and trailing x-quantity', () => {
   const raw = ['Roti Canai x3 4.50', 'Kopi O 2.00', 'JUMLAH RM6.50'].join('\n');
   const { items, total } = parseReceiptText(raw);

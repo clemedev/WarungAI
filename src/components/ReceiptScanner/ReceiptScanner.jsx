@@ -44,6 +44,10 @@ export default function ReceiptScanner({ onSaved }) {
 
   // Sum of the rows still ticked — offered as a hint under the amount field
   // so the user can cross-check against what OCR read.
+  //
+  // `price` is the LINE total (quantity is already baked in — see
+  // parseReceiptText), so do NOT multiply by row.quantity here: that would
+  // double-count every multi-item line.
   const includedTotal = useMemo(
     () =>
       rows.reduce(
@@ -87,6 +91,7 @@ export default function ReceiptScanner({ onSaved }) {
         items.map((it) => ({
           include: true,
           name: it.name,
+          quantity: it.quantity,
           price: it.price,
         })),
       );
@@ -106,8 +111,8 @@ export default function ReceiptScanner({ onSaved }) {
     }
   }
 
-  function toggleRow(i, include) {
-    setRows((rs) => rs.map((r, j) => (j === i ? { ...r, include } : r)));
+  function updateRow(i, patch) {
+    setRows((rs) => rs.map((r, j) => (j === i ? { ...r, ...patch } : r)));
   }
 
   async function handleSave() {
@@ -220,6 +225,7 @@ export default function ReceiptScanner({ onSaved }) {
                 <tr>
                   <th></th>
                   <th>{t('scanner.expenseItemCol')}</th>
+                  <th>{t('scanner.qtyCol')}</th>
                   <th>RM</th>
                 </tr>
               </thead>
@@ -230,10 +236,17 @@ export default function ReceiptScanner({ onSaved }) {
                       <input
                         type="checkbox"
                         checked={r.include}
-                        onChange={(e) => toggleRow(i, e.target.checked)}
+                        onChange={(e) =>
+                          updateRow(i, { include: e.target.checked })
+                        }
                       />
                     </td>
                     <td className={styles.ocrName}>{r.name}</td>
+                    {/* Read-only: an expense stores a category/amount/note,
+                        so there is nowhere for a per-item quantity to
+                        persist. It is shown to check the read against the
+                        paper, not to edit. */}
+                    <td>{r.quantity}</td>
                     <td>
                       {Number.isFinite(Number(r.price))
                         ? Number(r.price).toFixed(2)

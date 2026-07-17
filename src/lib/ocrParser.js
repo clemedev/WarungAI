@@ -85,6 +85,21 @@ function parseAmount(value) {
   );
 }
 
+/**
+ * True when two money amounts match to the cent (with a little slack for
+ * receipt rounding). Used to confirm that a number really is a unit price
+ * — quantity × unit should reconstruct the line total — before trusting
+ * it. Without that check, any product name ending in a number could be
+ * mistaken for a price.
+ */
+function amountsAgree(a, b) {
+  return (
+    Number.isFinite(a) &&
+    Number.isFinite(b) &&
+    Math.abs(a - b) < 0.011
+  );
+}
+
 function round2(value) {
   return (
     Math.round(
@@ -151,9 +166,15 @@ function parseQuantityToken(token) {
  * 2 Nasi Lemak 12.00
  * Nasi Lemak x2 12.00
  * Nasi Lemak 3 12.00
+ * Nasi Lemak 3 x 4.00 12.00     (quantity × unit price)
+ * Nasi Lemak 3 @ 4.00 12.00     (quantity @ unit price)
+ * 2 Nasi Lemak 6.00 12.00       (quantity, unit price, line total)
  * Nasi Lemak 12.00
  *
- * The final number is always treated as the line total.
+ * The final number is always treated as the line total. Where a unit
+ * price also appears, it is only stripped once quantity × unit is
+ * confirmed to reconstruct that total, so a name like "100PLUS" or
+ * "Milo 3in1" is never mistaken for pricing.
  */
 function parseItemLine(line) {
   const priceMatch =
@@ -187,25 +208,71 @@ function parseItemLine(line) {
   }
 
   let quantity = 1;
+  let quantityFound = false;
+
+  // Formats where a unit price follows the quantity:
+  //   "Nasi Lemak 3 x 4.00" / "3 @ 4.00" / "3 4.00" (plain QTY|UNIT columns)
+  // Checked first: the trailing number is a UNIT price, not the quantity,
+  // so the plain trailing-number rule below would read the line as
+  // quantity 1 and leave "3 x 4.00" stuck on the name.
+  const quantityTimesUnit =
+    rest.match(
+      /\s+(\d{1,3}|[iIlL]{1,2})\s*(?:[x@]\s*|\s+)(?:rm\s*)?(\d{1,4}(?:[.,]\d{1,2})?)\s*$/i,
+    );
+
+  if (quantityTimesUnit) {
+    const parsedQuantity =
+      parseQuantityToken(
+        quantityTimesUnit[1],
+      );
+
+    const unitPrice = parseAmount(
+      quantityTimesUnit[2],
+    );
+
+    if (
+      parsedQuantity !== null &&
+      amountsAgree(
+        parsedQuantity * unitPrice,
+        price,
+      )
+    ) {
+      quantity = parsedQuantity;
+      quantityFound = true;
+
+      rest = rest
+        .slice(
+          0,
+          quantityTimesUnit.index,
+        )
+        .trim();
+    }
+  }
 
   // Format: "2 x Nasi Lemak" or "2 Nasi Lemak"
   const leadingQuantity =
-    rest.match(
-      /^(\d{1,3})\s*(?:x\s+|x(?=[a-z])|\s+)/i,
-    );
+    quantityFound
+      ? null
+      : rest.match(
+          /^(\d{1,3})\s*(?:x\s+|x(?=[a-z])|\s+)/i,
+        );
 
   // Format: "Nasi Lemak x2"
   const trailingXQuantity =
-    rest.match(
-      /\bx\s*(\d{1,3})\s*$/i,
-    );
+    quantityFound
+      ? null
+      : rest.match(
+          /\bx\s*(\d{1,3})\s*$/i,
+        );
 
   // Format: "Nasi Lemak 3"
   // Also handles OCR mistakes such as "Roti Canai il".
   const trailingQuantity =
-    rest.match(
-      /\s+(\d{1,3}|[iIlL]{1,2})\s*$/,
-    );
+    quantityFound
+      ? null
+      : rest.match(
+          /\s+(\d{1,3}|[iIlL]{1,2})\s*$/,
+        );
 
   if (leadingQuantity) {
     quantity = Number.parseInt(
@@ -254,6 +321,34 @@ function parseItemLine(line) {
     quantity > 999
   ) {
     quantity = 1;
+  }
+
+  // Columned receipts print the unit price too ("2 Nasi Lemak 6.00 12.00").
+  // The line total is already taken, so a remaining trailing amount is the
+  // unit price — but only strip it once quantity × unit reconstructs the
+  // total, otherwise it is part of the name.
+  const trailingUnitPrice = rest.match(
+    /\s+(?:rm\s*)?(\d{1,4}[.,]\d{2})\s*$/i,
+  );
+
+  if (trailingUnitPrice) {
+    const unitPrice = parseAmount(
+      trailingUnitPrice[1],
+    );
+
+    if (
+      amountsAgree(
+        quantity * unitPrice,
+        price,
+      )
+    ) {
+      rest = rest
+        .slice(
+          0,
+          trailingUnitPrice.index,
+        )
+        .trim();
+    }
   }
 
   const name = rest

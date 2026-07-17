@@ -688,8 +688,8 @@
   gap: 0.62rem;
 
   min-width: 0;
-  min-height: 72px;
-  padding: 0.7rem;
+  min-height: 78px;
+  padding: 0.78rem;
 
   color: var(--color-text);
   background:
@@ -714,8 +714,8 @@
   place-items: center;
   flex-shrink: 0;
 
-  width: 35px;
-  height: 35px;
+  width: 38px;
+  height: 38px;
 
   color: var(--color-primary-dark);
   background: var(--color-primary-light);
@@ -731,7 +731,7 @@
 }
 
 .createOptions strong {
-  font-size: 0.72rem;
+  font-size: 0.76rem;
   font-weight: 850;
 }
 
@@ -740,7 +740,7 @@
 
   color: var(--color-text-light);
 
-  font-size: 0.58rem;
+  font-size: 0.62rem;
   line-height: 1.35;
 }
 
@@ -919,6 +919,25 @@
 
   .createOptions {
     grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .createOptions > button {
+    min-height: 82px;
+    padding: 0.82rem;
+  }
+
+  .createOptions > button > span {
+    width: 40px;
+    height: 40px;
+  }
+
+  .createOptions strong {
+    font-size: 0.8rem;
+  }
+
+  .createOptions small {
+    font-size: 0.65rem;
   }
 }
 

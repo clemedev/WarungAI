@@ -273,6 +273,8 @@ export default function App() {
 
   const createMenuRef = useRef(null);
   const createMenuTriggerRef = useRef(null);
+  const capturePanelRef = useRef(null);
+  const restoreMenuFocusRef = useRef(true);
 
   const currentView = useMemo(
     () =>
@@ -312,7 +314,10 @@ export default function App() {
 
   useEffect(() => {
     if (!createMenuOpen) {
-      createMenuTriggerRef.current?.focus();
+      if (restoreMenuFocusRef.current) {
+        createMenuTriggerRef.current?.focus();
+      }
+      restoreMenuFocusRef.current = true;
       return undefined;
     }
 
@@ -487,9 +492,7 @@ export default function App() {
   }
 
   function openSale() {
-    setView('overview');
-    setComposer('chat');
-    setCreateMenuOpen(false);
+    openCapture('chat');
   }
 
   function openCreateMenu(event) {
@@ -498,19 +501,50 @@ export default function App() {
   }
 
   function openReceipt() {
+    openCapture('receipt');
+  }
+
+  function openCapture(nextComposer) {
     setView('overview');
-    setComposer('receipt');
+    setComposer(nextComposer);
+    // A create-sheet action should lead the user to the selected capture
+    // method, not return focus to the floating + button at the bottom.
+    restoreMenuFocusRef.current = false;
     setCreateMenuOpen(false);
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        const isPhone = window.matchMedia('(max-width: 719px)').matches;
+
+        if (!isPhone || !capturePanelRef.current) {
+          return;
+        }
+
+        const reduceMotion = window.matchMedia(
+          '(prefers-reduced-motion: reduce)',
+        ).matches;
+
+        capturePanelRef.current.scrollIntoView({
+          behavior: reduceMotion ? 'auto' : 'smooth',
+          block: 'start',
+        });
+        capturePanelRef.current.querySelector('button')?.focus({
+          preventScroll: true,
+        });
+      });
+    });
   }
 
   function openExpense() {
     setView('records');
     setRecordType('expenses');
+    restoreMenuFocusRef.current = false;
     setCreateMenuOpen(false);
   }
 
   function openProduct() {
     setView('inventory');
+    restoreMenuFocusRef.current = false;
     setCreateMenuOpen(false);
   }
 
@@ -707,6 +741,7 @@ export default function App() {
                   }
                 >
                 <section
+                  ref={capturePanelRef}
                   className={
                     styles.capturePanel
                   }

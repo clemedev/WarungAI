@@ -45,7 +45,11 @@
     "hint": "Taip seperti anda bercakap biasa.",
     "badge": "Dibantu AI",
     "tabChat": "Teks / suara",
-    "tabReceipt": "Imbas resit"
+    "tabReceipt": "Imbas resit",
+    "tabBusy": "Mod pantas"
+  },
+  "busy": {
+    "hint": "Pilih produk untuk tambah ke jualan.", "noProducts": "Tambah produk dahulu untuk menggunakan Mod pantas.", "addProduct": "Tambah {{name}}", "removeProduct": "Kurangkan {{name}}", "stock_other": "Stok {{count}}", "cart": "Jualan semasa", "emptyCart": "Pilih produk untuk mula.", "paymentAria": "Kaedah bayaran", "cash": "Tunai", "qr": "QR", "save_other": "Simpan {{count}} item", "saving": "Menyimpan...", "saveFailed": "Gagal menyimpan jualan pantas."
   },
   "quick": {
     "eyebrow": "Hari ini",
@@ -109,8 +113,24 @@
     "errVerify": "Akaun dicipta. Sila semak e-mel anda sebelum log masuk.",
     "errGeneric": "Log masuk gagal. Sila cuba lagi."
   },
+  "demo": {
+    "try": "Cuba Gerai Demo",
+    "note": "Memuatkan data pembentangan dalam pelayar ini sahaja. Tiada apa disimpan dalam akaun anda.",
+    "banner": "Mod Gerai Demo — data hanya berada dalam pelayar ini",
+    "exit": "Keluar demo",
+    "walkthrough": "Panduan demo"
+  },
+  "walkthrough": {
+    "eyebrow": "Laluan untuk juri", "title": "Panduan demo", "close": "Tutup panduan", "next": "Langkah seterusnya", "done": "Tamatkan panduan",
+    "busyTitle": "Mod Sibuk", "busyHint": "Tekan, bayar, simpan.", "busyScript": "Rekod jualan waktu sibuk dalam beberapa sentuhan.",
+    "safeTitle": "Semakan resit", "safeHint": "Semak sebelum simpan.", "safeScript": "Pemilik menyemak item OCR yang tidak pasti dahulu.",
+    "closingTitle": "Penutup Harian", "closingHint": "Jualan, untung, stok.", "closingScript": "Gambaran perniagaan harian dalam beberapa saat.",
+    "analyticsTitle": "Analitik", "analyticsHint": "Apa berlaku dan apa seterusnya.", "analyticsScript": "Lihat yang laris, risiko dan persediaan esok.",
+    "reportTitle": "Laporan mingguan", "reportHint": "Cetak atau simpan PDF.", "reportScript": "Simpan atau kongsi dengan akauntan."
+  },
   "lang": {
-    "select": "Pilih bahasa"
+    "select": "Pilih bahasa",
+    "toggle": "Tukar bahasa. Bahasa semasa: {{current}}. Seterusnya: {{next}}."
   },
   "dashboard": {
     "loading": "Memuatkan papan pemuka...",
@@ -175,12 +195,64 @@
     "cash": "Tunai",
     "qr": "Bayaran QR"
   },
+  "weekly": {
+    "loading": "Memuatkan analitik mingguan...",
+    "loadFailed": "Gagal memuatkan analitik mingguan.",
+    "empty": "Belum ada jualan atau perbelanjaan dalam 7 hari ini.",
+    "thisWeek": "7 hari ini",
+    "netMargin": "Margin untung bersih",
+    "marginDelta": "{{value}} mata berbanding minggu lalu",
+    "noPreviousWeek": "Belum ada minggu lalu untuk dibandingkan",
+    "weekProfit": "Untung bersih: {{amount}}",
+    "topProducts": "3 produk teratas",
+    "slowMovers": "Produk perlahan",
+    "lowestSales": "Jualan terendah",
+    "units_other": "{{count}} unit",
+    "noSales": "Tiada jualan",
+    "lowStockCount": "Bilangan stok rendah",
+    "lowStockItems_one": "{{count}} produk",
+    "lowStockItems_other": "{{count}} produk",
+    "stockLeft_one": "{{count}} tinggal",
+    "stockLeft_other": "{{count}} tinggal",
+    "stockHealthy": "Semua produk melebihi paras amaran.",
+    "expenseBreakdown": "Pecahan belanja",
+    "largestExpense": "Belanja terbesar: {{category}} — {{amount}}",
+    "paymentSplit": "Tunai vs QR",
+    "cash": "Tunai",
+    "qr": "QR",
+    "profitTrend": "Trend untung harian",
+    "profitLeaks": "Lindungi untung anda",
+    "actionNeeded": "Perlu tindakan",
+    "belowCost": "Dijual pada {{price}} seunit, lebih rendah daripada kos {{cost}}.",
+    "lowMargin": "Margin untung minggu ini cuma {{margin}}.",
+    "profitLeakHint": "Semak harga jual atau kos bahan di Inventori.",
+    "businessStory": "Cerita perniagaan minggu ini",
+    "storySalesUpExpenses": "Jualan naik {{revenue}}, tetapi belanja {{category}} sebanyak {{expense}} menghalang untung daripada meningkat.",
+    "storyProfitUp": "Untung bersih meningkat sebanyak {{profit}} berbanding minggu lalu.",
+    "storySalesDown": "Jualan turun {{revenue}} berbanding minggu lalu. Semak produk perlahan dan tawaran waktu puncak.",
+    "storyExpensesHigh": "Belanja mencecah {{expense}}, lebih tinggi daripada untung kasar minggu ini. Semak kos sebelum pembelian seterusnya.",
+    "storySteady": "Perniagaan anda sedang membina corak mingguan pertama. Rekod beberapa jualan lagi untuk perbandingan lebih jelas.",
+    "reportEyebrow": "Laporan WarungAI",
+    "reportTitle": "Laporan perniagaan mingguan",
+    "reportHint": "Ringkasan sedia cetak untuk dikongsi atau disimpan sebagai PDF.",
+    "print": "Cetak / Simpan PDF",
+    "none": "Tiada data lagi."
+  },
+  "prepare": {
+    "loading": "Menyediakan cadangan esok...", "loadFailed": "Gagal memuatkan cadangan esok.", "eyebrow": "Rancang awal", "title": "Sedia untuk {{weekday}}", "hint": "Berdasarkan {{count}} hari {{weekday}} yang lalu.", "average_other": "Purata {{count}} unit", "recommend_other": "Sedia {{count}}"
+  },
+  "closing": {
+    "eyebrow": "Tutup hari ini", "title": "Ringkasan penutup", "empty": "Belum ada jualan untuk ditutup hari ini.", "sales": "Jualan hari ini: {{amount}}.", "profit": "Untung bersih: {{amount}}.", "salesLabel": "Jualan", "profitLabel": "Untung bersih", "cash": "Tunai", "qr": "QR", "top_other": "Paling laris: {{name}} ({{count}} unit)", "share": "Kongsi penutup hari", "lowStock": "Stok rendah", "manageStock": "Urus stok", "health": "Kesihatan perniagaan", "healthHealthy": "Nampak sihat hari ini", "healthAttention": "Beberapa perkara perlu perhatian", "healthCritical": "Ambil tindakan atas risiko hari ini"
+  },
   "chat": {
     "placeholder": "cth: \"Jual 3 nasi lemak RM12\"",
     "send": "Hantar",
     "saving": "Menyimpan...",
     "saveFailed": "Gagal menyimpan jualan.",
-    "unknownProduct": "Produk tidak dikenali"
+    "unknownProduct": "Produk tidak dikenali",
+    "noProducts": "Tiada produk lagi — tambah produk dulu supaya jualan boleh dipadankan.",
+    "savedThisSession": "Disimpan sesi ini",
+    "entryAria": "Masukkan jualan"
   },
   "confirm": {
     "title": "Sahkan jualan",
@@ -237,6 +309,7 @@
     "saveItems_other": "Simpan {{count}} item",
     "noValidItems": "Tiada item yang sah untuk disimpan.",
     "saleSaveFailed": "Gagal menyimpan jualan daripada resit."
+    ,"attentionCount_other": "{{count}} item perlu disemak sebelum disimpan.", "needsAttention": "Perlu semakan"
   },
   "salesList": {
     "title": "Sejarah jualan",

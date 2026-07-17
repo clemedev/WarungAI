@@ -1,0 +1,396 @@
+.wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.preparationArea { min-width: 0; }
+
+.reportHeader {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.reportHeader h1,
+.reportHeader p { margin: 0; }
+.reportHeader h1 { color: var(--color-text); font-size: 1.25rem; }
+.reportHeader > div > p:last-child { margin-top: 0.25rem; color: var(--color-text-muted); font-size: 0.78rem; }
+
+.printButton {
+  flex: 0 0 auto;
+  min-height: 42px;
+  padding: 0.55rem 0.8rem;
+  color: #f6fff8;
+  background: var(--color-primary-dark);
+  border: 1px solid var(--color-primary-dark);
+  border-radius: var(--radius-md);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.card,
+.state,
+.error {
+  padding: 1.1rem;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.78), rgba(246, 251, 247, 0.58));
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 9px 24px rgba(8, 37, 22, 0.12);
+  /* Analytics can render many cards at once; solid translucent surfaces scroll
+     far more smoothly than backdrop-filtered cards. */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.card {
+  min-width: 0;
+}
+
+.storyCard {
+  background: linear-gradient(135deg, rgba(215, 245, 225, 0.96), rgba(232, 251, 237, 0.78));
+  border-color: rgba(42, 132, 79, 0.2);
+}
+
+.storyText {
+  margin: 0.4rem 0 0;
+  color: var(--color-text);
+  font-size: 0.96rem;
+  font-weight: 720;
+  line-height: 1.55;
+}
+
+.marginCard {
+  color: #f4fff7;
+  background: linear-gradient(135deg, #176b43, #0d4f31);
+  border-color: rgba(182, 237, 205, 0.24);
+}
+
+.eyebrow,
+.muted,
+.delta,
+.cardHeader h2,
+.cardHeader span,
+.empty,
+.largestExpense {
+  margin: 0;
+}
+
+.eyebrow {
+  color: rgba(235, 255, 243, 0.75);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.marginValue {
+  margin: 0.2rem 0;
+  font-size: clamp(2.15rem, 8vw, 3.2rem);
+  letter-spacing: -0.07em;
+}
+
+.marginCard .muted {
+  color: rgba(235, 255, 243, 0.82);
+  font-size: 0.8rem;
+}
+
+.delta {
+  display: inline-flex;
+  margin: 0.9rem 0 0.4rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.positive { color: #0a542f; background: #c6f3d8; }
+.negative { color: #7b2e28; background: #ffe0da; }
+.neutral { color: #eaf7ef; background: rgba(255, 255, 255, 0.12); }
+
+.cardHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.cardHeader h2 {
+  color: var(--color-text);
+  font-size: 0.94rem;
+}
+
+.cardHeader span,
+.productMeta,
+.empty {
+  color: var(--color-text-muted);
+  font-size: 0.74rem;
+}
+
+.rankList,
+.slowList,
+.expenseList {
+  display: grid;
+  gap: 0.62rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rankList li,
+.slowList li,
+.expenseList li {
+  display: grid;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.rankList li {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.slowList li,
+.expenseList li {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.rank {
+  display: grid;
+  width: 1.55rem;
+  height: 1.55rem;
+  place-items: center;
+  color: var(--color-primary-dark);
+  background: var(--color-primary-light);
+  border-radius: 50%;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.productName {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: 0.82rem;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.productMeta { text-align: right; }
+
+.profitLeakCard {
+  border-color: rgba(214, 120, 48, 0.28);
+  background: linear-gradient(145deg, rgba(255, 247, 235, 0.9), rgba(255, 238, 220, 0.7));
+}
+
+.lowStockCard {
+  border-color: rgba(205, 151, 43, 0.28);
+  background: linear-gradient(145deg, rgba(255, 248, 226, 0.9), rgba(255, 241, 201, 0.68));
+}
+
+.leakList {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.leakList li {
+  display: grid;
+  gap: 0.16rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid rgba(178, 91, 23, 0.16);
+}
+
+.leakList li:last-child { padding-bottom: 0; border-bottom: 0; }
+.leakDetail { color: #a54d16; font-size: 0.76rem; font-weight: 700; }
+.leakHint { margin: 0.8rem 0 0; color: var(--color-text-muted); font-size: 0.74rem; line-height: 1.45; }
+
+.expenseList strong {
+  color: var(--color-text);
+  font-size: 0.78rem;
+}
+
+.largestExpense {
+  margin-top: 0.9rem;
+  padding-top: 0.75rem;
+  color: var(--color-warning);
+  border-top: 1px solid var(--color-border);
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
+.payments {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.payments div {
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.8rem;
+  background: var(--color-primary-light);
+  border-radius: var(--radius-md);
+}
+
+.payments span { color: var(--color-text-muted); font-size: 0.72rem; }
+.payments strong { color: var(--color-primary-dark); font-size: 0.9rem; }
+
+.chartCard { min-height: 295px; }
+.chartBox { position: relative; height: 220px; }
+
+.state,
+.error { margin: 0; color: var(--color-text-muted); }
+.error { color: var(--color-danger); background: var(--color-danger-light); }
+
+@media (min-width: 720px) {
+  .wrap { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .reportHeader { grid-column: span 2; }
+  .preparationArea { grid-column: span 2; }
+  .storyCard { grid-column: span 2; }
+  .marginCard { grid-row: span 2; }
+  .chartCard { grid-column: span 2; }
+}
+
+@media (min-width: 1080px) {
+  .wrap { grid-template-columns: 1.15fr 1fr 1fr; }
+  .reportHeader { grid-column: span 3; }
+  .marginCard { grid-row: span 2; }
+  .preparationArea { grid-column: span 3; }
+  .storyCard { grid-column: span 3; }
+  .chartCard { grid-column: span 2; }
+}
+
+@media (max-width: 420px) {
+  .rankList li { grid-template-columns: auto minmax(0, 1fr); }
+  .rankList .productMeta { grid-column: 2; text-align: left; }
+}
+
+:global(html[data-theme="dark"]) .card,
+:global(html[data-theme="dark"]) .state {
+  color: var(--color-text);
+  background: linear-gradient(145deg, rgba(20, 43, 30, 0.78), rgba(10, 29, 19, 0.64));
+  border-color: rgba(162, 211, 183, 0.14);
+}
+
+:global(html[data-theme="dark"]) .marginCard {
+  background: linear-gradient(135deg, #176b43, #0a301d);
+  border-color: rgba(141, 225, 176, 0.22);
+}
+
+:global(html[data-theme="dark"]) .storyCard {
+  background: linear-gradient(135deg, rgba(28, 77, 47, 0.82), rgba(15, 50, 30, 0.72));
+  border-color: rgba(126, 216, 161, 0.2);
+}
+
+:global(html[data-theme="dark"]) .payments div { background: rgba(65, 157, 101, 0.16); }
+:global(html[data-theme="dark"]) .payments strong { color: #9ae3b9; }
+:global(html[data-theme="dark"]) .rank { color: #9ae3b9; background: rgba(65, 157, 101, 0.18); }
+:global(html[data-theme="dark"]) .largestExpense { border-color: var(--color-border); }
+:global(html[data-theme="dark"]) .profitLeakCard {
+  background: linear-gradient(145deg, rgba(79, 42, 19, 0.78), rgba(54, 28, 14, 0.68));
+  border-color: rgba(236, 159, 99, 0.25);
+}
+:global(html[data-theme="dark"]) .lowStockCard {
+  background: linear-gradient(145deg, rgba(75, 60, 19, 0.78), rgba(48, 39, 12, 0.68));
+  border-color: rgba(240, 200, 96, 0.22);
+}
+:global(html[data-theme="dark"]) .leakList li { border-color: rgba(236, 159, 99, 0.18); }
+:global(html[data-theme="dark"]) .leakDetail { color: #ffc18c; }
+
+@media (prefers-reduced-motion: reduce) {
+  .card { backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+
+@media print {
+  :global(html),
+  :global(body),
+  .wrap,
+  .wrap * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  :global(body) * { visibility: hidden; }
+  .wrap,
+  .wrap * { visibility: visible; }
+  .wrap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    gap: 0.45rem;
+  }
+  .card,
+  .state,
+  .error {
+    break-inside: avoid;
+    padding: 0.75rem;
+    background: #fff !important;
+    border: 1px solid #c8d4cd;
+    border-radius: 10px;
+    box-shadow: none;
+  }
+  .marginCard { color: #123b25; background: #e7f4eb !important; }
+  .marginCard .muted,
+  .eyebrow { color: #466052; }
+  .wrap { color: #17291e; }
+  .reportHeader h1,
+  .storyText,
+  .cardHeader h2,
+  .productName,
+  .expenseList strong,
+  .payments strong { color: #17291e !important; }
+  .reportHeader > div > p:last-child,
+  .cardHeader span,
+  .productMeta,
+  .empty,
+  .leakHint,
+  .payments span,
+  .state { color: #52655a !important; }
+  .profitLeakCard { background: #fff4e4 !important; border-color: #d9b078; }
+  .lowStockCard { background: #fff8dd !important; border-color: #dec979; }
+  .leakDetail { color: #934615 !important; }
+  .largestExpense { color: #8a5a00; border-color: #d7dfda; }
+  .payments div { background: #eaf4ed; }
+  .rank { color: #145334; background: #dcefe2; }
+  .printButton { display: none; }
+  .chartCard { min-height: 220px; }
+  .chartBox { height: 175px; }
+
+  :global(html[data-theme="dark"]) .wrap {
+    padding: 0.5rem;
+    color: #effff4;
+    background: #061f12;
+  }
+  :global(html[data-theme="dark"]) .card,
+  :global(html[data-theme="dark"]) .state,
+  :global(html[data-theme="dark"]) .error {
+    color: #effff4;
+    background: #103d27 !important;
+    border-color: rgba(171, 222, 192, 0.25);
+  }
+  :global(html[data-theme="dark"]) .marginCard { color: #effff4; background: #176b43 !important; }
+  :global(html[data-theme="dark"]) .profitLeakCard { background: #4b2a13 !important; border-color: #9b6a38; }
+  :global(html[data-theme="dark"]) .lowStockCard { background: #4a3a12 !important; border-color: #a18a3c; }
+  :global(html[data-theme="dark"]) .reportHeader h1,
+  :global(html[data-theme="dark"]) .storyText,
+  :global(html[data-theme="dark"]) .cardHeader h2,
+  :global(html[data-theme="dark"]) .productName,
+  :global(html[data-theme="dark"]) .expenseList strong,
+  :global(html[data-theme="dark"]) .payments strong { color: #effff4 !important; }
+  :global(html[data-theme="dark"]) .reportHeader > div > p:last-child,
+  :global(html[data-theme="dark"]) .cardHeader span,
+  :global(html[data-theme="dark"]) .productMeta,
+  :global(html[data-theme="dark"]) .empty,
+  :global(html[data-theme="dark"]) .leakHint,
+  :global(html[data-theme="dark"]) .payments span,
+  :global(html[data-theme="dark"]) .state { color: #b9d5c4 !important; }
+  :global(html[data-theme="dark"]) .leakDetail,
+  :global(html[data-theme="dark"]) .largestExpense { color: #ffd08a !important; }
+  :global(html[data-theme="dark"]) .payments div { background: #1b5636; }
+  :global(html[data-theme="dark"]) .rank { color: #d9f7e4; background: #1c6240; }
+}

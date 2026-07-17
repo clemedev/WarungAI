@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { deleteDemoSale, getDemoSales, isDemoStallEnabled, saveDemoSale } from './demoStall.js';
 
 import {
   adjustStock,
@@ -62,6 +63,7 @@ export async function getSales({
   fromDate,
   toDate,
 } = {}) {
+  if (isDemoStallEnabled()) return getDemoSales({ fromDate, toDate });
   await requireUser();
 
   let query = supabase
@@ -117,6 +119,7 @@ export async function getSales({
 }
 
 export async function saveSale(sale) {
+  if (isDemoStallEnabled()) return saveDemoSale(sale);
   await requireUser();
 
   const productId = String(
@@ -183,6 +186,23 @@ export async function saveSale(sale) {
     throw new Error(
       'Tarikh jualan tidak sah.',
     );
+  }
+
+  // Do not create money records for stock that does not exist. This is a
+  // pre-flight guard; the later stock adjustment remains best-effort so an
+  // already-committed sale is never lost to a recoverable stock-write error.
+  const { data: stockProduct, error: stockError } = await supabase
+    .from('products')
+    .select('current_stock')
+    .eq('id', productId)
+    .single();
+
+  if (stockError) {
+    throw new Error(`Gagal membaca stok: ${stockError.message}`);
+  }
+
+  if ((Number(stockProduct?.current_stock) || 0) < quantity) {
+    throw new Error('Stok tidak mencukupi untuk jualan ini.');
   }
 
   const { data, error } =
@@ -257,6 +277,7 @@ export async function saveSale(sale) {
 }
 
 export async function deleteSale(id) {
+  if (isDemoStallEnabled()) return deleteDemoSale(id);
   await requireUser();
 
   if (!id) {

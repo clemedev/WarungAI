@@ -45,7 +45,11 @@
     "hint": "Type it the way you'd say it.",
     "badge": "AI-assisted",
     "tabChat": "Text / voice",
-    "tabReceipt": "Scan receipt"
+    "tabReceipt": "Scan receipt",
+    "tabBusy": "Busy mode"
+  },
+  "busy": {
+    "hint": "Tap products to add them to the sale.", "noProducts": "Add products before using Busy Mode.", "addProduct": "Add {{name}}", "removeProduct": "Remove one {{name}}", "stock_one": "{{count}} in stock", "stock_other": "{{count}} in stock", "cart": "Current sale", "emptyCart": "Tap a product to begin.", "paymentAria": "Payment method", "cash": "Cash", "qr": "QR", "save_one": "Save {{count}} item", "save_other": "Save {{count}} items", "saving": "Saving...", "saveFailed": "Could not save the quick sale."
   },
   "quick": {
     "eyebrow": "Today",
@@ -110,8 +114,24 @@
     "errVerify": "Account created. Please check your email before logging in.",
     "errGeneric": "Log in failed. Please try again."
   },
+  "demo": {
+    "try": "Try the Demo Stall",
+    "note": "Loads presentation data only in this browser. Nothing is saved to your account.",
+    "banner": "Demo Stall mode — data stays in this browser only",
+    "exit": "Exit demo",
+    "walkthrough": "Demo guide"
+  },
+  "walkthrough": {
+    "eyebrow": "Judge-ready route", "title": "Demo walkthrough", "close": "Close walkthrough", "next": "Next step", "done": "Finish walkthrough",
+    "busyTitle": "Busy Mode", "busyHint": "Tap, pay, save.", "busyScript": "Record a rush-hour sale in a few taps.",
+    "safeTitle": "Receipt review", "safeHint": "Review before saving.", "safeScript": "The owner checks uncertain OCR items first.",
+    "closingTitle": "Daily Closing", "closingHint": "Sales, profit, stock.", "closingScript": "The daily business picture in seconds.",
+    "analyticsTitle": "Analytics", "analyticsHint": "What happened and what next.", "analyticsScript": "Find winners, risks, and tomorrow's preparation.",
+    "reportTitle": "Weekly report", "reportHint": "Print or save PDF.", "reportScript": "Keep it or share it with an accountant."
+  },
   "lang": {
-    "select": "Select language"
+    "select": "Select language",
+    "toggle": "Change language. Current: {{current}}. Next: {{next}}."
   },
   "dashboard": {
     "loading": "Loading dashboard...",
@@ -181,12 +201,65 @@
     "cash": "Cash",
     "qr": "QR payment"
   },
+  "weekly": {
+    "loading": "Loading weekly insights...",
+    "loadFailed": "Could not load weekly insights.",
+    "empty": "No sales or expenses recorded in the last 7 days.",
+    "thisWeek": "This week",
+    "netMargin": "Net profit margin",
+    "marginDelta": "{{value}} points from last week",
+    "noPreviousWeek": "No previous week to compare yet",
+    "weekProfit": "Net profit: {{amount}}",
+    "topProducts": "Top 3 products",
+    "slowMovers": "Slow movers",
+    "lowestSales": "Lowest sales",
+    "units_one": "{{count}} unit",
+    "units_other": "{{count}} units",
+    "noSales": "No sales",
+    "lowStockCount": "Low stock count",
+    "lowStockItems_one": "{{count}} item",
+    "lowStockItems_other": "{{count}} items",
+    "stockLeft_one": "{{count}} left",
+    "stockLeft_other": "{{count}} left",
+    "stockHealthy": "All products are above their warning levels.",
+    "expenseBreakdown": "Expense breakdown",
+    "largestExpense": "Largest expense: {{category}} — {{amount}}",
+    "paymentSplit": "Cash vs QR",
+    "cash": "Cash",
+    "qr": "QR",
+    "profitTrend": "Daily profit trend",
+    "profitLeaks": "Protect your profit",
+    "actionNeeded": "Action needed",
+    "belowCost": "Selling at {{price}} each, below its {{cost}} cost.",
+    "lowMargin": "Only {{margin}} profit margin this week.",
+    "profitLeakHint": "Review the selling price or ingredient cost in Inventory.",
+    "businessStory": "This week's business story",
+    "storySalesUpExpenses": "Sales rose by {{revenue}}, but {{category}} spending of {{expense}} kept profit from growing.",
+    "storyProfitUp": "Net profit improved by {{profit}} compared with last week.",
+    "storySalesDown": "Sales are down {{revenue}} compared with last week. Review your slow movers and peak-hour offer.",
+    "storyExpensesHigh": "Expenses reached {{expense}}, higher than this week's gross profit. Check costs before the next buying run.",
+    "storySteady": "Your business is building its first weekly pattern. Record a few more sales to unlock a clearer comparison.",
+    "reportEyebrow": "WarungAI report",
+    "reportTitle": "Weekly business report",
+    "reportHint": "A print-ready summary for sharing or saving as a PDF.",
+    "print": "Print / Save PDF",
+    "none": "No data yet."
+  },
+  "prepare": {
+    "loading": "Preparing tomorrow's suggestion...", "loadFailed": "Could not load tomorrow's suggestion.", "eyebrow": "Plan ahead", "title": "Prepare for {{weekday}}", "hint": "Based on {{count}} previous matching weekdays.", "average_one": "Average {{count}} unit", "average_other": "Average {{count}} units", "recommend_one": "Prepare {{count}}", "recommend_other": "Prepare {{count}}"
+  },
+  "closing": {
+    "eyebrow": "Close today", "title": "Closing summary", "empty": "No sales to close today yet.", "sales": "Today's sales: {{amount}}.", "profit": "Net profit: {{amount}}.", "salesLabel": "Sales", "profitLabel": "Net profit", "cash": "Cash", "qr": "QR", "top_one": "Top seller: {{name}} ({{count}} unit)", "top_other": "Top seller: {{name}} ({{count}} units)", "share": "Share daily close", "lowStock": "Low stock", "manageStock": "Manage stock", "health": "Business health", "healthHealthy": "Looking healthy today", "healthAttention": "A few items need attention", "healthCritical": "Act on today's risks"
+  },
   "chat": {
     "placeholder": "e.g. \"Sold 3 nasi lemak RM12\"",
     "send": "Send",
     "saving": "Saving...",
     "saveFailed": "Could not save the sale.",
-    "unknownProduct": "Unknown product"
+    "unknownProduct": "Unknown product",
+    "noProducts": "No products yet — add a product first so sales can be matched.",
+    "savedThisSession": "Saved this session",
+    "entryAria": "Enter a sale"
   },
   "confirm": {
     "title": "Confirm sale",
@@ -244,6 +317,7 @@
     "saveItems_other": "Save {{count}} items",
     "noValidItems": "No valid items to save.",
     "saleSaveFailed": "Could not save the sales from this receipt."
+    ,"attentionCount_one": "{{count}} item needs checking before saving.", "attentionCount_other": "{{count}} items need checking before saving.", "needsAttention": "Needs review"
   },
   "salesList": {
     "title": "Sales history",

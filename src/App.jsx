@@ -1,4 +1,7 @@
 import {
+  lazy,
+  useRef,
+  Suspense,
   useEffect,
   useMemo,
   useState,
@@ -6,20 +9,23 @@ import {
 
 import { useTranslation } from 'react-i18next';
 
-import Dashboard from './components/Dashboard/Dashboard';
-import SaleReceiptScanner from './components/ReceiptScanner/SaleReceiptScanner';
 import ChatEntry from './components/ChatEntry/ChatEntry';
-import ProductList from './components/ProductList/ProductList';
-import ExpenseTracker from './components/ExpenseTracker/ExpenseTracker';
 import LoginScreen from './components/LoginScreen/LoginScreen';
-import SalesList from './components/SalesList/SalesList';
 import ThemeToggle from './components/ThemeToggle/ThemeToggle.jsx';
 import LanguageSwitcher from './components/LanguageSwitcher/LanguageSwitcher';
 import OverviewMetrics from './components/OverviewMetrics/OverviewMetrics';
+import QuickSaleGrid from './components/QuickSaleGrid/QuickSaleGrid';
+import DailyClosing from './components/DailyClosing/DailyClosing';
 
 import {
   getProducts,
 } from './lib/supabaseProducts.js';
+
+import {
+  clearDemoStall,
+  isDemoStallEnabled,
+  startDemoStall,
+} from './lib/demoStall.js';
 
 import {
   getCurrentUser,
@@ -44,6 +50,38 @@ const VIEWS = [
   { id: 'inventory', icon: '◫' },
   { id: 'insights', icon: '↗' },
 ];
+
+const DEMO_USER = {
+  id: 'demo-stall',
+  name: 'Warung Kak Lina',
+  email: 'demo@warungai.local',
+};
+
+// These features are only needed after a user opens their corresponding
+// screen. Lazy loading keeps Tesseract and Chart.js out of the first bundle.
+const SaleReceiptScanner = lazy(() =>
+  import('./components/ReceiptScanner/SaleReceiptScanner'),
+);
+
+const SalesList = lazy(() =>
+  import('./components/SalesList/SalesList'),
+);
+
+const ExpenseTracker = lazy(() =>
+  import('./components/ExpenseTracker/ExpenseTracker'),
+);
+
+const ProductList = lazy(() =>
+  import('./components/ProductList/ProductList'),
+);
+
+const WeeklyInsights = lazy(() =>
+  import('./components/WeeklyInsights/WeeklyInsights'),
+);
+
+const DemoWalkthrough = lazy(() =>
+  import('./components/DemoWalkthrough/DemoWalkthrough'),
+);
 
 function mapSupabaseUser(user) {
   if (!user) {
@@ -177,6 +215,16 @@ function LoadingScreen() {
   );
 }
 
+function FeatureFallback() {
+  const { t } = useTranslation();
+
+  return (
+    <p className={styles.featureLoading} role="status">
+      {t('app.loading')}
+    </p>
+  );
+}
+
 export default function App() {
   const { t, i18n: i18nInstance } =
     useTranslation();
@@ -186,6 +234,12 @@ export default function App() {
 
   const [authLoading, setAuthLoading] =
     useState(true);
+
+  const [demoMode, setDemoMode] =
+    useState(() => isDemoStallEnabled());
+
+  const [walkthroughOpen, setWalkthroughOpen] =
+    useState(false);
 
   const [view, setView] =
     useState('overview');
@@ -216,6 +270,9 @@ export default function App() {
     createMenuOpen,
     setCreateMenuOpen,
   ] = useState(false);
+
+  const createMenuRef = useRef(null);
+  const createMenuTriggerRef = useRef(null);
 
   const currentView = useMemo(
     () =>
@@ -254,9 +311,35 @@ export default function App() {
   }
 
   useEffect(() => {
+    if (!createMenuOpen) {
+      createMenuTriggerRef.current?.focus();
+      return undefined;
+    }
+
+    const sheet = createMenuRef.current;
+    sheet?.querySelector('button')?.focus();
+
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        setCreateMenuOpen(false);
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [createMenuOpen]);
+
+  useEffect(() => {
     let active = true;
 
     async function restoreUser() {
+      if (isDemoStallEnabled()) {
+        setUser(DEMO_USER);
+        await loadProducts();
+        if (active) setAuthLoading(false);
+        return;
+      }
+
       const currentUser =
         await getCurrentUser();
 
@@ -286,6 +369,9 @@ export default function App() {
     const unsubscribe =
       onAuthStateChange(
         async (nextUser) => {
+          if (isDemoStallEnabled()) {
+            return;
+          }
           if (!active) {
             return;
           }
@@ -323,7 +409,24 @@ export default function App() {
     await loadProducts();
   }
 
+  async function handleTryDemo() {
+    startDemoStall();
+    setDemoMode(true);
+    setUser(DEMO_USER);
+    await loadProducts();
+    setWalkthroughOpen(true);
+  }
+
   async function handleSignOut() {
+    if (demoMode) {
+      clearDemoStall();
+      setDemoMode(false);
+      setWalkthroughOpen(false);
+      setUser(null);
+      setProducts([]);
+      return;
+    }
+
     try {
       await signOut();
     } catch (error) {
@@ -355,7 +458,7 @@ export default function App() {
     );
   }
 
-  function handleSaved(count) {
+  async function handleSaved(count) {
     setToast(
       t('toast.salesSaved', { count }),
     );
@@ -368,15 +471,30 @@ export default function App() {
       (version) => version + 1,
     );
 
+    // A sale also consumes stock. Reload the shared product list so Busy
+    // Mode immediately reflects (for example) 8 Nasi Lemak → 6 left.
+    await loadProducts();
+
     window.setTimeout(() => {
       setToast('');
     }, 3000);
+  }
+
+  async function handleSalesChanged() {
+    setSalesVersion((version) => version + 1);
+    setActivityVersion((version) => version + 1);
+    await loadProducts();
   }
 
   function openSale() {
     setView('overview');
     setComposer('chat');
     setCreateMenuOpen(false);
+  }
+
+  function openCreateMenu(event) {
+    createMenuTriggerRef.current = event.currentTarget;
+    setCreateMenuOpen(true);
   }
 
   function openReceipt() {
@@ -404,6 +522,7 @@ export default function App() {
     return (
       <LoginScreen
         onAuthed={handleAuthed}
+        onTryDemo={handleTryDemo}
       />
     );
   }
@@ -474,9 +593,7 @@ export default function App() {
         <button
           type="button"
           className={styles.sidebarCreate}
-          onClick={() =>
-            setCreateMenuOpen(true)
-          }
+          onClick={openCreateMenu}
         >
           <span>+</span>
           {t('app.recordActivity')}
@@ -505,6 +622,15 @@ export default function App() {
       </aside>
 
       <section className={styles.application}>
+        {demoMode && (
+          <div className={styles.demoBanner} role="status">
+            <span>{t('demo.banner')}</span>
+            <span className={styles.demoActions}>
+              <button type="button" onClick={() => setWalkthroughOpen(true)}>{t('demo.walkthrough')}</button>
+              <button type="button" onClick={handleSignOut}>{t('demo.exit')}</button>
+            </span>
+          </div>
+        )}
         <header className={styles.mobileHeader}>
           <div className={styles.mobileBrand}>
             <span>🍛</span>
@@ -519,9 +645,7 @@ export default function App() {
             <button
               type="button"
               className={styles.mobileProfile}
-              onClick={() =>
-                setCreateMenuOpen(true)
-              }
+              onClick={openCreateMenu}
               aria-label={t(
                 'app.openMenuAria',
               )}
@@ -570,6 +694,11 @@ export default function App() {
                   refreshKey={
                     activityVersion
                   }
+                />
+
+                <DailyClosing
+                  refreshKey={activityVersion}
+                  onManageStock={() => setView('inventory')}
                 />
 
                 <div
@@ -648,6 +777,18 @@ export default function App() {
                         'capture.tabReceipt',
                       )}
                     </button>
+
+                    <button
+                      type="button"
+                      className={
+                        composer === 'quick'
+                          ? styles.captureTabActive
+                          : styles.captureTab
+                      }
+                      onClick={() => setComposer('quick')}
+                    >
+                      ⚡ {t('capture.tabBusy')}
+                    </button>
                   </div>
 
                   <div
@@ -667,11 +808,20 @@ export default function App() {
 
                     {composer ===
                       'receipt' && (
-                      <SaleReceiptScanner
+                      <Suspense
+                        fallback={<FeatureFallback />}
+                      >
+                        <SaleReceiptScanner
+                          products={products}
+                          onSaved={handleSaved}
+                        />
+                      </Suspense>
+                    )}
+
+                    {composer === 'quick' && (
+                      <QuickSaleGrid
                         products={products}
-                        onSaved={
-                          handleSaved
-                        }
+                        onSaved={handleSaved}
                       />
                     )}
                   </div>
@@ -807,19 +957,25 @@ export default function App() {
                     </button>
                   </div>
 
-                  <SalesList
-                    refreshKey={
-                      salesVersion
-                    }
-                    onChange={() =>
-                      setSalesVersion(
-                        (version) =>
-                          version + 1,
-                      )
-                    }
-                  />
-                </section>
-                </div>
+                  <Suspense fallback={<FeatureFallback />}>
+                    <SalesList
+                      refreshKey={salesVersion}
+                      onChange={handleSalesChanged}
+                    />
+                  </Suspense>
+      </section>
+      {demoMode && walkthroughOpen && (
+        <Suspense fallback={null}>
+          <DemoWalkthrough
+            onClose={() => setWalkthroughOpen(false)}
+            onNavigate={({ view: nextView, composer: nextComposer }) => {
+              setView(nextView);
+              if (nextComposer) setComposer(nextComposer);
+            }}
+          />
+        </Suspense>
+      )}
+    </div>
               </>
             )}
 
@@ -867,29 +1023,29 @@ export default function App() {
                 </div>
 
                 {recordType === 'sales' && (
-                  <SalesList
-                    refreshKey={
-                      salesVersion
-                    }
-                    onChange={() =>
-                      setSalesVersion(
-                        (version) =>
-                          version + 1,
-                      )
-                    }
-                  />
+                  <Suspense
+                    fallback={<FeatureFallback />}
+                  >
+                    <SalesList
+                      refreshKey={salesVersion}
+                      onChange={handleSalesChanged}
+                    />
+                  </Suspense>
                 )}
 
                 {recordType ===
                   'expenses' && (
-                  <ExpenseTracker
-                    onChange={() =>
-                      setActivityVersion(
-                        (version) =>
-                          version + 1,
-                      )
-                    }
-                  />
+                  <Suspense
+                    fallback={<FeatureFallback />}
+                  >
+                    <ExpenseTracker
+                      onChange={() =>
+                        setActivityVersion(
+                          (version) => version + 1,
+                        )
+                      }
+                    />
+                  </Suspense>
                 )}
               </div>
             )}
@@ -900,11 +1056,9 @@ export default function App() {
                   styles.inventoryLayout
                 }
               >
-                <ProductList
-                  onChange={
-                    refreshProducts
-                  }
-                />
+                <Suspense fallback={<FeatureFallback />}>
+                  <ProductList onChange={refreshProducts} />
+                </Suspense>
               </div>
             )}
 
@@ -914,7 +1068,11 @@ export default function App() {
                   styles.insightsLayout
                 }
               >
-                <Dashboard />
+                <Suspense fallback={<FeatureFallback />}>
+                  <WeeklyInsights
+                    refreshKey={activityVersion}
+                  />
+                </Suspense>
               </div>
             )}
           </div>
@@ -952,9 +1110,7 @@ export default function App() {
         <button
           type="button"
           className={styles.mobileCreate}
-          onClick={() =>
-            setCreateMenuOpen(true)
-          }
+          onClick={openCreateMenu}
           aria-label={t(
             'app.newActivityAria',
           )}
@@ -1001,6 +1157,7 @@ export default function App() {
           }}
         >
           <section
+            ref={createMenuRef}
             className={styles.createSheet}
             role="dialog"
             aria-modal="true"

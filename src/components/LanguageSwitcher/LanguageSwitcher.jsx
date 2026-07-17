@@ -1,34 +1,57 @@
 import { useTranslation } from 'react-i18next';
-import { changeLanguage, LANGUAGES } from '../../i18n/config.js';
+
+import {
+  changeLanguage,
+  getNextLanguage,
+  LANGUAGES,
+} from '../../i18n/config.js';
+
 import styles from './LanguageSwitcher.module.css';
 
-/**
- * Language picker (ms / en / zh). `darkSurface` restyles it for the dark
- * green sidebar, which stays dark in both themes — same contract as
- * ThemeToggle's prop of the same name.
- */
+const SHORT_NAMES = {
+  ms: 'BM',
+  en: 'BI',
+  zh: 'BC',
+};
+
+/** A one-tap language cycle: BM → BI → BC. */
 export default function LanguageSwitcher({ darkSurface = false }) {
   const { i18n, t } = useTranslation();
 
+  const currentLanguage =
+    LANGUAGES.find(
+      (language) => language.code === i18n.language,
+    ) ?? LANGUAGES[0];
+
+  const nextLanguageCode = getNextLanguage(
+    currentLanguage.code,
+  );
+
+  const currentShortName =
+    SHORT_NAMES[currentLanguage.code] ?? 'BM';
+
+  const nextShortName =
+    SHORT_NAMES[nextLanguageCode] ?? 'BM';
+
+  const label = t('lang.toggle', {
+    current: currentShortName,
+    next: nextShortName,
+  });
+
   return (
     <div className={styles.wrap}>
-      <label htmlFor="lang-select" className={styles.label}>
-        🌐
-      </label>
-
-      <select
-        id="lang-select"
-        className={`${styles.select} ${darkSurface ? styles.darkSurface : ''}`}
-        value={i18n.language}
-        onChange={(event) => changeLanguage(event.target.value)}
-        aria-label={t('lang.select')}
+      <button
+        type="button"
+        className={`${styles.toggle} ${
+          darkSurface ? styles.darkSurface : ''
+        }`}
+        onClick={() => changeLanguage(nextLanguageCode)}
+        aria-label={label}
+        title={label}
       >
-        {LANGUAGES.map((lang) => (
-          <option key={lang.code} value={lang.code}>
-            {lang.name}
-          </option>
-        ))}
-      </select>
+        <span className={styles.icon} aria-hidden="true">🌐</span>
+        <span>{currentShortName}</span>
+      </button>
     </div>
   );
 }

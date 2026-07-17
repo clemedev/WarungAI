@@ -9,6 +9,7 @@ import {
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { shortLabel } from '../../lib/dates';
+import { useTheme } from '../../theme/ThemeContext.jsx';
 import styles from './SevenDayChart.module.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
@@ -16,6 +17,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
 /** 7-day sales trend bar chart. */
 export default function SevenDayChart({ trend }) {
   const { t } = useTranslation();
+  const { isDark } = useTheme();
 
   // Mount the chart one frame after first paint: if Chart.js measures the
   // container mid page-load it can capture a transient 0px width and the
@@ -33,7 +35,13 @@ export default function SevenDayChart({ trend }) {
         label: t('chart.legend'),
         data: trend.map((d) => d.total),
         backgroundColor: trend.map((_, i) =>
-          i === trend.length - 1 ? '#1a7f4b' : '#a8c9b8',
+          i === trend.length - 1
+            ? isDark
+              ? '#57c78b'
+              : '#1a7f4b'
+            : isDark
+              ? '#346c4d'
+              : '#a8c9b8',
         ),
         borderRadius: 6,
       },
@@ -51,8 +59,24 @@ export default function SevenDayChart({ trend }) {
       },
     },
     scales: {
-      y: { beginAtZero: true, ticks: { precision: 0 } },
-      x: { grid: { display: false } },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          precision: 0,
+          color: isDark ? '#a8bdb0' : '#68736d',
+        },
+        grid: {
+          color: isDark
+            ? 'rgba(155, 188, 169, 0.12)'
+            : 'rgba(104, 115, 109, 0.12)',
+        },
+      },
+      x: {
+        grid: { display: false },
+        ticks: {
+          color: isDark ? '#a8bdb0' : '#68736d',
+        },
+      },
     },
   };
 

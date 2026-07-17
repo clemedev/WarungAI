@@ -69,3 +69,6 @@ pnpm-debug.log*
 
 # Vite production build
 /dist/
+
+# Tesseract language data — downloaded at runtime, not source
+*.traineddata

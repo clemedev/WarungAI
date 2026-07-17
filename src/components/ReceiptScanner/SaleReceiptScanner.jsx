@@ -1,4 +1,8 @@
-import { useRef, useState } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import Tesseract from 'tesseract.js';
 import { parseReceiptText } from '../../lib/ocrParser';
@@ -27,6 +31,15 @@ export default function SaleReceiptScanner({ products, onSaved }) {
   const [receiptTotal, setReceiptTotal] = useState(null);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+
+  useEffect(
+    () => () => {
+      if (imageUrl) {
+        URL.revokeObjectURL(imageUrl);
+      }
+    },
+    [imageUrl],
+  );
 
   async function handleFile(e) {
     const file = e.target.files?.[0];
@@ -68,6 +81,12 @@ export default function SaleReceiptScanner({ products, onSaved }) {
             productId: product?.id ?? '',
             quantity: it.quantity,
             total: it.price,
+            needsAttention:
+              !product ||
+              !Number.isInteger(Number(it.quantity)) ||
+              Number(it.quantity) <= 0 ||
+              !Number.isFinite(Number(it.price)) ||
+              Number(it.price) <= 0,
           };
         }),
       );
@@ -125,7 +144,7 @@ export default function SaleReceiptScanner({ products, onSaved }) {
       );
 
       reset();
-      onSaved?.(good.length);
+      await onSaved?.(good.length);
     } catch (caughtError) {
       setError(
         caughtError instanceof Error
@@ -148,6 +167,9 @@ export default function SaleReceiptScanner({ products, onSaved }) {
   }
 
   const savableCount = rows.filter((r) => r.include && r.productId && r.total > 0).length;
+  const attentionCount = rows.filter(
+    (row) => row.include && (row.needsAttention || !row.productId),
+  ).length;
 
   return (
     <div className={styles.wrap}>
@@ -165,6 +187,7 @@ export default function SaleReceiptScanner({ products, onSaved }) {
             onChange={handleFile}
           />
           <button
+            type="button"
             className={styles.bigButton}
             onClick={() => fileInputRef.current?.click()}
           >
@@ -174,27 +197,41 @@ export default function SaleReceiptScanner({ products, onSaved }) {
       )}
 
       {status === 'ocr' && (
-        <div className={styles.progressWrap}>
+        <div
+          className={styles.progressWrap}
+          role="status"
+          aria-live="polite"
+        >
           <p>
             {t('scanner.reading', {
               percent: Math.round(progress * 100),
             })}
           </p>
           <progress value={progress} max="1" />
-          {imageUrl && <img className={styles.preview} src={imageUrl} alt="resit" />}
+          {imageUrl && (
+            <img
+              className={styles.preview}
+              src={imageUrl}
+              alt={t('scanner.saleHint')}
+            />
+          )}
         </div>
       )}
 
       {status === 'error' && (
         <div>
-          <p className={styles.error}>{error}</p>
+          <p className={styles.error} role="alert">{error}</p>
           {rawText && (
             <details>
               <summary>{t('scanner.rawText')}</summary>
               <pre className={styles.rawText}>{rawText}</pre>
             </details>
           )}
-          <button className={styles.bigButton} onClick={reset}>
+          <button
+            type="button"
+            className={styles.bigButton}
+            onClick={reset}
+          >
             {t('scanner.tryAgain')}
           </button>
         </div>
@@ -203,6 +240,11 @@ export default function SaleReceiptScanner({ products, onSaved }) {
       {status === 'review' && (
         <div className={styles.review}>
           <h3 className={styles.title}>{t('scanner.saleReview')}</h3>
+          {attentionCount > 0 && (
+            <p className={styles.attention} role="status">
+              {t('scanner.attentionCount', { count: attentionCount })}
+            </p>
+          )}
           {receiptTotal !== null && (
             <p className={styles.hint}>
               {t('scanner.detectedTotal', {
@@ -222,19 +264,23 @@ export default function SaleReceiptScanner({ products, onSaved }) {
             </thead>
             <tbody>
               {rows.map((r, i) => (
-                <tr key={i} className={r.include ? '' : styles.excluded}>
+                <tr key={i} className={r.include ? r.needsAttention ? styles.attentionRow : '' : styles.excluded}>
                   <td>
                     <input
                       type="checkbox"
                       checked={r.include}
                       onChange={(e) => updateRow(i, { include: e.target.checked })}
+                      aria-label={`${t('scanner.fromReceipt')}: ${r.ocrName}`}
                     />
                   </td>
                   <td className={styles.ocrName}>{r.ocrName}</td>
                   <td>
                     <select
                       value={r.productId}
-                      onChange={(e) => updateRow(i, { productId: e.target.value })}
+                      onChange={(e) => updateRow(i, {
+                        productId: e.target.value,
+                        needsAttention: !e.target.value,
+                      })}
                     >
                       <option value="">{t('scanner.pick')}</option>
                       {products.map((p) => (
@@ -243,6 +289,11 @@ export default function SaleReceiptScanner({ products, onSaved }) {
                         </option>
                       ))}
                     </select>
+                    {r.needsAttention && (
+                      <small className={styles.attentionTag}>
+                        {t('scanner.needsAttention')}
+                      </small>
+                    )}
                   </td>
                   <td>
                     <input
@@ -273,6 +324,7 @@ export default function SaleReceiptScanner({ products, onSaved }) {
           </details>
           <div className={styles.actions}>
             <button
+              type="button"
               className={styles.saveButton}
               disabled={savableCount === 0 || saving}
               onClick={handleSaveAll}
@@ -283,7 +335,12 @@ export default function SaleReceiptScanner({ products, onSaved }) {
                     count: savableCount,
                   })}
             </button>
-            <button className={styles.cancelButton} onClick={reset}>
+            <button
+              type="button"
+              className={styles.cancelButton}
+              onClick={reset}
+              disabled={saving}
+            >
               {t('scanner.cancel')}
             </button>
           </div>

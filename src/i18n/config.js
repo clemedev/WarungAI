@@ -3,8 +3,11 @@ import { initReactI18next } from 'react-i18next';
 import ms from './locales/ms.json';
 import en from './locales/en.json';
 import zh from './locales/zh.json';
+import {
+  getNextLanguage,
+  SUPPORTED_LANGS,
+} from './languages.js';
 
-const SUPPORTED_LANGS = ['ms', 'en', 'zh'];
 const DEFAULT_LANG = 'ms';
 const LANG_KEY = 'warungai.lang';
 
@@ -46,6 +49,8 @@ export function changeLanguage(lang) {
 export function getCurrentLanguage() {
   return i18n.language;
 }
+
+export { getNextLanguage } from './languages.js';
 
 /**
  * BCP 47 tag for Intl formatting. Regions are Malaysia-first on purpose:

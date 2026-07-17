@@ -5,9 +5,10 @@ import {
   signUp,
 } from '../../lib/supabaseAuth.js';
 import LanguageSwitcher from '../LanguageSwitcher/LanguageSwitcher';
+import ThemeToggle from '../ThemeToggle/ThemeToggle.jsx';
 import styles from './LoginScreen.module.css';
 
-export default function LoginScreen({ onAuthed }) {
+export default function LoginScreen({ onAuthed, onTryDemo }) {
   const { t } = useTranslation();
   const [mode, setMode] = useState('signin');
   const [displayName, setDisplayName] = useState('');
@@ -92,6 +93,7 @@ export default function LoginScreen({ onAuthed }) {
             non-Malay speaker cannot read the form they need to fill. */}
         <div className={styles.langRow}>
           <LanguageSwitcher />
+          <ThemeToggle compact />
         </div>
 
         <h1 className={styles.logo}>
@@ -215,6 +217,17 @@ export default function LoginScreen({ onAuthed }) {
         <p className={styles.note}>
           {t('login.note')}
         </p>
+
+        <button
+          type="button"
+          className={styles.demoButton}
+          onClick={onTryDemo}
+          disabled={busy}
+        >
+          {t('demo.try')}
+        </button>
+
+        <p className={styles.demoNote}>{t('demo.note')}</p>
       </div>
     </div>
   );

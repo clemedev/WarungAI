@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { adjustDemoStock, archiveDemoProduct, getDemoProducts, isDemoStallEnabled, saveDemoProduct } from './demoStall.js';
 
 function mapProduct(row) {
   return {
@@ -32,6 +33,7 @@ async function requireUser() {
 }
 
 export async function getProducts() {
+  if (isDemoStallEnabled()) return getDemoProducts();
   await requireUser();
 
   const { data, error } = await supabase
@@ -52,6 +54,7 @@ export async function getProducts() {
 }
 
 export async function saveProduct(product) {
+  if (isDemoStallEnabled()) return saveDemoProduct(product);
   const user = await requireUser();
 
   const name =
@@ -178,6 +181,7 @@ export async function saveProduct(product) {
  *   in one statement.
  */
 export async function adjustStock(productId, delta) {
+  if (isDemoStallEnabled()) return adjustDemoStock(productId, delta);
   await requireUser();
 
   const amount = Number(delta);
@@ -227,6 +231,7 @@ export async function adjustStock(productId, delta) {
 }
 
 export async function archiveProduct(id) {
+  if (isDemoStallEnabled()) return archiveDemoProduct(id);
   await requireUser();
 
   if (!id) {

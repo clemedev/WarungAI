@@ -15,6 +15,14 @@ import {
   todayISO,
 } from './dates.js';
 
+import {
+  createWeeklyInsights,
+} from './weeklyInsights.js';
+
+import {
+  createTomorrowPreparation,
+} from './tomorrowPreparation.js';
+
 function round2(value) {
   return Math.round(
     (Number(value) + Number.EPSILON) * 100,
@@ -391,5 +399,56 @@ export async function getDashboardData(
     lowStockItems,
     split,
     dailyTarget,
+  };
+}
+
+/**
+ * Loads the last two calendar weeks using the existing date-scoped queries.
+ * No schema changes are required: all insight values are calculated from
+ * current sales, expenses, and active products.
+ */
+export async function getWeeklyInsights() {
+  const fortnight = lastNDates(14);
+  const previousWeek = fortnight.slice(0, 7);
+  const currentWeek = fortnight.slice(7);
+
+  const [sales, expenses, products] = await Promise.all([
+    getSales({
+      fromDate: fortnight[0],
+      toDate: fortnight[fortnight.length - 1],
+    }),
+    getExpenses({
+      fromDate: fortnight[0],
+      toDate: fortnight[fortnight.length - 1],
+    }),
+    getProducts(),
+  ]);
+
+  return createWeeklyInsights({
+    sales,
+    expenses,
+    products,
+    currentWeek,
+    previousWeek,
+  });
+}
+
+export async function getTomorrowPreparation() {
+  const history = lastNDates(57);
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowWeekday = tomorrow.getDay();
+  const matchingDates = history.filter((date) =>
+    new Date(`${date}T00:00:00`).getDay() === tomorrowWeekday,
+  );
+
+  const [sales, products] = await Promise.all([
+    getSales({ fromDate: history[0], toDate: history[history.length - 1] }),
+    getProducts(),
+  ]);
+
+  return {
+    ...createTomorrowPreparation({ sales, products, matchingDates }),
+    tomorrowDate: tomorrow,
   };
 }

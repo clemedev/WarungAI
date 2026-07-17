@@ -15,7 +15,10 @@ const SpeechRecognition =
  * Not supported in all browsers (works in Chrome/Edge/Safari; not Firefox) —
  * the button hides itself when unavailable.
  */
-export default function VoiceEntry({ onTranscript }) {
+export default function VoiceEntry({
+  onTranscript,
+  disabled = false,
+}) {
   const { t, i18n } = useTranslation();
   const recognitionRef = useRef(null);
   const [listening, setListening] = useState(false);
@@ -60,6 +63,10 @@ export default function VoiceEntry({ onTranscript }) {
   if (!SpeechRecognition) return null;
 
   function toggle() {
+    if (disabled) {
+      return;
+    }
+
     setError('');
     if (listening) {
       recognitionRef.current?.stop();
@@ -80,6 +87,9 @@ export default function VoiceEntry({ onTranscript }) {
         type="button"
         className={`${styles.mic} ${listening ? styles.listening : ''}`}
         onClick={toggle}
+        disabled={disabled}
+        aria-label={listening ? t('voice.stop') : t('voice.start')}
+        aria-pressed={listening}
         title={listening ? t('voice.stop') : t('voice.start')}
       >
         {listening ? '⏹' : '🎤'}

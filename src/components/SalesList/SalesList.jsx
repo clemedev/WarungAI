@@ -125,7 +125,7 @@ export default function SalesList({
     try {
       await deleteSale(sale.id);
       await loadSales();
-      onChange?.();
+      await onChange?.();
     } catch (caughtError) {
       setError(
         caughtError instanceof Error

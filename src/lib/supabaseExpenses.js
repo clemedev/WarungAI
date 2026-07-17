@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { deleteDemoExpense, getDemoExpenses, isDemoStallEnabled, saveDemoExpense } from './demoStall.js';
 
 const VALID_CATEGORIES = [
   'bahan',
@@ -44,6 +45,7 @@ export async function getExpenses({
   fromDate,
   toDate,
 } = {}) {
+  if (isDemoStallEnabled()) return getDemoExpenses({ fromDate, toDate });
   await requireUser();
 
   let query = supabase
@@ -82,6 +84,7 @@ export async function getExpenses({
 }
 
 export async function saveExpense(expense) {
+  if (isDemoStallEnabled()) return saveDemoExpense(expense);
   const user = await requireUser();
 
   const category = String(
@@ -155,6 +158,7 @@ export async function saveExpense(expense) {
 }
 
 export async function deleteExpense(id) {
+  if (isDemoStallEnabled()) return deleteDemoExpense(id);
   await requireUser();
 
   if (!id) {

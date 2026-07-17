@@ -1,80 +1,233 @@
 .wrap {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
+}
+
+.summaryArea,
+.emptyArea,
+.chartArea,
+.topArea,
+.insightArea,
+.footerArea {
+  min-width: 0;
+}
+
+.emptyArea {
+  animation: cardEnter 280ms ease-out;
 }
 
 .empty {
   margin: 0;
-  padding: 0.75rem 0.95rem;
-  background: var(--color-accent-soft);
-  border: 1px solid var(--color-accent-soft);
-  border-radius: var(--radius-card);
-  font-size: 0.88rem;
-  color: var(--color-text);
+  padding: 0.85rem 1rem;
+
+  color: var(--color-warning);
+  background:
+    linear-gradient(
+      135deg,
+      var(--color-warning-light),
+      #fffaf0
+    );
+  border: 1px solid #f0dda4;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs);
+
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.chartArea,
+.topArea,
+.insightArea,
+.footerArea {
+  animation: cardEnter 320ms ease-out both;
+}
+
+.chartArea {
+  animation-delay: 40ms;
+}
+
+.topArea {
+  animation-delay: 80ms;
+}
+
+.insightArea {
+  animation-delay: 120ms;
+}
+
+.footerArea {
+  animation-delay: 160ms;
 }
 
 .summaryCard {
-  background: var(--color-surface);
+  position: relative;
+  overflow: hidden;
+
+  padding: clamp(1.1rem, 3vw, 1.5rem);
+
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff,
+      #fdfbf7
+    );
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-card);
-  padding: 1.1rem 1.2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  box-shadow: var(--shadow-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+
+  transition:
+    transform var(--transition-normal),
+    box-shadow var(--transition-normal),
+    border-color var(--transition-normal);
+}
+
+.summaryCard:hover {
+  border-color: var(--color-primary-border);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.summaryCard::after {
+  position: absolute;
+  right: -3.5rem;
+  bottom: -4rem;
+
+  width: 11rem;
+  height: 11rem;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(23, 107, 67, 0.1),
+      transparent 70%
+    );
+  border-radius: 50%;
+  pointer-events: none;
+
+  content: "";
 }
 
 .summaryTitle {
-  margin: 0;
-  font-size: 0.95rem;
+  position: relative;
+  z-index: 1;
+
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+
+  margin: 0 0 0.65rem;
+
   color: var(--color-text);
+
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .summaryTitle::before {
-  content: '\2731';
-  margin-right: 0.4rem;
-  color: var(--color-accent);
-  font-size: 0.8em;
-  vertical-align: 0.1em;
+  display: grid;
+  place-items: center;
+
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+
+  color: var(--color-primary-dark);
+  background: var(--color-primary-light);
+  border: 1px solid var(--color-primary-border);
+  border-radius: 9px;
+
+  font-size: 0.85rem;
+
+  content: "✦";
 }
 
 .summaryText {
-  margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.5;
+  position: relative;
+  z-index: 1;
+
+  max-width: 780px;
+  margin: 0 0 1rem;
+
+  color: var(--color-text-muted);
+
+  font-size: 0.88rem;
+  line-height: 1.65;
 }
 
 .waButton {
-  align-self: flex-start;
-  padding: 0.55rem 1rem;
-  background: #25d366;
-  color: #fff;
-  border-radius: 999px;
+  position: relative;
+  z-index: 1;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+
+  min-height: 44px;
+  padding: 0.65rem 1rem;
+
+  color: #ffffff;
+  background:
+    linear-gradient(
+      135deg,
+      #1ea952,
+      #168641
+    );
+  border: 1px solid #168641;
+  border-radius: var(--radius-pill);
+  box-shadow:
+    0 7px 18px rgba(30, 169, 82, 0.2);
+
+  font-size: 0.82rem;
+  font-weight: 750;
   text-decoration: none;
-  font-weight: 600;
-  font-size: 0.9rem;
+
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    filter var(--transition-fast);
 }
 
-/* ---------------------------------------------------------------
-   Desktop (≥ 880px): swap the single stacked column for a named
-   grid — summary spans the full width up top, chart + top-items
-   run side by side, insight sits as a slim strip, and the
-   share/summary card closes the page full-width.
-   ------------------------------------------------------------- */
-@media (min-width: 880px) {
+.waButton:hover {
+  color: #ffffff;
+  box-shadow:
+    0 10px 24px rgba(30, 169, 82, 0.27);
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
+
+.waButton:active {
+  transform: translateY(0);
+}
+
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (min-width: 700px) {
   .wrap {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns:
+      minmax(0, 1.55fr)
+      minmax(240px, 0.85fr);
+
     grid-template-areas:
-      'summary  summary'
-      'empty    empty'
-      'lowstock lowstock'
-      'chart    top'
-      'insight  insight'
-      'footer   footer';
-    gap: 1.25rem;
-    align-items: start;
+      "summary summary"
+      "empty empty"
+      "chart top"
+      "insight insight"
+      "footer footer";
+
+    gap: 1.1rem;
+    align-items: stretch;
   }
 
   .summaryArea {
@@ -83,10 +236,6 @@
 
   .emptyArea {
     grid-area: empty;
-  }
-
-  .lowStockArea {
-    grid-area: lowstock;
   }
 
   .chartArea {
@@ -105,22 +254,165 @@
     grid-area: footer;
   }
 
-  /* summary card's own internal layout can spread out horizontally
-     now that it isn't fighting a 560px phone column */
+  .chartArea,
+  .topArea {
+    display: flex;
+  }
+
+  .chartArea > *,
+  .topArea > * {
+    width: 100%;
+  }
+
   .summaryCard {
-    padding: 1.25rem 1.5rem;
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto;
+    column-gap: 1.5rem;
+    align-items: center;
+  }
+
+  .summaryTitle,
+  .summaryText {
+    grid-column: 1;
+  }
+
+  .waButton {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .summaryText {
+    margin-bottom: 0;
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1180px) {
   .wrap {
-    grid-template-columns: 380px 1fr 320px;
-    grid-template-areas:
-      'summary  summary  summary'
-      'empty    empty    empty'
-      'lowstock lowstock lowstock'
-      'chart    chart    top'
-      'insight  insight  insight'
-      'footer   footer   footer';
+    grid-template-columns:
+      minmax(0, 1.5fr)
+      minmax(280px, 0.72fr);
+
+    gap: 1.25rem;
+  }
+
+  .summaryCard {
+    padding: 1.4rem 1.55rem;
   }
 }
+
+@media (max-width: 699px) {
+  .summaryCard {
+    border-radius: 15px;
+  }
+
+  .waButton {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .emptyArea,
+  .chartArea,
+  .topArea,
+  .insightArea,
+  .footerArea {
+    animation: none;
+  }
+}
+
+/* ===== LIQUID GLASS OVERRIDES ===== */
+.card,
+.form,
+.review,
+.summaryCard,
+.item {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.76),
+      rgba(246, 251, 247, 0.54)
+    );
+  border-color:
+    rgba(255, 255, 255, 0.72);
+  box-shadow:
+    0 15px 42px
+      rgba(34, 65, 47, 0.1),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.9);
+  backdrop-filter:
+    blur(22px) saturate(140%);
+  -webkit-backdrop-filter:
+    blur(22px) saturate(140%);
+}
+
+.card:hover,
+.item:hover,
+.summaryCard:hover {
+  box-shadow:
+    0 23px 58px
+      rgba(34, 65, 47, 0.15),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.94);
+}
+/* ===== END LIQUID GLASS OVERRIDES ===== */
+
+/* ===== SHARED DARK GLASS OVERRIDES ===== */
+
+:global(html[data-theme="dark"]) .card,
+:global(html[data-theme="dark"]) .form,
+:global(html[data-theme="dark"]) .review,
+:global(html[data-theme="dark"]) .summaryCard,
+:global(html[data-theme="dark"]) .item,
+:global(html[data-theme="dark"]) .history,
+:global(html[data-theme="dark"]) .progressWrap {
+  color: var(--color-text);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(20, 43, 30, 0.77),
+      rgba(10, 29, 19, 0.6)
+    );
+  border-color:
+    rgba(162, 211, 183, 0.13);
+  box-shadow:
+    0 18px 50px
+      rgba(0, 0, 0, 0.29),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.06);
+}
+
+:global(html[data-theme="dark"]) .card:hover,
+:global(html[data-theme="dark"]) .item:hover,
+:global(html[data-theme="dark"]) .summaryCard:hover {
+  border-color:
+    rgba(112, 214, 156, 0.23);
+  box-shadow:
+    0 25px 67px
+      rgba(0, 0, 0, 0.38),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.08);
+}
+
+:global(html[data-theme="dark"]) .empty {
+  color: var(--color-text-muted);
+  background:
+    rgba(17, 37, 26, 0.58);
+  border-color:
+    rgba(162, 211, 183, 0.16);
+}
+
+:global(html[data-theme="dark"]) .title {
+  color: var(--color-text);
+}
+
+:global(html[data-theme="dark"]) .meta,
+:global(html[data-theme="dark"]) .prices,
+:global(html[data-theme="dark"]) .hint,
+:global(html[data-theme="dark"]) .note {
+  color: var(--color-text-muted);
+}
+
+/* ===== END SHARED DARK GLASS OVERRIDES ===== */
+

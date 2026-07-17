@@ -279,3 +279,210 @@
 
 /* ===== END SHARED DARK GLASS OVERRIDES ===== */
 
+/* ===== EXPENSE DARK MODE START ===== */
+
+:global(html[data-theme="dark"]) .wrap {
+  color: var(--color-text);
+}
+
+:global(html[data-theme="dark"]) .form {
+  color: var(--color-text);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(20, 43, 30, 0.86),
+      rgba(8, 27, 17, 0.74)
+    );
+  border-color:
+    rgba(153, 216, 180, 0.15);
+  box-shadow:
+    0 22px 60px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.06);
+  backdrop-filter:
+    blur(24px) saturate(140%);
+  -webkit-backdrop-filter:
+    blur(24px) saturate(140%);
+}
+
+:global(html[data-theme="dark"]) .title {
+  color: #edf7f0;
+}
+
+:global(html[data-theme="dark"]) .title::before {
+  color: #f4ca76;
+  background:
+    rgba(164, 106, 9, 0.18);
+  border-color:
+    rgba(244, 193, 91, 0.22);
+}
+
+:global(html[data-theme="dark"]) .field {
+  color: #a8bdb0;
+}
+
+:global(html[data-theme="dark"]) .field input,
+:global(html[data-theme="dark"]) .field select {
+  color: #edf7f0;
+  background:
+    rgba(4, 20, 12, 0.66);
+  border-color:
+    rgba(143, 204, 169, 0.18);
+  box-shadow:
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.035);
+}
+
+:global(html[data-theme="dark"]) .field input:hover,
+:global(html[data-theme="dark"]) .field select:hover {
+  background:
+    rgba(8, 27, 17, 0.82);
+  border-color:
+    rgba(111, 213, 155, 0.27);
+}
+
+:global(html[data-theme="dark"]) .field input:focus,
+:global(html[data-theme="dark"]) .field select:focus {
+  background:
+    rgba(10, 31, 20, 0.94);
+  border-color: #57c78b;
+  box-shadow:
+    0 0 0 3px
+      rgba(87, 199, 139, 0.14);
+}
+
+:global(html[data-theme="dark"]) .field input::placeholder {
+  color: #637b6c;
+}
+
+:global(html[data-theme="dark"]) .field option {
+  color: #edf7f0;
+  background: #10261a;
+}
+
+:global(html[data-theme="dark"]) .todayTotal {
+  color: #a8bdb0;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(28, 88, 53, 0.26),
+      rgba(11, 31, 20, 0.78)
+    );
+  border-color:
+    rgba(105, 210, 150, 0.19);
+  box-shadow:
+    0 16px 43px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.055);
+  backdrop-filter:
+    blur(21px) saturate(135%);
+  -webkit-backdrop-filter:
+    blur(21px) saturate(135%);
+}
+
+:global(html[data-theme="dark"]) .todayTotal strong {
+  color: #91e2b3;
+}
+
+:global(html[data-theme="dark"]) .list {
+  color: var(--color-text);
+}
+
+:global(html[data-theme="dark"]) .item {
+  color: var(--color-text);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(20, 43, 30, 0.79),
+      rgba(9, 28, 18, 0.65)
+    );
+  border-color:
+    rgba(153, 216, 180, 0.13);
+  box-shadow:
+    0 14px 38px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.045);
+}
+
+:global(html[data-theme="dark"]) .item:hover {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(27, 58, 40, 0.86),
+      rgba(12, 36, 23, 0.73)
+    );
+  border-color:
+    rgba(111, 213, 155, 0.23);
+  box-shadow:
+    0 19px 48px rgba(0, 0, 0, 0.31),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.06);
+}
+
+:global(html[data-theme="dark"]) .itemInfo strong {
+  color: #edf7f0;
+}
+
+:global(html[data-theme="dark"]) .meta {
+  color: #91a99a;
+}
+
+:global(html[data-theme="dark"]) .delete {
+  color: #ffaaa1;
+  background:
+    rgba(193, 60, 50, 0.12);
+  border-color:
+    rgba(255, 143, 131, 0.17);
+  box-shadow:
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.04);
+}
+
+:global(html[data-theme="dark"]) .delete:hover:not(:disabled) {
+  color: #ffd0cb;
+  background:
+    rgba(193, 60, 50, 0.23);
+  border-color:
+    rgba(255, 143, 131, 0.3);
+}
+
+:global(html[data-theme="dark"]) .empty {
+  color: #9eb4a6;
+  background:
+    rgba(16, 36, 25, 0.68);
+  border-color:
+    rgba(153, 216, 180, 0.17);
+}
+
+:global(html[data-theme="dark"]) .save {
+  color: #07150e;
+  background:
+    linear-gradient(
+      135deg,
+      #83dfaa,
+      #4fbd80
+    );
+  border-color:
+    rgba(126, 221, 168, 0.35);
+  box-shadow:
+    0 10px 25px
+      rgba(39, 154, 88, 0.2),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.28);
+}
+
+:global(html[data-theme="dark"]) .save:hover:not(:disabled) {
+  background:
+    linear-gradient(
+      135deg,
+      #94e8b7,
+      #5aca8b
+    );
+  box-shadow:
+    0 14px 32px
+      rgba(39, 154, 88, 0.27),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.32);
+}
+
+/* ===== EXPENSE DARK MODE END ===== */

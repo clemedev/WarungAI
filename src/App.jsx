@@ -547,16 +547,7 @@ export default function App() {
               </div>
 
               <div className={styles.headerMeta}>
-                <span
-                  className={
-                    styles.syncedBadge
-                  }
-                >
-                  <i />
-                  Data diselaraskan
-                </span>
-
-                <time>
+                <time className={styles.headerDate}>
                   {formattedDate}
                 </time>
               </div>

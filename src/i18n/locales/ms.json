@@ -111,5 +111,67 @@
   },
   "lang": {
     "select": "Pilih bahasa"
+  },
+  "dashboard": {
+    "loading": "Memuatkan papan pemuka...",
+    "loadFailed": "Gagal memuatkan papan pemuka.",
+    "noSalesWeek": "Belum ada jualan minggu ini. Rekod jualan pertama anda di tab “Ringkasan”!",
+    "summaryTitle": "Ringkasan hari ini",
+    "shareWhatsApp": "📤 Kongsi ke WhatsApp",
+    "summaryNone": "Tiada jualan direkod hari ini lagi.",
+    "summarySales_other": "Jualan hari ini: {{amount}} ({{count}} transaksi).",
+    "summaryProfit": "Untung bersih: {{amount}}.",
+    "summaryTop_other": "Paling laris: {{name}} ({{count}} unit).",
+    "summaryExpense": "Perbelanjaan: {{amount}}.",
+    "insightTitle": "Cadangan hari ini",
+    "insightBelowCost": "⚠️ {{name}} dijual bawah kos — purata {{averagePrice}} seunit berbanding kos {{averageCost}}.",
+    "insightTopSeller_other": "🔥 {{name}} paling laris minggu ini ({{count}} unit). Pastikan stok mencukupi.",
+    "lowStockTitle": "Stok rendah",
+    "lowStockOut": "Habis",
+    "lowStockLeft_other": "{{count}} tinggal"
+  },
+  "chart": {
+    "title": "Trend 7 hari",
+    "unit": "jualan (RM)",
+    "legend": "Jualan (RM)"
+  },
+  "top": {
+    "title": "Paling laris (7 hari)",
+    "empty": "Belum ada jualan minggu ini.",
+    "units_other": "{{count}} unit"
+  },
+  "metrics": {
+    "loading": "Memuatkan ringkasan...",
+    "salesLabel": "Jualan hari ini",
+    "salesDetail": "Jumlah hasil disahkan",
+    "profitLabel": "Untung bersih",
+    "profitDetail": "Selepas kos dan belanja",
+    "lossDetail": "Kerugian hari ini",
+    "expensesLabel": "Perbelanjaan",
+    "expensesDetail": "Kos operasi hari ini",
+    "transactionsLabel": "Transaksi",
+    "transactionsDetail": "Jualan direkod"
+  },
+  "summaryCard": {
+    "eyebrow": "Prestasi hari ini",
+    "title": "Ringkasan perniagaan",
+    "subtitle": "Angka terkini berdasarkan jualan dan perbelanjaan yang disahkan.",
+    "live": "Data langsung",
+    "salesLabel": "Jualan hari ini",
+    "salesHint": "Jumlah hasil yang direkod",
+    "profitLabel": "Untung bersih",
+    "margin": "Margin <bold>{{value}}%</bold> daripada jualan",
+    "targetLabel": "Sasaran jualan harian",
+    "targetAria": "Sasaran jualan harian",
+    "targetReached": "Sasaran dicapai",
+    "targetAchieved": "Telah dicapai",
+    "progressAria": "Kemajuan sasaran harian",
+    "recorded": "{{amount}} direkod",
+    "over": "Lebih {{amount}}",
+    "remaining": "Baki {{amount}}",
+    "paymentLabel": "Kaedah bayaran",
+    "paymentHint": "Pecahan hasil tunai dan QR hari ini",
+    "cash": "Tunai",
+    "qr": "Bayaran QR"
   }
 }

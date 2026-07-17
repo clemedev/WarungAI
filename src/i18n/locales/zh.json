@@ -111,5 +111,67 @@
   },
   "lang": {
     "select": "选择语言"
+  },
+  "dashboard": {
+    "loading": "正在加载仪表板…",
+    "insightTitle": "今日建议",
+    "loadFailed": "无法加载仪表板。",
+    "noSalesWeek": "本周还没有销售记录。到“概览”页记录你的第一笔销售吧！",
+    "summaryTitle": "今日摘要",
+    "shareWhatsApp": "📤 分享到 WhatsApp",
+    "summaryNone": "今天还没有销售记录。",
+    "summarySales_other": "今日销售：{{amount}}（{{count}} 笔交易）。",
+    "summaryProfit": "净利润：{{amount}}。",
+    "summaryTop_other": "最畅销：{{name}}（{{count}} 件）。",
+    "summaryExpense": "开支：{{amount}}。",
+    "insightBelowCost": "⚠️ {{name}} 的售价低于成本 — 每件平均 {{averagePrice}}，成本为 {{averageCost}}。",
+    "insightTopSeller_other": "🔥 {{name}} 是本周最畅销的产品（{{count}} 件）。记得备足库存。",
+    "lowStockTitle": "库存不足",
+    "lowStockOut": "已售罄",
+    "lowStockLeft_other": "剩 {{count}} 件"
+  },
+  "chart": {
+    "title": "7 天趋势",
+    "unit": "销售（RM）",
+    "legend": "销售（RM）"
+  },
+  "top": {
+    "title": "最畅销（7 天）",
+    "empty": "本周还没有销售记录。",
+    "units_other": "{{count}} 件"
+  },
+  "metrics": {
+    "loading": "正在加载摘要…",
+    "salesLabel": "今日销售",
+    "salesDetail": "已确认的总收入",
+    "profitLabel": "净利润",
+    "profitDetail": "扣除成本与开支后",
+    "lossDetail": "今天亏损",
+    "expensesLabel": "开支",
+    "expensesDetail": "今日营运成本",
+    "transactionsLabel": "交易",
+    "transactionsDetail": "已记录的销售"
+  },
+  "summaryCard": {
+    "eyebrow": "今日表现",
+    "title": "生意摘要",
+    "subtitle": "根据已确认的销售与开支实时计算。",
+    "live": "实时数据",
+    "salesLabel": "今日销售",
+    "salesHint": "已记录的总收入",
+    "profitLabel": "净利润",
+    "margin": "销售利润率 <bold>{{value}}%</bold>",
+    "targetLabel": "每日销售目标",
+    "targetAria": "每日销售目标",
+    "targetReached": "已达成目标",
+    "targetAchieved": "已达成",
+    "progressAria": "每日目标进度",
+    "recorded": "已记录 {{amount}}",
+    "over": "超出 {{amount}}",
+    "remaining": "还差 {{amount}}",
+    "paymentLabel": "付款方式",
+    "paymentHint": "今日现金与二维码收入占比",
+    "cash": "现金",
+    "qr": "二维码支付"
   }
 }

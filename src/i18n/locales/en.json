@@ -112,5 +112,72 @@
   },
   "lang": {
     "select": "Select language"
+  },
+  "dashboard": {
+    "loading": "Loading dashboard...",
+    "loadFailed": "Could not load the dashboard.",
+    "noSalesWeek": "No sales yet this week. Record your first sale from the “Overview” tab!",
+    "summaryTitle": "Today's summary",
+    "shareWhatsApp": "📤 Share to WhatsApp",
+    "summaryNone": "No sales recorded today yet.",
+    "summarySales_one": "Today's sales: {{amount}} ({{count}} transaction).",
+    "summarySales_other": "Today's sales: {{amount}} ({{count}} transactions).",
+    "summaryProfit": "Net profit: {{amount}}.",
+    "summaryTop_one": "Best seller: {{name}} ({{count}} unit).",
+    "summaryTop_other": "Best seller: {{name}} ({{count}} units).",
+    "summaryExpense": "Expenses: {{amount}}.",
+    "insightTitle": "Today's tip",
+    "insightBelowCost": "⚠️ {{name}} is selling below cost — averaging {{averagePrice}} per unit against a cost of {{averageCost}}.",
+    "insightTopSeller_one": "🔥 {{name}} is your best seller this week ({{count}} unit). Keep it in stock.",
+    "insightTopSeller_other": "🔥 {{name}} is your best seller this week ({{count}} units). Keep it in stock.",
+    "lowStockTitle": "Low stock",
+    "lowStockOut": "Out of stock",
+    "lowStockLeft_one": "{{count}} left",
+    "lowStockLeft_other": "{{count}} left"
+  },
+  "chart": {
+    "title": "7-day trend",
+    "unit": "sales (RM)",
+    "legend": "Sales (RM)"
+  },
+  "top": {
+    "title": "Best sellers (7 days)",
+    "empty": "No sales yet this week.",
+    "units_one": "{{count}} unit",
+    "units_other": "{{count}} units"
+  },
+  "metrics": {
+    "loading": "Loading summary...",
+    "salesLabel": "Today's sales",
+    "salesDetail": "Total confirmed revenue",
+    "profitLabel": "Net profit",
+    "profitDetail": "After costs and expenses",
+    "lossDetail": "Loss today",
+    "expensesLabel": "Expenses",
+    "expensesDetail": "Today's operating costs",
+    "transactionsLabel": "Transactions",
+    "transactionsDetail": "Sales recorded"
+  },
+  "summaryCard": {
+    "eyebrow": "Today's performance",
+    "title": "Business summary",
+    "subtitle": "Live figures from confirmed sales and expenses.",
+    "live": "Live data",
+    "salesLabel": "Today's sales",
+    "salesHint": "Total revenue recorded",
+    "profitLabel": "Net profit",
+    "margin": "<bold>{{value}}%</bold> margin on sales",
+    "targetLabel": "Daily sales target",
+    "targetAria": "Daily sales target",
+    "targetReached": "Target reached",
+    "targetAchieved": "Achieved",
+    "progressAria": "Daily target progress",
+    "recorded": "{{amount}} recorded",
+    "over": "{{amount}} over",
+    "remaining": "{{amount}} to go",
+    "paymentLabel": "Payment methods",
+    "paymentHint": "Today's cash and QR split",
+    "cash": "Cash",
+    "qr": "QR payment"
   }
 }

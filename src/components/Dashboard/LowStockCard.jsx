@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import styles from './LowStockCard.module.css';
 
 /**
@@ -6,6 +7,8 @@ import styles from './LowStockCard.module.css';
  * dashboard the vendor checks mid-service.
  */
 export default function LowStockCard({ items }) {
+  const { t } = useTranslation();
+
   if (!items || items.length === 0) {
     return null;
   }
@@ -13,7 +16,7 @@ export default function LowStockCard({ items }) {
   return (
     <div className={styles.card}>
       <h3 className={styles.title}>
-        Stok rendah ({items.length})
+        {t('dashboard.lowStockTitle')} ({items.length})
       </h3>
 
       <ul className={styles.list}>
@@ -34,8 +37,10 @@ export default function LowStockCard({ items }) {
               }
             >
               {item.currentStock === 0
-                ? 'Habis'
-                : `${item.currentStock} tinggal`}
+                ? t('dashboard.lowStockOut')
+                : t('dashboard.lowStockLeft', {
+                    count: item.currentStock,
+                  })}
             </span>
           </li>
         ))}

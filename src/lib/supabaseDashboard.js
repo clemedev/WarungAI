@@ -21,10 +21,6 @@ function round2(value) {
   ) / 100;
 }
 
-function formatRM(value) {
-  return `RM${round2(value).toFixed(2)}`;
-}
-
 function calculateTopItems(
   sales,
   dates,
@@ -95,6 +91,11 @@ function calculatePaymentSplit(
   };
 }
 
+/**
+ * Returns the numbers behind the daily summary, NOT a sentence — the
+ * wording and currency formatting are the view's job, so the text can
+ * follow the language picker. See `dashboard.summary*` in the locales.
+ */
 function createDailySummary({
   date,
   sales,
@@ -108,7 +109,7 @@ function createDailySummary({
   );
 
   if (daySales.length === 0) {
-    return 'Tiada jualan direkod hari ini lagi.';
+    return { hasSales: false };
   }
 
   const expenseTotal = expenses
@@ -123,26 +124,26 @@ function createDailySummary({
       0,
     );
 
-  const parts = [
-    `Jualan hari ini: ${formatRM(totalSales)} (${daySales.length} transaksi).`,
-    `Untung bersih: ${formatRM(netProfit)}.`,
-  ];
-
-  if (topItem) {
-    parts.push(
-      `Paling laris: ${topItem.name} (${topItem.quantity} unit).`,
-    );
-  }
-
-  if (expenseTotal > 0) {
-    parts.push(
-      `Perbelanjaan: ${formatRM(expenseTotal)}.`,
-    );
-  }
-
-  return parts.join(' ');
+  return {
+    hasSales: true,
+    totalSales,
+    transactionCount: daySales.length,
+    netProfit,
+    topItem: topItem
+      ? {
+          name: topItem.name,
+          quantity: topItem.quantity,
+        }
+      : null,
+    expenseTotal,
+  };
 }
 
+/**
+ * Rule-based tip as `{ type, ...params }` rather than prose, so the view
+ * can translate it and style it off `type` instead of sniffing the text
+ * for a warning emoji. See `dashboard.insight*` in the locales.
+ */
 function createInsight({
   sales,
   week,
@@ -204,19 +205,21 @@ function createInsight({
       item.quantity;
 
     if (averagePrice < averageCost) {
-      return (
-        `⚠️ ${item.name} dijual bawah kos — ` +
-        `purata ${formatRM(averagePrice)} seunit ` +
-        `berbanding kos ${formatRM(averageCost)}.`
-      );
+      return {
+        type: 'belowCost',
+        name: item.name,
+        averagePrice,
+        averageCost,
+      };
     }
   }
 
   if (topItem) {
-    return (
-      `🔥 ${topItem.name} paling laris minggu ini ` +
-      `(${topItem.quantity} unit). Pastikan stok mencukupi.`
-    );
+    return {
+      type: 'topSeller',
+      name: topItem.name,
+      quantity: topItem.quantity,
+    };
   }
 
   return null;

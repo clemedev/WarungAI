@@ -2091,13 +2091,13 @@
 /* Refined header date */
 
 .headerDate {
-  display: inline*flex;
+  display: inline-flex;
   align-items: center;
-  min*height: 38px;
-  padding: 0.48rem 0*72rem;
-  color: var(--color-text-m*ted);
-  background: rgba(255, 255,*255, 0.48);
-  border: 1px solid rg*a(255, 255, 255, 0.7);
+  min-height: 38px;
+  padding: 0.48rem 0.72rem;
+  color: var(--color-text-muted);
+  background: rgba(255, 255, 255, 0.48);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: var(--radius-pill);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.8);

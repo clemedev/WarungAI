@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import {
   useTheme,
 } from '../../theme/ThemeContext.jsx';
@@ -8,14 +10,16 @@ export default function ThemeToggle({
   darkSurface = false,
   compact = false,
 }) {
+  const { t } = useTranslation();
+
   const {
     isDark,
     toggleTheme,
   } = useTheme();
 
   const label = isDark
-    ? 'Gunakan mod cerah'
-    : 'Gunakan mod gelap';
+    ? t('theme.useLight')
+    : t('theme.useDark');
 
   return (
     <button
@@ -54,8 +58,8 @@ export default function ThemeToggle({
       {!compact && (
         <span className={styles.label}>
           {isDark
-            ? 'Mod gelap'
-            : 'Mod cerah'}
+            ? t('theme.dark')
+            : t('theme.light')}
         </span>
       )}
     </button>

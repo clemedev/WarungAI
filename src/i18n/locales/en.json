@@ -1,102 +1,116 @@
 {
-  "nav": {
-    "dashboard": "Dashboard",
+  "app": {
+    "workspaceTag": "Business workspace",
+    "loading": "Setting up your workspace...",
+    "navHeading": "Workspace",
+    "navAria": "Main navigation",
+    "mobileNavAria": "Mobile navigation",
+    "recordActivity": "Record activity",
+    "newActivityAria": "Record new activity",
+    "openMenuAria": "Open actions menu",
+    "signOut": "Log out",
+    "signOutFailed": "Log out failed.",
+    "defaultUserName": "WarungAI user"
+  },
+  "greeting": {
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening"
+  },
+  "views": {
+    "overview": {
+      "label": "Overview",
+      "short": "Home",
+      "description": "Record activity and see how the business is doing today."
+    },
+    "records": {
+      "label": "Records",
+      "short": "Records",
+      "description": "Review your sales and expense history."
+    },
+    "inventory": {
+      "label": "Inventory",
+      "short": "Stock",
+      "description": "Manage products, prices, costs, margins and current stock."
+    },
+    "insights": {
+      "label": "Analytics",
+      "short": "Analytics",
+      "description": "Understand performance, trends and opportunities."
+    }
+  },
+  "capture": {
+    "eyebrow": "Smart capture",
+    "title": "What happened today?",
+    "hint": "Type it the way you'd say it.",
+    "badge": "AI-assisted",
+    "tabChat": "Text / voice",
+    "tabReceipt": "Scan receipt"
+  },
+  "quick": {
+    "eyebrow": "Today",
+    "title": "Quick actions",
+    "saleTitle": "New sale",
+    "saleHint": "Type or speak",
+    "receiptTitle": "Scan receipt",
+    "receiptHint": "Extract items",
+    "expenseTitle": "Add expense",
+    "expenseHint": "Log operating costs",
+    "productTitle": "Add product",
+    "productHint": "Price and stock"
+  },
+  "recent": {
+    "eyebrow": "Recent activity",
+    "title": "Latest sales",
+    "viewAll": "View all"
+  },
+  "records": {
     "sales": "Sales",
-    "scan": "Scan",
-    "products": "Products",
     "expenses": "Expenses"
   },
-  "common": {
-    "logout": "Log Out",
-    "loading": "Loading...",
-    "error": "Error",
-    "success": "Success",
-    "cancel": "Cancel",
-    "save": "Save",
-    "delete": "Delete",
-    "edit": "Edit",
-    "add": "Add",
+  "createSheet": {
+    "eyebrow": "Record activity",
+    "title": "What happened?",
     "close": "Close",
-    "back": "Back"
+    "saleTitle": "Record a sale",
+    "saleHint": "Type or use voice",
+    "receiptTitle": "Scan receipt",
+    "receiptHint": "Read a printed receipt",
+    "expenseTitle": "Add expense",
+    "expenseHint": "Log operating costs",
+    "productTitle": "Add product",
+    "productHint": "Price, cost and stock"
   },
-  "dashboard": {
-    "title": "Dashboard",
-    "todaysSales": "Today's Sales",
-    "totalExpense": "Total Expenses",
-    "netProfit": "Net Profit",
-    "dailyTarget": "Daily Sales Target",
-    "targetReached": "Target Reached",
-    "achieved": "Achieved",
-    "paymentMethod": "Payment Method",
-    "cash": "Cash",
-    "qr": "QR Payment",
-    "liveData": "Live Data",
-    "lowStock": "Low Stock",
-    "noLowStock": "All products have sufficient stock"
+  "toast": {
+    "salesSaved_one": "✓ {{count}} sale saved",
+    "salesSaved_other": "✓ {{count}} sales saved"
   },
-  "sales": {
-    "recordSale": "Record Sale",
-    "salesHistory": "Sales History",
-    "noSales": "No sales recorded yet.",
-    "noSalesInRange": "No sales in this range.",
-    "product": "Product",
-    "quantity": "Quantity",
-    "amount": "Amount",
-    "source": "Source",
-    "manual": "Manual",
-    "voice": "Voice",
-    "receipt": "Receipt",
-    "type": "Type",
-    "dictate": "Voice"
+  "theme": {
+    "useLight": "Switch to light mode",
+    "useDark": "Switch to dark mode",
+    "dark": "Dark mode",
+    "light": "Light mode"
   },
-  "expenses": {
-    "addExpense": "Add Expense",
-    "expenseHistory": "Expense History",
-    "noExpenses": "No expenses recorded.",
-    "category": "Category",
-    "amount": "Amount",
-    "note": "Note",
-    "ingredients": "Ingredients",
-    "gas": "Gas",
-    "packaging": "Packaging",
-    "rent": "Rent / Utilities",
-    "other": "Other",
-    "scanReceipt": "Scan Supplier Receipt",
-    "today": "Today"
-  },
-  "scanner": {
-    "scanReceipt": "Scan Receipt",
-    "takePhoto": "Take a receipt photo or pick a file.",
-    "reading": "Reading receipt",
-    "review": "Review items",
-    "detectTotal": "Receipt total detected",
-    "couldNotRead": "Could not read items — try a clearer photo.",
-    "ocrFailed": "OCR failed — please try again.",
-    "rawText": "Raw OCR text",
-    "tryAgain": "Try Again",
-    "itemsFrom": "From receipt",
-    "selectProduct": "Select product"
-  },
-  "products": {
-    "productList": "Product List",
-    "addProduct": "Add Product",
-    "name": "Product Name",
-    "sellPrice": "Selling Price",
-    "costPrice": "Cost Price",
-    "currentStock": "Current Stock",
-    "lowStockThreshold": "Low Stock Threshold",
-    "noProducts": "No products."
-  },
-  "voice": {
-    "startListening": "Start Listening",
-    "stopListening": "Stop Listening",
-    "listening": "Listening...",
-    "error": "Error in voice recognition"
+  "login": {
+    "tagline": "Record sales in seconds",
+    "signin": "Log in",
+    "register": "Sign up",
+    "nameLabel": "Stall / seller name",
+    "namePlaceholder": "e.g. Warung Pak Ali",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "e.g. you@email.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "At least 8 characters",
+    "submitRegister": "Sign up & start",
+    "busy": "Please wait...",
+    "note": "Your account is protected by Supabase Authentication. Business data is kept separate per user.",
+    "errEmail": "Please enter an email address.",
+    "errPassword": "Password must be at least 8 characters.",
+    "errName": "Please enter a stall or seller name.",
+    "errVerify": "Account created. Please check your email before logging in.",
+    "errGeneric": "Log in failed. Please try again."
   },
   "lang": {
-    "select": "Select Language",
-    "malay": "Bahasa Melayu",
-    "english": "English",
-    "chinese": "中文"
+    "select": "Select language"
   }
 }

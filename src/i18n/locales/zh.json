@@ -1,102 +1,115 @@
 {
-  "nav": {
-    "dashboard": "仪表板",
+  "app": {
+    "workspaceTag": "生意工作台",
+    "loading": "正在准备你的工作台…",
+    "navHeading": "工作台",
+    "navAria": "主导航",
+    "mobileNavAria": "手机导航",
+    "recordActivity": "记录活动",
+    "newActivityAria": "记录新活动",
+    "openMenuAria": "打开操作菜单",
+    "signOut": "登出",
+    "signOutFailed": "登出失败。",
+    "defaultUserName": "WarungAI 用户"
+  },
+  "greeting": {
+    "morning": "早安",
+    "afternoon": "午安",
+    "evening": "晚安"
+  },
+  "views": {
+    "overview": {
+      "label": "概览",
+      "short": "首页",
+      "description": "记录活动，查看今天的生意状况。"
+    },
+    "records": {
+      "label": "记录",
+      "short": "记录",
+      "description": "查看销售与开支的历史记录。"
+    },
+    "inventory": {
+      "label": "库存",
+      "short": "库存",
+      "description": "管理产品、售价、成本、利润和现有库存。"
+    },
+    "insights": {
+      "label": "分析",
+      "short": "分析",
+      "description": "了解生意表现、趋势和机会。"
+    }
+  },
+  "capture": {
+    "eyebrow": "智能记录",
+    "title": "今天发生了什么？",
+    "hint": "像平时说话一样打字就行。",
+    "badge": "AI 辅助",
+    "tabChat": "文字 / 语音",
+    "tabReceipt": "扫描收据"
+  },
+  "quick": {
+    "eyebrow": "今天",
+    "title": "快捷操作",
+    "saleTitle": "新销售",
+    "saleHint": "打字或语音",
+    "receiptTitle": "扫描收据",
+    "receiptHint": "提取项目",
+    "expenseTitle": "添加开支",
+    "expenseHint": "记录营运成本",
+    "productTitle": "添加产品",
+    "productHint": "售价与库存"
+  },
+  "recent": {
+    "eyebrow": "最近活动",
+    "title": "最新销售",
+    "viewAll": "查看全部"
+  },
+  "records": {
     "sales": "销售",
-    "scan": "扫描",
-    "products": "产品",
-    "expenses": "支出"
+    "expenses": "开支"
   },
-  "common": {
-    "logout": "登出",
-    "loading": "加载中...",
-    "error": "错误",
-    "success": "成功",
-    "cancel": "取消",
-    "save": "保存",
-    "delete": "删除",
-    "edit": "编辑",
-    "add": "添加",
+  "createSheet": {
+    "eyebrow": "记录活动",
+    "title": "发生了什么？",
     "close": "关闭",
-    "back": "返回"
+    "saleTitle": "记录销售",
+    "saleHint": "打字或使用语音",
+    "receiptTitle": "扫描收据",
+    "receiptHint": "读取纸质收据",
+    "expenseTitle": "添加开支",
+    "expenseHint": "记录营运成本",
+    "productTitle": "添加产品",
+    "productHint": "售价、成本与库存"
   },
-  "dashboard": {
-    "title": "仪表板",
-    "todaysSales": "今日销售额",
-    "totalExpense": "总支出",
-    "netProfit": "净利润",
-    "dailyTarget": "每日销售目标",
-    "targetReached": "目标已达成",
-    "achieved": "已达成",
-    "paymentMethod": "付款方式",
-    "cash": "现金",
-    "qr": "二维码支付",
-    "liveData": "实时数据",
-    "lowStock": "库存不足",
-    "noLowStock": "所有产品库存充足"
+  "toast": {
+    "salesSaved_other": "✓ 已记录 {{count}} 笔销售"
   },
-  "sales": {
-    "recordSale": "记录销售",
-    "salesHistory": "销售历史",
-    "noSales": "还未记录任何销售。",
-    "noSalesInRange": "此范围内无销售记录。",
-    "product": "产品",
-    "quantity": "数量",
-    "amount": "金额",
-    "source": "来源",
-    "manual": "手动",
-    "voice": "语音",
-    "receipt": "收据",
-    "type": "输入",
-    "dictate": "语音"
+  "theme": {
+    "useLight": "切换到浅色模式",
+    "useDark": "切换到深色模式",
+    "dark": "深色模式",
+    "light": "浅色模式"
   },
-  "expenses": {
-    "addExpense": "添加支出",
-    "expenseHistory": "支出历史",
-    "noExpenses": "未记录支出。",
-    "category": "类别",
-    "amount": "金额",
-    "note": "备注",
-    "ingredients": "原料",
-    "gas": "燃气",
-    "packaging": "包装",
-    "rent": "租金 / 公用事业",
-    "other": "其他",
-    "scanReceipt": "扫描供应商收据",
-    "today": "今天"
-  },
-  "scanner": {
-    "scanReceipt": "扫描收据",
-    "takePhoto": "拍摄收据照片或选择文件。",
-    "reading": "正在识别收据",
-    "review": "查看项目",
-    "detectTotal": "检测到收据总额",
-    "couldNotRead": "无法读取项目 — 请尝试更清晰的照片。",
-    "ocrFailed": "OCR 失败 — 请重试。",
-    "rawText": "原始 OCR 文本",
-    "tryAgain": "重试",
-    "itemsFrom": "来自收据",
-    "selectProduct": "选择产品"
-  },
-  "products": {
-    "productList": "产品列表",
-    "addProduct": "添加产品",
-    "name": "产品名称",
-    "sellPrice": "售价",
-    "costPrice": "成本",
-    "currentStock": "当前库存",
-    "lowStockThreshold": "低库存阈值",
-    "noProducts": "无产品。"
-  },
-  "voice": {
-    "startListening": "开始聆听",
-    "stopListening": "停止聆听",
-    "listening": "聆听中...",
-    "error": "语音识别出错"
+  "login": {
+    "tagline": "几秒钟记录一笔销售",
+    "signin": "登录",
+    "register": "注册",
+    "nameLabel": "档口 / 卖家名称",
+    "namePlaceholder": "例如：Warung Pak Ali",
+    "emailLabel": "电邮地址",
+    "emailPlaceholder": "例如：you@email.com",
+    "passwordLabel": "密码",
+    "passwordPlaceholder": "至少 8 个字符",
+    "submitRegister": "注册并开始",
+    "busy": "请稍候…",
+    "note": "你的账户由 Supabase Authentication 保护，各用户的生意数据相互独立。",
+    "errEmail": "请输入电邮地址。",
+    "errPassword": "密码至少需要 8 个字符。",
+    "errName": "请输入档口或卖家名称。",
+    "errVerify": "账户已创建。请先查看电邮完成验证再登录。",
+    "errGeneric": "登录失败，请再试一次。"
   },
   "lang": {
-    "select": "选择语言",
-    "malay": "Bahasa Melayu",
-    "english": "English",
-    "chinese": "中文"
+    "select": "选择语言"
   }
 }

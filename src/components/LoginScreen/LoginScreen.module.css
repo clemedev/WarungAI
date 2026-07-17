@@ -268,3 +268,10 @@
 
 /* ===== END SHARED DARK GLASS OVERRIDES ===== */
 
+
+/* Language picker above the sign-in form */
+.langRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.4rem;
+}

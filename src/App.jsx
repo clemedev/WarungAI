@@ -4,6 +4,8 @@ import {
   useState,
 } from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import Dashboard from './components/Dashboard/Dashboard';
 import SaleReceiptScanner from './components/ReceiptScanner/SaleReceiptScanner';
 import ChatEntry from './components/ChatEntry/ChatEntry';
@@ -25,41 +27,22 @@ import {
   signOut,
 } from './lib/supabaseAuth.js';
 
+import i18n, {
+  getDateLocale,
+} from './i18n/config.js';
+
 import styles from './App.module.css';
 
+/**
+ * Nav model. Labels/descriptions are not stored here — they live in the
+ * locale files under `views.<id>` and are resolved at render, so they
+ * follow the language picker.
+ */
 const VIEWS = [
-  {
-    id: 'overview',
-    icon: '⌂',
-    label: 'Ringkasan',
-    shortLabel: 'Utama',
-    description:
-      'Rekod aktiviti dan lihat keadaan perniagaan hari ini.',
-  },
-  {
-    id: 'records',
-    icon: '≡',
-    label: 'Rekod',
-    shortLabel: 'Rekod',
-    description:
-      'Semak sejarah jualan dan perbelanjaan perniagaan.',
-  },
-  {
-    id: 'inventory',
-    icon: '◫',
-    label: 'Inventori',
-    shortLabel: 'Stok',
-    description:
-      'Urus produk, harga, kos, margin dan stok semasa.',
-  },
-  {
-    id: 'insights',
-    icon: '↗',
-    label: 'Analitik',
-    shortLabel: 'Analitik',
-    description:
-      'Fahami prestasi, trend dan peluang perniagaan.',
-  },
+  { id: 'overview', icon: '⌂' },
+  { id: 'records', icon: '≡' },
+  { id: 'inventory', icon: '◫' },
+  { id: 'insights', icon: '↗' },
 ];
 
 function mapSupabaseUser(user) {
@@ -73,7 +56,9 @@ function mapSupabaseUser(user) {
     name:
       user.user_metadata?.display_name ??
       user.email ??
-      'Pengguna WarungAI',
+      // Module scope, so the i18n instance is used directly rather than
+      // the hook. Only reached when a user has neither name nor email.
+      i18n.t('app.defaultUserName'),
   };
 }
 
@@ -155,21 +140,24 @@ function getInitials(name) {
     .toUpperCase();
 }
 
-function getGreeting() {
+/** Returns a locale key, not a phrase — resolved by the caller via t(). */
+function getGreetingKey() {
   const hour = new Date().getHours();
 
   if (hour < 12) {
-    return 'Selamat pagi';
+    return 'greeting.morning';
   }
 
   if (hour < 18) {
-    return 'Selamat petang';
+    return 'greeting.afternoon';
   }
 
-  return 'Selamat malam';
+  return 'greeting.evening';
 }
 
 function LoadingScreen() {
+  const { t } = useTranslation();
+
   return (
     <div className={styles.loadingScreen}>
       <div className={styles.loadingContent}>
@@ -179,9 +167,7 @@ function LoadingScreen() {
 
         <h1>WarungAI</h1>
 
-        <p>
-          Menyediakan ruang kerja anda...
-        </p>
+        <p>{t('app.loading')}</p>
 
         <div className={styles.loadingTrack}>
           <span />
@@ -192,6 +178,9 @@ function LoadingScreen() {
 }
 
 export default function App() {
+  const { t, i18n: i18nInstance } =
+    useTranslation();
+
   const [user, setUser] =
     useState(null);
 
@@ -236,10 +225,13 @@ export default function App() {
     [view],
   );
 
+  // Re-formats when the language changes, so the date is not stuck in Malay.
   const formattedDate = useMemo(
     () =>
       new Intl.DateTimeFormat(
-        'ms-MY',
+        getDateLocale(
+          i18nInstance.language,
+        ),
         {
           weekday: 'long',
           day: 'numeric',
@@ -247,7 +239,7 @@ export default function App() {
           year: 'numeric',
         },
       ).format(new Date()),
-    [],
+    [i18nInstance.language],
   );
 
   async function loadProducts() {
@@ -338,7 +330,7 @@ export default function App() {
       setToast(
         error instanceof Error
           ? error.message
-          : 'Log keluar gagal.',
+          : t('app.signOutFailed'),
       );
 
       return;
@@ -365,7 +357,7 @@ export default function App() {
 
   function handleSaved(count) {
     setToast(
-      `✓ ${count} jualan berjaya disimpan`,
+      t('toast.salesSaved', { count }),
     );
 
     setSalesVersion(
@@ -426,7 +418,9 @@ export default function App() {
 
           <div className={styles.brandCopy}>
             <strong>WarungAI</strong>
-            <span>Business workspace</span>
+            <span>
+              {t('app.workspaceTag')}
+            </span>
           </div>
         </div>
 
@@ -441,12 +435,12 @@ export default function App() {
         </div>
 
         <p className={styles.navHeading}>
-          Ruang kerja
+          {t('app.navHeading')}
         </p>
 
         <nav
           className={styles.desktopNav}
-          aria-label="Navigasi utama"
+          aria-label={t('app.navAria')}
         >
           {VIEWS.map((item) => (
             <button
@@ -468,7 +462,11 @@ export default function App() {
                 {item.icon}
               </span>
 
-              <span>{item.label}</span>
+              <span>
+                {t(
+                  `views.${item.id}.label`,
+                )}
+              </span>
             </button>
           ))}
         </nav>
@@ -481,7 +479,7 @@ export default function App() {
           }
         >
           <span>+</span>
-          Rekod aktiviti
+          {t('app.recordActivity')}
         </button>
 
         <div className={styles.sidebarSpacer} />
@@ -502,7 +500,7 @@ export default function App() {
           className={styles.signOut}
           onClick={handleSignOut}
         >
-          ↪ Log keluar
+          ↪ {t('app.signOut')}
         </button>
       </aside>
 
@@ -524,7 +522,9 @@ export default function App() {
               onClick={() =>
                 setCreateMenuOpen(true)
               }
-              aria-label="Buka menu tindakan"
+              aria-label={t(
+                'app.openMenuAria',
+              )}
             >
               {getInitials(user.name)}
             </button>
@@ -536,12 +536,14 @@ export default function App() {
             <header className={styles.pageHeader}>
               <div>
                 <p className={styles.greeting}>
-                  {getGreeting()},{' '}
+                  {t(getGreetingKey())},{' '}
                   <strong>{user.name}</strong>
                 </p>
 
                 <h1 className={styles.pageTitle}>
-                  {currentView.label}
+                  {t(
+                    `views.${currentView.id}.label`,
+                  )}
                 </h1>
 
                 <p
@@ -549,7 +551,9 @@ export default function App() {
                     styles.pageDescription
                   }
                 >
-                  {currentView.description}
+                  {t(
+                    `views.${currentView.id}.description`,
+                  )}
                 </p>
               </div>
 
@@ -584,13 +588,16 @@ export default function App() {
                     }
                   >
                     <div>
-                      <p>Catatan pintar</p>
+                      <p>
+                        {t(
+                          'capture.eyebrow',
+                        )}
+                      </p>
                       <h2>
-                        Apa berlaku hari ini?
+                        {t('capture.title')}
                       </h2>
                       <span>
-                        Taip seperti anda
-                        bercakap biasa.
+                        {t('capture.hint')}
                       </span>
                     </div>
 
@@ -599,7 +606,7 @@ export default function App() {
                         styles.captureStatus
                       }
                     >
-                      AI-assisted
+                      {t('capture.badge')}
                     </div>
                   </div>
 
@@ -619,7 +626,7 @@ export default function App() {
                         setComposer('chat')
                       }
                     >
-                      ✦ Teks / suara
+                      ✦ {t('capture.tabChat')}
                     </button>
 
                     <button
@@ -636,7 +643,10 @@ export default function App() {
                         )
                       }
                     >
-                      ▣ Imbas resit
+                      ▣{' '}
+                      {t(
+                        'capture.tabReceipt',
+                      )}
                     </button>
                   </div>
 
@@ -677,10 +687,10 @@ export default function App() {
                       styles.todayEyebrow
                     }
                   >
-                    Hari ini
+                    {t('quick.eyebrow')}
                   </p>
 
-                  <h2>Gerak pantas</h2>
+                  <h2>{t('quick.title')}</h2>
 
                   <div
                     className={
@@ -694,10 +704,14 @@ export default function App() {
                       <span>+</span>
                       <div>
                         <strong>
-                          Jualan baharu
+                          {t(
+                            'quick.saleTitle',
+                          )}
                         </strong>
                         <small>
-                          Taip atau suara
+                          {t(
+                            'quick.saleHint',
+                          )}
                         </small>
                       </div>
                     </button>
@@ -709,10 +723,14 @@ export default function App() {
                       <span>▣</span>
                       <div>
                         <strong>
-                          Imbas resit
+                          {t(
+                            'quick.receiptTitle',
+                          )}
                         </strong>
                         <small>
-                          Ekstrak item
+                          {t(
+                            'quick.receiptHint',
+                          )}
                         </small>
                       </div>
                     </button>
@@ -724,10 +742,14 @@ export default function App() {
                       <span>−</span>
                       <div>
                         <strong>
-                          Tambah belanja
+                          {t(
+                            'quick.expenseTitle',
+                          )}
                         </strong>
                         <small>
-                          Catat kos operasi
+                          {t(
+                            'quick.expenseHint',
+                          )}
                         </small>
                       </div>
                     </button>
@@ -739,10 +761,14 @@ export default function App() {
                       <span>◫</span>
                       <div>
                         <strong>
-                          Tambah produk
+                          {t(
+                            'quick.productTitle',
+                          )}
                         </strong>
                         <small>
-                          Harga dan stok
+                          {t(
+                            'quick.productHint',
+                          )}
                         </small>
                       </div>
                     </button>
@@ -760,9 +786,11 @@ export default function App() {
                     }
                   >
                     <div>
-                      <p>Aktiviti terkini</p>
+                      <p>
+                        {t('recent.eyebrow')}
+                      </p>
                       <h2>
-                        Jualan terbaharu
+                        {t('recent.title')}
                       </h2>
                     </div>
 
@@ -775,7 +803,7 @@ export default function App() {
                         );
                       }}
                     >
-                      Lihat semua
+                      {t('recent.viewAll')}
                     </button>
                   </div>
 
@@ -817,7 +845,7 @@ export default function App() {
                       setRecordType('sales')
                     }
                   >
-                    Jualan
+                    {t('records.sales')}
                   </button>
 
                   <button
@@ -834,7 +862,7 @@ export default function App() {
                       )
                     }
                   >
-                    Perbelanjaan
+                    {t('records.expenses')}
                   </button>
                 </div>
 
@@ -895,7 +923,7 @@ export default function App() {
 
       <nav
         className={styles.mobileNav}
-        aria-label="Navigasi mudah alih"
+        aria-label={t('app.mobileNavAria')}
       >
         {VIEWS.slice(0, 2).map(
           (item) => (
@@ -913,7 +941,9 @@ export default function App() {
             >
               <span>{item.icon}</span>
               <small>
-                {item.shortLabel}
+                {t(
+                  `views.${item.id}.short`,
+                )}
               </small>
             </button>
           ),
@@ -925,7 +955,9 @@ export default function App() {
           onClick={() =>
             setCreateMenuOpen(true)
           }
-          aria-label="Rekod aktiviti baharu"
+          aria-label={t(
+            'app.newActivityAria',
+          )}
         >
           +
         </button>
@@ -946,7 +978,9 @@ export default function App() {
             >
               <span>{item.icon}</span>
               <small>
-                {item.shortLabel}
+                {t(
+                  `views.${item.id}.short`,
+                )}
               </small>
             </button>
           ),
@@ -984,9 +1018,11 @@ export default function App() {
               }
             >
               <div>
-                <p>Rekod aktiviti</p>
+                <p>
+                  {t('createSheet.eyebrow')}
+                </p>
                 <h2 id="create-title">
-                  Apa yang berlaku?
+                  {t('createSheet.title')}
                 </h2>
               </div>
 
@@ -997,7 +1033,9 @@ export default function App() {
                     false,
                   )
                 }
-                aria-label="Tutup"
+                aria-label={t(
+                  'createSheet.close',
+                )}
               >
                 ×
               </button>
@@ -1015,10 +1053,14 @@ export default function App() {
                 <span>+</span>
                 <div>
                   <strong>
-                    Rekod jualan
+                    {t(
+                      'createSheet.saleTitle',
+                    )}
                   </strong>
                   <small>
-                    Taip atau gunakan suara
+                    {t(
+                      'createSheet.saleHint',
+                    )}
                   </small>
                 </div>
               </button>
@@ -1030,10 +1072,14 @@ export default function App() {
                 <span>▣</span>
                 <div>
                   <strong>
-                    Imbas resit
+                    {t(
+                      'createSheet.receiptTitle',
+                    )}
                   </strong>
                   <small>
-                    Baca resit bercetak
+                    {t(
+                      'createSheet.receiptHint',
+                    )}
                   </small>
                 </div>
               </button>
@@ -1045,10 +1091,14 @@ export default function App() {
                 <span>−</span>
                 <div>
                   <strong>
-                    Tambah belanja
+                    {t(
+                      'createSheet.expenseTitle',
+                    )}
                   </strong>
                   <small>
-                    Rekod kos operasi
+                    {t(
+                      'createSheet.expenseHint',
+                    )}
                   </small>
                 </div>
               </button>
@@ -1060,10 +1110,14 @@ export default function App() {
                 <span>◫</span>
                 <div>
                   <strong>
-                    Tambah produk
+                    {t(
+                      'createSheet.productTitle',
+                    )}
                   </strong>
                   <small>
-                    Harga, kos dan stok
+                    {t(
+                      'createSheet.productHint',
+                    )}
                   </small>
                 </div>
               </button>

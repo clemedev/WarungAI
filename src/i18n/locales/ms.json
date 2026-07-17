@@ -1,102 +1,115 @@
 {
-  "nav": {
-    "dashboard": "Papan",
+  "app": {
+    "workspaceTag": "Ruang kerja perniagaan",
+    "loading": "Menyediakan ruang kerja anda...",
+    "navHeading": "Ruang kerja",
+    "navAria": "Navigasi utama",
+    "mobileNavAria": "Navigasi mudah alih",
+    "recordActivity": "Rekod aktiviti",
+    "newActivityAria": "Rekod aktiviti baharu",
+    "openMenuAria": "Buka menu tindakan",
+    "signOut": "Log keluar",
+    "signOutFailed": "Log keluar gagal.",
+    "defaultUserName": "Pengguna WarungAI"
+  },
+  "greeting": {
+    "morning": "Selamat pagi",
+    "afternoon": "Selamat petang",
+    "evening": "Selamat malam"
+  },
+  "views": {
+    "overview": {
+      "label": "Ringkasan",
+      "short": "Utama",
+      "description": "Rekod aktiviti dan lihat keadaan perniagaan hari ini."
+    },
+    "records": {
+      "label": "Rekod",
+      "short": "Rekod",
+      "description": "Semak sejarah jualan dan perbelanjaan perniagaan."
+    },
+    "inventory": {
+      "label": "Inventori",
+      "short": "Stok",
+      "description": "Urus produk, harga, kos, margin dan stok semasa."
+    },
+    "insights": {
+      "label": "Analitik",
+      "short": "Analitik",
+      "description": "Fahami prestasi, trend dan peluang perniagaan."
+    }
+  },
+  "capture": {
+    "eyebrow": "Catatan pintar",
+    "title": "Apa berlaku hari ini?",
+    "hint": "Taip seperti anda bercakap biasa.",
+    "badge": "Dibantu AI",
+    "tabChat": "Teks / suara",
+    "tabReceipt": "Imbas resit"
+  },
+  "quick": {
+    "eyebrow": "Hari ini",
+    "title": "Gerak pantas",
+    "saleTitle": "Jualan baharu",
+    "saleHint": "Taip atau suara",
+    "receiptTitle": "Imbas resit",
+    "receiptHint": "Ekstrak item",
+    "expenseTitle": "Tambah belanja",
+    "expenseHint": "Catat kos operasi",
+    "productTitle": "Tambah produk",
+    "productHint": "Harga dan stok"
+  },
+  "recent": {
+    "eyebrow": "Aktiviti terkini",
+    "title": "Jualan terbaharu",
+    "viewAll": "Lihat semua"
+  },
+  "records": {
     "sales": "Jualan",
-    "scan": "Imbas",
-    "products": "Produk",
-    "expenses": "Belanja"
+    "expenses": "Perbelanjaan"
   },
-  "common": {
-    "logout": "Log keluar",
-    "loading": "Memuatkan...",
-    "error": "Ralat",
-    "success": "Berjaya",
-    "cancel": "Batal",
-    "save": "Simpan",
-    "delete": "Padam",
-    "edit": "Sunting",
-    "add": "Tambah",
+  "createSheet": {
+    "eyebrow": "Rekod aktiviti",
+    "title": "Apa yang berlaku?",
     "close": "Tutup",
-    "back": "Kembali"
+    "saleTitle": "Rekod jualan",
+    "saleHint": "Taip atau gunakan suara",
+    "receiptTitle": "Imbas resit",
+    "receiptHint": "Baca resit bercetak",
+    "expenseTitle": "Tambah belanja",
+    "expenseHint": "Rekod kos operasi",
+    "productTitle": "Tambah produk",
+    "productHint": "Harga, kos dan stok"
   },
-  "dashboard": {
-    "title": "Papan Pemuka",
-    "todaysSales": "Jualan Hari Ini",
-    "totalExpense": "Jumlah Belanja",
-    "netProfit": "Untung Bersih",
-    "dailyTarget": "Sasaran Jualan Harian",
-    "targetReached": "Sasaran Dicapai",
-    "achieved": "Telah Dicapai",
-    "paymentMethod": "Kaedah Bayaran",
-    "cash": "Tunai",
-    "qr": "Bayaran QR",
-    "liveData": "Data Langsung",
-    "lowStock": "Stok Rendah",
-    "noLowStock": "Semua produk stok mencukupi"
+  "toast": {
+    "salesSaved_other": "✓ {{count}} jualan berjaya disimpan"
   },
-  "sales": {
-    "recordSale": "Rekod Jualan",
-    "salesHistory": "Sejarah Jualan",
-    "noSales": "Tiada jualan direkod lagi.",
-    "noSalesInRange": "Tiada jualan dalam julat ini.",
-    "product": "Produk",
-    "quantity": "Kuantiti",
-    "amount": "Jumlah",
-    "source": "Sumber",
-    "manual": "Manual",
-    "voice": "Suara",
-    "receipt": "Resit",
-    "type": "Taip",
-    "dictate": "Suara"
+  "theme": {
+    "useLight": "Gunakan mod cerah",
+    "useDark": "Gunakan mod gelap",
+    "dark": "Mod gelap",
+    "light": "Mod cerah"
   },
-  "expenses": {
-    "addExpense": "Tambah Perbelanjaan",
-    "expenseHistory": "Sejarah Perbelanjaan",
-    "noExpenses": "Tiada perbelanjaan direkod.",
-    "category": "Kategori",
-    "amount": "Jumlah",
-    "note": "Nota",
-    "ingredients": "Bahan Mentah",
-    "gas": "Gas",
-    "packaging": "Pembungkusan",
-    "rent": "Sewa / Utiliti",
-    "other": "Lain-lain",
-    "scanReceipt": "Imbas Resit Pembekal",
-    "today": "Hari Ini"
-  },
-  "scanner": {
-    "scanReceipt": "Imbas Resit",
-    "takePhoto": "Ambil gambar resit atau pilih fail.",
-    "reading": "Membaca resit",
-    "review": "Semak item",
-    "detectTotal": "Jumlah resit dikesan",
-    "couldNotRead": "Tak dapat baca item dari resit ini — cuba gambar lebih jelas/terang.",
-    "ocrFailed": "OCR gagal — sila cuba lagi.",
-    "rawText": "Teks OCR mentah",
-    "tryAgain": "Cuba lagi",
-    "itemsFrom": "Dari resit",
-    "selectProduct": "Pilih produk"
-  },
-  "products": {
-    "productList": "Senarai Produk",
-    "addProduct": "Tambah Produk",
-    "name": "Nama Produk",
-    "sellPrice": "Harga Jual",
-    "costPrice": "Harga Kos",
-    "currentStock": "Stok Semasa",
-    "lowStockThreshold": "Paras Stok Rendah",
-    "noProducts": "Tiada produk."
-  },
-  "voice": {
-    "startListening": "Mula Mendengar",
-    "stopListening": "Henti Mendengar",
-    "listening": "Mendengar...",
-    "error": "Ralat dalam pengenalan suara"
+  "login": {
+    "tagline": "Rekod jualan dalam beberapa saat",
+    "signin": "Log masuk",
+    "register": "Daftar baru",
+    "nameLabel": "Nama kedai / penjual",
+    "namePlaceholder": "cth: Warung Pak Ali",
+    "emailLabel": "Alamat e-mel",
+    "emailPlaceholder": "cth: anda@email.com",
+    "passwordLabel": "Kata laluan",
+    "passwordPlaceholder": "Sekurang-kurangnya 8 aksara",
+    "submitRegister": "Daftar & mula",
+    "busy": "Sila tunggu...",
+    "note": "Akaun anda dilindungi oleh Supabase Authentication. Data perniagaan akan dipisahkan mengikut pengguna.",
+    "errEmail": "Sila masukkan alamat e-mel.",
+    "errPassword": "Kata laluan mesti sekurang-kurangnya 8 aksara.",
+    "errName": "Sila masukkan nama kedai atau penjual.",
+    "errVerify": "Akaun dicipta. Sila semak e-mel anda sebelum log masuk.",
+    "errGeneric": "Log masuk gagal. Sila cuba lagi."
   },
   "lang": {
-    "select": "Pilih Bahasa",
-    "malay": "Bahasa Melayu",
-    "english": "English",
-    "chinese": "中文"
+    "select": "Pilih bahasa"
   }
 }

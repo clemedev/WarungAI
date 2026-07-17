@@ -47,6 +47,21 @@ export function getCurrentLanguage() {
   return i18n.language;
 }
 
+/**
+ * BCP 47 tag for Intl formatting. Regions are Malaysia-first on purpose:
+ * an en/zh-speaking warung owner is still in Malaysia, so dates and
+ * numbers should read the local way, not US/China conventions.
+ */
+const DATE_LOCALES = {
+  ms: 'ms-MY',
+  en: 'en-MY',
+  zh: 'zh-MY',
+};
+
+export function getDateLocale(lang = i18n.language) {
+  return DATE_LOCALES[lang] ?? DATE_LOCALES[DEFAULT_LANG];
+}
+
 export const LANGUAGES = [
   { code: 'ms', name: 'Bahasa Melayu' },
   { code: 'en', name: 'English' },

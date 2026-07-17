@@ -6,7 +6,7 @@ export default function InsightOfTheDay({ insight }) {
   const isWarning = insight.startsWith('⚠️');
   return (
     <div className={`${styles.card} ${isWarning ? styles.warning : ''}`}>
-      <h3 className={styles.title}>💡 Cadangan hari ini</h3>
+      <h3 className={styles.title}>Cadangan hari ini</h3>
       <p className={styles.text}>{insight}</p>
     </div>
   );

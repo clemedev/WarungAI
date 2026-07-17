@@ -9,6 +9,7 @@ import {
 } from '../../lib/supabaseSales.js';
 
 import {
+  lastNDates,
   todayISO,
 } from '../../lib/dates.js';
 
@@ -22,12 +23,34 @@ const SOURCE_LABEL = {
   receipt: '📷 Resit',
 };
 
+/** Date-window presets; fromDate undefined = the whole ledger. */
+const RANGES = [
+  {
+    id: 'today',
+    label: 'Hari ini',
+    fromDate: () => todayISO(),
+  },
+  {
+    id: 'week',
+    label: '7 hari',
+    fromDate: () => lastNDates(7)[0],
+  },
+  {
+    id: 'all',
+    label: 'Semua',
+    fromDate: () => undefined,
+  },
+];
+
 export default function SalesList({
   refreshKey,
   onChange,
 }) {
   const [sales, setSales] =
     useState([]);
+
+  const [range, setRange] =
+    useState('today');
 
   const [loading, setLoading] =
     useState(true);
@@ -40,13 +63,22 @@ export default function SalesList({
 
   const today = todayISO();
 
-  async function loadSales() {
+  async function loadSales(
+    rangeId = range,
+  ) {
     setLoading(true);
     setError('');
 
+    const preset =
+      RANGES.find(
+        (item) => item.id === rangeId,
+      ) ?? RANGES[0];
+
     try {
       const nextSales =
-        await getSales();
+        await getSales({
+          fromDate: preset.fromDate(),
+        });
 
       setSales(nextSales);
     } catch (caughtError) {
@@ -62,7 +94,13 @@ export default function SalesList({
 
   useEffect(() => {
     loadSales();
-  }, [refreshKey]);
+  }, [refreshKey, range]);
+
+  function handleRange(rangeId) {
+    if (rangeId !== range) {
+      setRange(rangeId);
+    }
+  }
 
   async function handleDelete(sale) {
     const confirmed =
@@ -108,9 +146,34 @@ export default function SalesList({
 
   return (
     <div className={styles.card}>
-      <h3 className={styles.title}>
-        Sejarah jualan
-      </h3>
+      <div className={styles.head}>
+        <h3 className={styles.title}>
+          Sejarah jualan
+        </h3>
+
+        <div
+          className={styles.ranges}
+          role="group"
+          aria-label="Julat sejarah jualan"
+        >
+          {RANGES.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={
+                range === item.id
+                  ? styles.rangeActive
+                  : styles.range
+              }
+              onClick={() =>
+                handleRange(item.id)
+              }
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {error && (
         <p className={styles.empty}>
@@ -120,7 +183,7 @@ export default function SalesList({
 
       {sales.length === 0 ? (
         <p className={styles.empty}>
-          Tiada jualan direkod lagi.
+          Tiada jualan dalam julat ini.
         </p>
       ) : (
         <ul className={styles.list}>

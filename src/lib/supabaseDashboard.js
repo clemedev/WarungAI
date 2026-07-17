@@ -7,6 +7,10 @@ import {
 } from './supabaseExpenses.js';
 
 import {
+  getProducts,
+} from './supabaseProducts.js';
+
+import {
   lastNDates,
   todayISO,
 } from './dates.js';
@@ -221,14 +225,22 @@ function createInsight({
 export async function getDashboardData(
   dailyTarget = 200,
 ) {
-  const [sales, expenses] =
-    await Promise.all([
-      getSales(),
-      getExpenses(),
-    ]);
-
   const today = todayISO();
   const week = lastNDates(7);
+
+  // Everything on the dashboard is derived from the last 7 days — scope
+  // the queries to that window instead of downloading the whole ledger.
+  // lastNDates is oldest-first, so week[0] is the window start.
+  const [sales, expenses, products] =
+    await Promise.all([
+      getSales({
+        fromDate: week[0],
+      }),
+      getExpenses({
+        fromDate: week[0],
+      }),
+      getProducts(),
+    ]);
 
   const todaySales = sales.filter(
     (sale) => sale.date === today,
@@ -313,16 +325,30 @@ export async function getDashboardData(
       today,
     );
 
+  // Deliberately uncapped. Clamping at 1 hid the best news the app has to
+  // report — a 140% day rendered as a flat "100%". The progress *bar* still
+  // clamps its width; the number tells the truth.
   const targetProgress =
     dailyTarget > 0
-      ? Math.min(
-          1,
-          round2(
-            todayTotal /
-              dailyTarget,
-          ),
+      ? round2(
+          todayTotal / dailyTarget,
         )
       : 0;
+
+  // The low-stock threshold was stored, edited, and displayed but never
+  // compared against anything — so a vendor could sell out and still read
+  // "Stok: 12". This is that comparison.
+  const lowStockItems = products
+    .filter(
+      (product) =>
+        product.currentStock <=
+        product.lowStockThreshold,
+    )
+    .sort(
+      (first, second) =>
+        first.currentStock -
+        second.currentStock,
+    );
 
   const summary =
     createDailySummary({
@@ -345,6 +371,9 @@ export async function getDashboardData(
     stats: {
       todayTotal:
         round2(todayTotal),
+      todaySpend: round2(
+        todayExpenseTotal,
+      ),
       todayProfit,
       todayExpenseTotal:
         round2(todayExpenseTotal),
@@ -356,6 +385,7 @@ export async function getDashboardData(
     },
     summary,
     insight,
+    lowStockItems,
     split,
     dailyTarget,
   };

@@ -1,5 +1,9 @@
 import { supabase } from './supabase.js';
 
+import {
+  adjustStock,
+} from './supabaseProducts.js';
+
 function mapSale(row) {
   const item =
     Array.isArray(row.sale_items)
@@ -48,10 +52,19 @@ async function requireUser() {
   return user;
 }
 
-export async function getSales() {
+/**
+ * Fetch sales, optionally scoped to a date window (YYYY-MM-DD, inclusive).
+ * Callers that only need a week should pass `fromDate` — filtering in the
+ * database keeps the payload flat as history grows, instead of shipping
+ * every sale ever made to the browser.
+ */
+export async function getSales({
+  fromDate,
+  toDate,
+} = {}) {
   await requireUser();
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('sales')
     .select(`
       id,
@@ -70,7 +83,23 @@ export async function getSales() {
         unit_cost,
         line_total
       )
-    `)
+    `);
+
+  if (fromDate) {
+    query = query.gte(
+      'sale_date',
+      fromDate,
+    );
+  }
+
+  if (toDate) {
+    query = query.lte(
+      'sale_date',
+      toDate,
+    );
+  }
+
+  const { data, error } = await query
     .order('sale_date', {
       ascending: false,
     })
@@ -178,6 +207,22 @@ export async function saveSale(sale) {
 
   const saleId = data;
 
+  // Consume stock. Deliberately best-effort: the sale is already committed
+  // in the database, and refusing to return it because a stock write failed
+  // would lose the money record over a recoverable counter. Surfaced as a
+  // warning instead; the vendor can correct stock in the Produk tab.
+  try {
+    await adjustStock(
+      productId,
+      -quantity,
+    );
+  } catch (stockError) {
+    console.warn(
+      'Jualan disimpan tetapi stok gagal dikemas kini:',
+      stockError,
+    );
+  }
+
   const { data: savedSale, error: loadError } =
     await supabase
       .from('sales')
@@ -220,6 +265,18 @@ export async function deleteSale(id) {
     );
   }
 
+  // Read what this sale consumed *before* it is deleted — the sale_items
+  // rows go with it, and afterwards there is no way to know what to give
+  // back. Best-effort: never block the delete on this.
+  let consumed = [];
+
+  const { data: items } = await supabase
+    .from('sale_items')
+    .select('product_id, quantity')
+    .eq('sale_id', id);
+
+  consumed = items ?? [];
+
   const { error } = await supabase
     .from('sales')
     .delete()
@@ -229,5 +286,24 @@ export async function deleteSale(id) {
     throw new Error(
       `Gagal memadam jualan: ${error.message}`,
     );
+  }
+
+  // Return the stock the deleted sale had taken.
+  for (const item of consumed) {
+    if (!item.product_id) {
+      continue;
+    }
+
+    try {
+      await adjustStock(
+        item.product_id,
+        Number(item.quantity) || 0,
+      );
+    } catch (stockError) {
+      console.warn(
+        'Jualan dipadam tetapi stok gagal dipulihkan:',
+        stockError,
+      );
+    }
   }
 }

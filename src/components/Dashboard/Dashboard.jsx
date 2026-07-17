@@ -17,12 +17,14 @@ import SalesSummaryCard from './SalesSummaryCard';
 import SevenDayChart from './SevenDayChart';
 import TopItemsList from './TopItemsList';
 import InsightOfTheDay from './InsightOfTheDay';
+import LowStockCard from './LowStockCard';
 
 import styles from './Dashboard.module.css';
 
 const EMPTY_DATA = {
   stats: {
     todayTotal: 0,
+    todaySpend: 0,
     todayProfit: 0,
     sevenDayTrend: [],
     topItems: [],
@@ -31,6 +33,7 @@ const EMPTY_DATA = {
   summary:
     'Tiada jualan direkod hari ini lagi.',
   insight: null,
+  lowStockItems: [],
   split: {
     cash: 0,
     qr: 0,
@@ -117,6 +120,7 @@ export default function Dashboard() {
     stats,
     summary,
     insight,
+    lowStockItems,
     split,
     dailyTarget,
   } = data;
@@ -177,6 +181,18 @@ export default function Dashboard() {
             Rekod jualan pertama anda di
             tab “➕ Jualan”!
           </p>
+        </div>
+      )}
+
+      {lowStockItems?.length > 0 && (
+        <div
+          className={
+            styles.lowStockArea
+          }
+        >
+          <LowStockCard
+            items={lowStockItems}
+          />
         </div>
       )}
 

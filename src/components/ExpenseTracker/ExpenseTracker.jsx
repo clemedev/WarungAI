@@ -13,6 +13,8 @@ import {
   todayISO,
 } from '../../lib/dates.js';
 
+import ReceiptScanner from '../ReceiptScanner/ReceiptScanner';
+
 import styles from './ExpenseTracker.module.css';
 
 const CATEGORIES = [
@@ -197,6 +199,14 @@ export default function ExpenseTracker({
 
   return (
     <div className={styles.wrap}>
+      {/* Supplier receipts are expenses — the scanner lives here and
+          refreshes the ledger below after each save. */}
+      <div className={styles.scanCard}>
+        <ReceiptScanner
+          onSaved={loadExpenses}
+        />
+      </div>
+
       <form
         className={styles.form}
         onSubmit={handleSubmit}

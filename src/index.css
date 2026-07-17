@@ -1,590 +1,100 @@
 :root {
-  color-scheme: light;
+  /* ------------------------------------------------------------------
+     Warm cream/brown palette — "warung" (food stall) theme.
 
-  --color-primary: #176b43;
-  --color-primary-dark: #0f5132;
-  --color-primary-light: #e8f5ee;
-  --color-primary-border: #c5e4d2;
+     Flat two-tone system: dark chocolate surfaces (sidebar, top bar,
+     the profit + chart cards) sitting on a warm cream canvas, with a
+     single orange accent. Orange is the "positive" colour; losses use
+     the red family so the two never collide.
+     ------------------------------------------------------------------ */
+  --color-bg: #f2ece3;
+  --color-surface: #fdfaf5;
+  --color-border: #e6dccc;
 
-  --color-accent: #f4b740;
-  --color-accent-light: #fff5d9;
+  --color-dark: #2f2018;
+  --color-dark-elevated: #3d2a1f;
+  --color-dark-border: #4a3529;
 
-  --color-background: #f8f6f1;
-  --color-surface: #ffffff;
-  --color-surface-soft: #fdfbf7;
-  --color-border: #e5e0d6;
-  --color-border-strong: #d8d0c3;
+  --color-text: #2b1d14;
+  --color-text-muted: #8a7869;
+  --color-text-on-dark: #f7efe6;
+  --color-text-on-dark-muted: #b9a595;
 
-  --color-text: #1d2922;
-  --color-text-muted: #68736d;
-  --color-text-light: #88918c;
+  --color-accent: #e8672c;
+  --color-accent-soft: #fbe2d1;
+  --color-accent-on-dark: #ff8a4c;
 
-  --color-success: #18794e;
-  --color-success-light: #e9f7ef;
-  --color-warning: #9a6700;
-  --color-warning-light: #fff6d8;
-  --color-danger: #c13c32;
-  --color-danger-light: #fdecea;
+  --color-loss: #d94f3d;
+  --color-loss-on-dark: #ff9686;
 
-  --shadow-xs:
-    0 1px 2px rgba(32, 45, 38, 0.05);
+  --color-disabled: #d8cbbd;
 
-  --shadow-sm:
-    0 2px 8px rgba(32, 45, 38, 0.07);
+  /* Insight/alert tints (light red) — separate tokens because the light
+     values are unreadable on a dark canvas and need a theme override. */
+  --color-warning-bg: #fdecea;
+  --color-warning-border: #f5c6c0;
 
-  --shadow-md:
-    0 10px 28px rgba(32, 45, 38, 0.1);
+  --radius-card: 16px;
+  --radius-sm: 10px;
+  --shadow-card: 0 1px 3px rgba(60, 40, 25, 0.05);
 
-  --shadow-lg:
-    0 18px 48px rgba(32, 45, 38, 0.14);
-
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 22px;
-  --radius-pill: 999px;
-
-  --transition-fast: 150ms ease;
-  --transition-normal: 220ms ease;
-
-  font-family:
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  --font-display: Georgia, 'Times New Roman', serif;
 }
 
-*,
-*::before,
-*::after {
+/* ------------------------------------------------------------------
+   Dark theme — the cream canvas flips to deep brown; the chocolate
+   sidebar/top bar/highlight cards lighten one step so the two-tone
+   contrast survives the flip. Accent orange is shared by both themes.
+   Applied via <html data-theme="dark">, set from App.jsx.
+   ------------------------------------------------------------------ */
+:root[data-theme='dark'] {
+  /* Native controls (selects, checkboxes, progress bars) follow the theme */
+  color-scheme: dark;
+
+  --color-bg: #191009;
+  --color-surface: #241811;
+  --color-border: #3a2a1e;
+
+  --color-dark: #322217;
+  --color-dark-elevated: #43301f;
+  --color-dark-border: #54402c;
+
+  --color-text: #f2e7da;
+  --color-text-muted: #a89681;
+  --color-text-on-dark: #f7efe6;
+  --color-text-on-dark-muted: #b9a595;
+
+  --color-accent: #ff8a4c;
+  --color-accent-soft: #45260f;
+  --color-accent-on-dark: #ff8a4c;
+
+  --color-loss: #ff9686;
+
+  --color-disabled: #55432f;
+
+  --color-warning-bg: #3d1f1a;
+  --color-warning-border: #6e352b;
+
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+* {
   box-sizing: border-box;
 }
 
-html {
-  min-width: 320px;
-  min-height: 100%;
-  background: var(--color-background);
-  scroll-behavior: smooth;
-  -webkit-text-size-adjust: 100%;
-}
-
 body {
-  min-width: 320px;
-  min-height: 100vh;
   margin: 0;
-  background:
-    radial-gradient(
-      circle at top right,
-      rgba(244, 183, 64, 0.08),
-      transparent 28rem
-    ),
-    var(--color-background);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--color-bg);
   color: var(--color-text);
-  font-family: inherit;
-  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  min-height: 100dvh;
 }
 
-button,
+/* Form controls inherit the theme instead of defaulting to white */
 input,
 select,
 textarea {
-  font: inherit;
-}
-
-button,
-select {
-  cursor: pointer;
-}
-
-button {
-  touch-action: manipulation;
-}
-
-button:disabled,
-input:disabled,
-select:disabled,
-textarea:disabled {
-  cursor: not-allowed;
-  opacity: 0.65;
-}
-
-input,
-select,
-textarea {
-  width: 100%;
-  min-height: 44px;
-  padding: 0.65rem 0.8rem;
-  color: var(--color-text);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-sm);
-  outline: none;
-  transition:
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast),
-    background-color var(--transition-fast);
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: var(--color-text-light);
-}
-
-input:hover,
-select:hover,
-textarea:hover {
-  border-color: #b8b0a4;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  border-color: var(--color-primary);
-  box-shadow:
-    0 0 0 3px rgba(23, 107, 67, 0.13);
-}
-
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 3px solid rgba(23, 107, 67, 0.28);
-  outline-offset: 2px;
-}
-
-a {
-  color: var(--color-primary);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
-}
-
-a:hover {
-  color: var(--color-primary-dark);
-}
-
-img,
-svg,
-canvas {
-  display: block;
-  max-width: 100%;
-}
-
-h1,
-h2,
-h3,
-h4,
-p {
-  overflow-wrap: break-word;
-}
-
-h1,
-h2,
-h3,
-h4 {
-  color: var(--color-text);
-  line-height: 1.2;
-}
-
-::selection {
-  color: #ffffff;
-  background: var(--color-primary);
-}
-
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #cbc6bc;
-  border: 3px solid transparent;
-  border-radius: var(--radius-pill);
-  background-clip: padding-box;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #aaa399;
-  border: 3px solid transparent;
-  background-clip: padding-box;
-}
-
-#root {
-  min-height: 100vh;
-}
-
-@media (max-width: 600px) {
-  body {
-    background:
-      linear-gradient(
-        180deg,
-        rgba(232, 245, 238, 0.42),
-        transparent 15rem
-      ),
-      var(--color-background);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* ===== LIQUID GLASS OVERRIDES ===== */
-:root {
-  --glass-surface:
-    rgba(255, 255, 255, 0.68);
-
-  --glass-surface-strong:
-    rgba(255, 255, 255, 0.82);
-
-  --glass-surface-soft:
-    rgba(255, 255, 255, 0.52);
-
-  --glass-green:
-    rgba(22, 101, 63, 0.72);
-
-  --glass-green-strong:
-    rgba(13, 79, 49, 0.88);
-
-  --glass-border:
-    rgba(255, 255, 255, 0.66);
-
-  --glass-border-muted:
-    rgba(216, 225, 218, 0.72);
-
-  --glass-shadow:
-    0 18px 55px
-      rgba(36, 64, 49, 0.13);
-
-  --glass-shadow-hover:
-    0 24px 65px
-      rgba(36, 64, 49, 0.18);
-
-  --glass-highlight:
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.82),
-    inset 0 -1px 0
-      rgba(255, 255, 255, 0.2);
-}
-
-html {
-  background: #edf3ee;
-}
-
-body {
-  background:
-    radial-gradient(
-      circle at 8% 8%,
-      rgba(255, 209, 112, 0.32),
-      transparent 25rem
-    ),
-    radial-gradient(
-      circle at 88% 18%,
-      rgba(95, 190, 146, 0.25),
-      transparent 29rem
-    ),
-    radial-gradient(
-      circle at 45% 90%,
-      rgba(123, 170, 224, 0.18),
-      transparent 30rem
-    ),
-    linear-gradient(
-      145deg,
-      #f5f6f0 0%,
-      #edf4ef 48%,
-      #f7f4ed 100%
-    );
-  background-attachment: fixed;
-}
-
-body::before,
-body::after {
-  position: fixed;
-  z-index: -1;
-
-  width: 26rem;
-  height: 26rem;
-
-  border-radius: 50%;
-  filter: blur(4px);
-  pointer-events: none;
-
-  content: "";
-}
-
-body::before {
-  top: 18%;
-  left: -13rem;
-
-  background:
-    radial-gradient(
-      circle,
-      rgba(38, 139, 88, 0.13),
-      transparent 70%
-    );
-}
-
-body::after {
-  right: -13rem;
-  bottom: 4%;
-
-  background:
-    radial-gradient(
-      circle,
-      rgba(244, 183, 64, 0.17),
-      transparent 70%
-    );
-}
-
-input,
-select,
-textarea {
-  background:
-    rgba(255, 255, 255, 0.7);
-  border-color:
-    rgba(205, 216, 208, 0.86);
-  box-shadow:
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-}
-
-input:hover,
-select:hover,
-textarea:hover {
-  background:
-    rgba(255, 255, 255, 0.84);
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  background:
-    rgba(255, 255, 255, 0.92);
-}
-/* ===== END LIQUID GLASS OVERRIDES ===== */
-
-/* ===== LIQUID GLASS DARK THEME ===== */
-
-html[data-theme="dark"] {
-  color-scheme: dark;
-
-  --color-primary: #57c78b;
-  --color-primary-dark: #9ae3b9;
-  --color-primary-light:
-    rgba(55, 150, 97, 0.18);
-  --color-primary-border:
-    rgba(93, 200, 140, 0.28);
-
-  --color-accent: #f3bd54;
-  --color-accent-light:
-    rgba(243, 189, 84, 0.14);
-
-  --color-background: #07150e;
-  --color-surface:
-    rgba(17, 35, 25, 0.84);
-  --color-surface-soft:
-    rgba(20, 42, 30, 0.68);
-
-  --color-border:
-    rgba(155, 188, 169, 0.15);
-  --color-border-strong:
-    rgba(155, 188, 169, 0.24);
-
-  --color-text: #edf7f0;
-  --color-text-muted: #a8bdb0;
-  --color-text-light: #738b7c;
-
-  --color-success: #72daa0;
-  --color-success-light:
-    rgba(40, 137, 81, 0.16);
-
-  --color-warning: #f5c769;
-  --color-warning-light:
-    rgba(177, 119, 10, 0.15);
-
-  --color-danger: #ff8f83;
-  --color-danger-light:
-    rgba(197, 65, 53, 0.15);
-
-  --shadow-xs:
-    0 2px 9px
-      rgba(0, 0, 0, 0.16);
-
-  --shadow-sm:
-    0 8px 24px
-      rgba(0, 0, 0, 0.2);
-
-  --shadow-md:
-    0 16px 42px
-      rgba(0, 0, 0, 0.28);
-
-  --shadow-lg:
-    0 26px 72px
-      rgba(0, 0, 0, 0.38);
-
-  --glass-surface:
-    rgba(17, 37, 26, 0.68);
-
-  --glass-surface-strong:
-    rgba(21, 44, 31, 0.84);
-
-  --glass-surface-soft:
-    rgba(20, 42, 30, 0.5);
-
-  --glass-border:
-    rgba(172, 215, 190, 0.14);
-
-  --glass-border-muted:
-    rgba(130, 178, 150, 0.16);
-
-  --glass-shadow:
-    0 22px 60px
-      rgba(0, 0, 0, 0.3);
-
-  --glass-shadow-hover:
-    0 27px 74px
-      rgba(0, 0, 0, 0.4);
-
-  --glass-highlight:
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.08),
-    inset 0 -1px 0
-      rgba(0, 0, 0, 0.2);
-
-  background: #07150e;
-}
-
-html[data-theme="dark"] body {
-  background:
-    radial-gradient(
-      circle at 8% 8%,
-      rgba(209, 147, 40, 0.13),
-      transparent 25rem
-    ),
-    radial-gradient(
-      circle at 88% 18%,
-      rgba(47, 158, 96, 0.15),
-      transparent 29rem
-    ),
-    radial-gradient(
-      circle at 46% 92%,
-      rgba(54, 104, 149, 0.12),
-      transparent 31rem
-    ),
-    linear-gradient(
-      145deg,
-      #06130c 0%,
-      #091b12 50%,
-      #07150e 100%
-    );
+  background-color: var(--color-surface);
   color: var(--color-text);
 }
-
-html[data-theme="dark"] body::before {
-  background:
-    radial-gradient(
-      circle,
-      rgba(34, 152, 84, 0.1),
-      transparent 70%
-    );
-}
-
-html[data-theme="dark"] body::after {
-  background:
-    radial-gradient(
-      circle,
-      rgba(243, 189, 84, 0.09),
-      transparent 70%
-    );
-}
-
-html[data-theme="dark"] input,
-html[data-theme="dark"] select,
-html[data-theme="dark"] textarea {
-  color: var(--color-text);
-  background:
-    rgba(16, 34, 24, 0.82);
-  border-color:
-    rgba(150, 191, 169, 0.2);
-  box-shadow:
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.05);
-}
-
-html[data-theme="dark"] input:hover,
-html[data-theme="dark"] select:hover,
-html[data-theme="dark"] textarea:hover {
-  background:
-    rgba(21, 43, 31, 0.92);
-  border-color:
-    rgba(116, 205, 154, 0.32);
-}
-
-html[data-theme="dark"] input:focus,
-html[data-theme="dark"] select:focus,
-html[data-theme="dark"] textarea:focus {
-  background:
-    rgba(20, 43, 30, 0.96);
-  border-color: #57c78b;
-  box-shadow:
-    0 0 0 3px
-      rgba(87, 199, 139, 0.15);
-}
-
-html[data-theme="dark"]
-input::placeholder,
-html[data-theme="dark"]
-textarea::placeholder {
-  color: #62796a;
-}
-
-html[data-theme="dark"] option {
-  color: #edf7f0;
-  background: #10261a;
-}
-
-html[data-theme="dark"] a {
-  color: #80dba6;
-}
-
-html[data-theme="dark"]
-::-webkit-scrollbar-thumb {
-  background: #31483a;
-  border: 3px solid transparent;
-  background-clip: padding-box;
-}
-
-html[data-theme="dark"]
-::-webkit-scrollbar-thumb:hover {
-  background: #476451;
-  border: 3px solid transparent;
-  background-clip: padding-box;
-}
-
-html[data-theme="dark"] ::selection {
-  color: #07150e;
-  background: #79daa3;
-}
-
-/* ===== END LIQUID GLASS DARK THEME ===== */

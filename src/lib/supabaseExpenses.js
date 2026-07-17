@@ -36,12 +36,35 @@ async function requireUser() {
   return user;
 }
 
-export async function getExpenses() {
+/**
+ * Fetch expenses, optionally scoped to a date window (YYYY-MM-DD,
+ * inclusive) — same contract as getSales.
+ */
+export async function getExpenses({
+  fromDate,
+  toDate,
+} = {}) {
   await requireUser();
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('expenses')
-    .select('*')
+    .select('*');
+
+  if (fromDate) {
+    query = query.gte(
+      'expense_date',
+      fromDate,
+    );
+  }
+
+  if (toDate) {
+    query = query.lte(
+      'expense_date',
+      toDate,
+    );
+  }
+
+  const { data, error } = await query
     .order('expense_date', {
       ascending: false,
     })
@@ -64,6 +87,13 @@ export async function saveExpense(expense) {
   const category = String(
     expense?.category ?? '',
   ).trim();
+
+  // The expenses table accepts 'manual' and 'receipt' (BACKEND.md,
+  // "Supported sources"); receipt-scanned expenses pass the latter.
+  const source =
+    expense?.source === 'receipt'
+      ? 'receipt'
+      : 'manual';
 
   const amount = Number(
     expense?.amount,
@@ -110,7 +140,7 @@ export async function saveExpense(expense) {
       amount,
       note: note || null,
       expense_date: date,
-      source: 'manual',
+      source,
     })
     .select()
     .single();

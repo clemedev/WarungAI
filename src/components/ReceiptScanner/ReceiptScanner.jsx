@@ -1,26 +1,57 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import Tesseract from 'tesseract.js';
 import { parseReceiptText } from '../../lib/ocrParser';
-import { matchProduct } from '../../lib/nlEntryParser';
-import { saveSale } from '../../lib/supabaseSales.js';
+import { saveExpense } from '../../lib/supabaseExpenses.js';
 import { todayISO } from '../../lib/dates';
 import styles from './ReceiptScanner.module.css';
 
+const CATEGORIES = [
+  { value: 'bahan', label: 'Bahan mentah (ingredients)' },
+  { value: 'gas', label: 'Gas' },
+  { value: 'pembungkusan', label: 'Pembungkusan (packaging)' },
+  { value: 'sewa', label: 'Sewa / utiliti' },
+  { value: 'lain', label: 'Lain-lain' },
+];
+
 /**
- * Receipt photo → Tesseract OCR → parseReceiptText → editable item table →
- * one Sale saved per confirmed row. `capture="environment"` opens the camera
- * on mobile; on desktop the same input is a normal file picker.
+ * Receipt photo → Tesseract OCR → parseReceiptText → review → one expense.
+ *
+ * This used to save *sales*: each receipt row was fuzzy-matched to a product
+ * the stall sells and saved as a cash sale. But paper receipts flow the other
+ * way — they come from suppliers when buying stock — so the scanner now
+ * feeds the expenses ledger (source: 'receipt'). Line items are shown for
+ * checking against the paper, and their sum (or the printed total when OCR
+ * finds one) becomes the expense amount.
+ *
+ * `capture="environment"` opens the camera on mobile; on desktop the same
+ * input is a normal file picker.
  */
-export default function ReceiptScanner({ products, onSaved }) {
+export default function ReceiptScanner({ onSaved }) {
   const fileInputRef = useRef(null);
   const [imageUrl, setImageUrl] = useState(null);
   const [status, setStatus] = useState('idle'); // idle | ocr | review | error
   const [progress, setProgress] = useState(0);
   const [rawText, setRawText] = useState('');
   const [rows, setRows] = useState([]);
-  const [receiptTotal, setReceiptTotal] = useState(null);
+  const [category, setCategory] = useState('bahan');
+  const [amount, setAmount] = useState('');
+  const [note, setNote] = useState('');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // Sum of the rows still ticked — offered as a hint under the amount field
+  // so the user can cross-check against what OCR read.
+  const includedTotal = useMemo(
+    () =>
+      rows.reduce(
+        (sum, row) =>
+          row.include && Number.isFinite(Number(row.price))
+            ? sum + Number(row.price)
+            : sum,
+        0,
+      ),
+    [rows],
+  );
 
   async function handleFile(e) {
     const file = e.target.files?.[0];
@@ -42,29 +73,30 @@ export default function ReceiptScanner({ products, onSaved }) {
       setRawText(data.text);
 
       const { items, total } = parseReceiptText(data.text);
-      setReceiptTotal(total);
 
-      if (items.length === 0) {
+      if (items.length === 0 && total === null) {
         setStatus('error');
         setError(
-          'Tak dapat baca item dari resit ini — cuba gambar lebih jelas/terang, atau taip jualan di tab Chat. (Could not read any items — try a clearer photo, or type the sale instead.)',
+          'Tak dapat baca apa-apa dari resit ini — cuba gambar lebih jelas/terang, atau rekod perbelanjaan secara manual di bawah. (Could not read anything — try a clearer photo, or add the expense manually.)',
         );
         return;
       }
 
-      // pre-map each OCR item to a product via fuzzy match; user fixes the rest
       setRows(
-        items.map((it) => {
-          const { product } = matchProduct(it.name, products);
-          return {
-            include: true,
-            ocrName: it.name,
-            productId: product?.id ?? '',
-            quantity: it.quantity,
-            total: it.price,
-          };
-        }),
+        items.map((it) => ({
+          include: true,
+          name: it.name,
+          price: it.price,
+        })),
       );
+
+      // Prefer the printed total; fall back to the sum of parsed lines.
+      const suggested =
+        total ??
+        items.reduce((sum, it) => sum + (Number(it.price) || 0), 0);
+
+      setAmount(suggested > 0 ? suggested.toFixed(2) : '');
+      setNote('');
       setStatus('review');
     } catch (err) {
       console.error('OCR failed:', err);
@@ -75,29 +107,14 @@ export default function ReceiptScanner({ products, onSaved }) {
     }
   }
 
-  function updateRow(i, patch) {
-    setRows((rs) => rs.map((r, j) => (j === i ? { ...r, ...patch } : r)));
+  function toggleRow(i, include) {
+    setRows((rs) => rs.map((r, j) => (j === i ? { ...r, include } : r)));
   }
 
-  async function handleSaveAll() {
-    if (saving) {
-      return;
-    }
+  async function handleSave() {
+    const numericAmount = Number(amount);
 
-    const good = rows.filter(
-      (row) =>
-        row.include &&
-        row.productId &&
-        Number.isInteger(Number(row.quantity)) &&
-        Number(row.quantity) > 0 &&
-        Number.isFinite(Number(row.total)) &&
-        Number(row.total) > 0,
-    );
-
-    if (good.length === 0) {
-      setError(
-        'Tiada item yang sah untuk disimpan.',
-      );
+    if (saving || !Number.isFinite(numericAmount) || numericAmount <= 0) {
       return;
     }
 
@@ -105,26 +122,21 @@ export default function ReceiptScanner({ products, onSaved }) {
     setError('');
 
     try {
-      await Promise.all(
-        good.map((row) =>
-          saveSale({
-            date: todayISO(),
-            productId: row.productId,
-            quantity: Number(row.quantity),
-            total: Number(row.total),
-            source: 'ocr',
-            paymentMethod: 'cash',
-          }),
-        ),
-      );
+      await saveExpense({
+        date: todayISO(),
+        category,
+        amount: numericAmount,
+        note: note.trim(),
+        source: 'receipt',
+      });
 
       reset();
-      onSaved?.(good.length);
+      onSaved?.();
     } catch (caughtError) {
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : 'Gagal menyimpan jualan daripada resit.',
+          : 'Gagal menyimpan perbelanjaan daripada resit.',
       );
     } finally {
       setSaving(false);
@@ -137,19 +149,23 @@ export default function ReceiptScanner({ products, onSaved }) {
     setStatus('idle');
     setRows([]);
     setRawText('');
-    setReceiptTotal(null);
+    setCategory('bahan');
+    setAmount('');
+    setNote('');
     setError('');
   }
 
-  const savableCount = rows.filter((r) => r.include && r.productId && r.total > 0).length;
+  const canSave =
+    Number.isFinite(Number(amount)) && Number(amount) > 0 && !saving;
 
   return (
     <div className={styles.wrap}>
       {status === 'idle' && (
         <>
           <p className={styles.hint}>
-            Ambil gambar resit atau pilih fail. (Snap a receipt photo, or pick a
-            file on desktop.)
+            Ambil gambar resit pembekal — jumlahnya disimpan sebagai
+            perbelanjaan. (Snap a supplier receipt; its total is recorded as
+            an expense.)
           </p>
           <input
             ref={fileInputRef}
@@ -193,80 +209,104 @@ export default function ReceiptScanner({ products, onSaved }) {
 
       {status === 'review' && (
         <div className={styles.review}>
-          <h3 className={styles.title}>Semak item (review items)</h3>
-          {receiptTotal !== null && (
-            <p className={styles.hint}>Jumlah resit dikesan: RM{receiptTotal.toFixed(2)}</p>
-          )}
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th></th>
-                <th>Dari resit</th>
-                <th>Produk</th>
-                <th>Kuantiti</th>
-                <th>RM</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r, i) => (
-                <tr key={i} className={r.include ? '' : styles.excluded}>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={r.include}
-                      onChange={(e) => updateRow(i, { include: e.target.checked })}
-                    />
-                  </td>
-                  <td className={styles.ocrName}>{r.ocrName}</td>
-                  <td>
-                    <select
-                      value={r.productId}
-                      onChange={(e) => updateRow(i, { productId: e.target.value })}
-                    >
-                      <option value="">— pilih —</option>
-                      {products.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.name}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td>
-                    <input
-                      className={styles.numInput}
-                      type="number"
-                      min="1"
-                      value={r.quantity}
-                      onChange={(e) => updateRow(i, { quantity: e.target.value })}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      className={styles.numInput}
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={r.total}
-                      onChange={(e) => updateRow(i, { total: e.target.value })}
-                    />
-                  </td>
+          <h3 className={styles.title}>Semak perbelanjaan (review expense)</h3>
+
+          {rows.length > 0 && (
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Item dari resit</th>
+                  <th>RM</th>
                 </tr>
+              </thead>
+              <tbody>
+                {rows.map((r, i) => (
+                  <tr key={i} className={r.include ? '' : styles.excluded}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={r.include}
+                        onChange={(e) => toggleRow(i, e.target.checked)}
+                      />
+                    </td>
+                    <td className={styles.ocrName}>{r.name}</td>
+                    <td>
+                      {Number.isFinite(Number(r.price))
+                        ? Number(r.price).toFixed(2)
+                        : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
+          <label className={styles.field}>
+            Kategori
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              {CATEGORIES.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
               ))}
-            </tbody>
-          </table>
+            </select>
+          </label>
+
+          <label className={styles.field}>
+            Jumlah (RM)
+            <input
+              className={styles.numInput}
+              type="number"
+              min="0.01"
+              step="0.01"
+              inputMode="decimal"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+          </label>
+
+          {rows.length > 0 && (
+            <p className={styles.hint}>
+              Jumlah item bertanda: RM{includedTotal.toFixed(2)}
+              {' — '}
+              <button
+                type="button"
+                className={styles.linkButton}
+                onClick={() => setAmount(includedTotal.toFixed(2))}
+              >
+                guna jumlah ini
+              </button>
+            </p>
+          )}
+
+          <label className={styles.field}>
+            Nota (pilihan)
+            <input
+              type="text"
+              placeholder="cth: barang dapur mingguan"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
+          </label>
+
+          {error && <p className={styles.error}>{error}</p>}
+
           <details>
             <summary>Teks OCR mentah (raw OCR text)</summary>
             <pre className={styles.rawText}>{rawText}</pre>
           </details>
+
           <div className={styles.actions}>
             <button
               className={styles.saveButton}
-              disabled={savableCount === 0 || saving}
-              onClick={handleSaveAll}
+              disabled={!canSave}
+              onClick={handleSave}
             >
-              {saving
-                ? 'Menyimpan...'
-                : `Simpan ${savableCount} item`}
+              {saving ? 'Menyimpan...' : 'Simpan perbelanjaan'}
             </button>
             <button className={styles.cancelButton} onClick={reset}>
               Batal

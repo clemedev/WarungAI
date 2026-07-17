@@ -1747,3 +1747,343 @@
     transform-origin: right center;
   }
 }
+
+/* Theme controls */
+
+.themeControl {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin: 0.9rem 0.5rem 0;
+}
+
+.mobileControls {
+  display: flex;
+  align-items: center;
+  gap: 0.42rem;
+}
+
+/* ===== APP LIQUID GLASS DARK MODE ===== */
+
+:global(html[data-theme="dark"]) .shell {
+  background:
+    radial-gradient(
+      circle at 90% 5%,
+      rgba(243, 189, 84, 0.08),
+      transparent 26rem
+    ),
+    radial-gradient(
+      circle at 48% 82%,
+      rgba(51, 163, 99, 0.07),
+      transparent 30rem
+    ),
+    linear-gradient(
+      145deg,
+      #06130c,
+      #091b12
+    );
+}
+
+:global(html[data-theme="dark"])
+.mobileHeader {
+  background:
+    rgba(7, 24, 15, 0.69);
+  border-bottom-color:
+    rgba(151, 200, 173, 0.12);
+  box-shadow:
+    0 10px 35px
+      rgba(0, 0, 0, 0.26),
+    inset 0 -1px 0
+      rgba(255, 255, 255, 0.04);
+}
+
+:global(html[data-theme="dark"])
+.mobileBrand strong {
+  color: #e4f5e9;
+}
+
+:global(html[data-theme="dark"])
+.capturePanel,
+:global(html[data-theme="dark"])
+.createSheet {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(18, 40, 28, 0.78),
+      rgba(10, 29, 19, 0.64)
+    );
+  border-color:
+    rgba(164, 213, 185, 0.14);
+  box-shadow:
+    0 24px 68px
+      rgba(0, 0, 0, 0.31),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.07);
+}
+
+:global(html[data-theme="dark"])
+.captureHeader,
+:global(html[data-theme="dark"])
+.captureTabs {
+  border-color:
+    rgba(164, 213, 185, 0.1);
+}
+
+:global(html[data-theme="dark"])
+.captureTabs,
+:global(html[data-theme="dark"])
+.recordTabs {
+  background:
+    rgba(6, 23, 14, 0.52);
+}
+
+:global(html[data-theme="dark"])
+.captureTabActive,
+:global(html[data-theme="dark"])
+.recordTabActive {
+  color: #9ae3b9;
+  background:
+    rgba(33, 68, 47, 0.76);
+  border-color:
+    rgba(123, 211, 161, 0.2);
+  box-shadow:
+    0 9px 25px
+      rgba(0, 0, 0, 0.22),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.07);
+}
+
+:global(html[data-theme="dark"])
+.todayPanel {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(6, 49, 28, 0.92),
+      rgba(15, 86, 50, 0.76)
+    );
+  border-color:
+    rgba(143, 224, 177, 0.15);
+  box-shadow:
+    0 25px 70px
+      rgba(0, 0, 0, 0.38),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.08);
+}
+
+:global(html[data-theme="dark"])
+.actionStack button {
+  background:
+    rgba(255, 255, 255, 0.055);
+  border-color:
+    rgba(255, 255, 255, 0.1);
+}
+
+:global(html[data-theme="dark"])
+.actionStack button:hover {
+  background:
+    rgba(255, 255, 255, 0.11);
+}
+
+:global(html[data-theme="dark"])
+.mobileNav {
+  background:
+    rgba(7, 24, 15, 0.76);
+  border-color:
+    rgba(164, 213, 185, 0.13);
+  box-shadow:
+    0 24px 60px
+      rgba(0, 0, 0, 0.44),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.06);
+}
+
+:global(html[data-theme="dark"])
+.mobileNavActive {
+  color: #a5e7c0;
+  background:
+    rgba(44, 127, 79, 0.22);
+}
+
+:global(html[data-theme="dark"])
+.mobileCreate {
+  border-color: #07160e;
+}
+
+:global(html[data-theme="dark"])
+.createOverlay {
+  background:
+    rgba(0, 8, 4, 0.58);
+}
+
+:global(html[data-theme="dark"])
+.createOptions > button {
+  color: var(--color-text);
+  background:
+    rgba(25, 51, 36, 0.66);
+  border-color:
+    rgba(165, 215, 187, 0.13);
+  box-shadow:
+    0 10px 26px
+      rgba(0, 0, 0, 0.2),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.05);
+}
+
+:global(html[data-theme="dark"])
+.createOptions > button:hover {
+  background:
+    rgba(38, 83, 56, 0.71);
+  border-color:
+    rgba(120, 218, 161, 0.22);
+}
+
+:global(html[data-theme="dark"])
+.createHeader button {
+  color: #c2d5c8;
+  background:
+    rgba(255, 255, 255, 0.06);
+  border-color:
+    rgba(255, 255, 255, 0.09);
+}
+
+:global(html[data-theme="dark"])
+.sheetHandle {
+  background: #46604f;
+}
+
+:global(html[data-theme="dark"])
+.toast {
+  background:
+    rgba(9, 25, 16, 0.88);
+  border-color:
+    rgba(164, 213, 185, 0.13);
+}
+
+:global(html[data-theme="dark"])
+.loadingScreen {
+  background:
+    radial-gradient(
+      circle at 50% 25%,
+      rgba(54, 176, 104, 0.11),
+      transparent 22rem
+    ),
+    #07150e;
+}
+
+:global(html[data-theme="dark"])
+.loadingContent h1 {
+  color: #dff4e6;
+}
+
+:global(html[data-theme="dark"])
+.loadingTrack {
+  background: #1c3527;
+}
+
+@media (min-width: 940px) {
+  :global(html[data-theme="dark"])
+  .sidebar {
+    background:
+      linear-gradient(
+        175deg,
+        rgba(4, 35, 20, 0.96),
+        rgba(7, 55, 31, 0.92) 50%,
+        rgba(3, 28, 16, 0.97)
+      );
+    border-right-color:
+      rgba(171, 220, 192, 0.1);
+    box-shadow:
+      18px 0 58px
+        rgba(0, 0, 0, 0.33),
+      inset -1px 0 0
+        rgba(255, 255, 255, 0.04);
+  }
+
+  :global(html[data-theme="dark"])
+  .navActive {
+    background:
+      linear-gradient(
+        135deg,
+        rgba(100, 213, 148, 0.16),
+        rgba(255, 255, 255, 0.045)
+      );
+    border-color:
+      rgba(128, 219, 166, 0.17);
+  }
+
+  :global(html[data-theme="dark"])
+  .businessCard {
+    background:
+      rgba(255, 255, 255, 0.04);
+    border-color:
+      rgba(255, 255, 255, 0.07);
+  }
+}
+
+/* ===== END APP LIQUID GLASS DARK MODE ===== */
+
+/* ===== DARK MODE: TRANSACTION ENTRY PANEL ===== */
+
+:global(html[data-theme="dark"]) .entryPanel {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(18, 40, 28, 0.82),
+      rgba(8, 27, 17, 0.68)
+    );
+  border-color:
+    rgba(153, 216, 180, 0.14);
+  box-shadow:
+    0 22px 60px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.06);
+  backdrop-filter:
+    blur(26px) saturate(140%);
+  -webkit-backdrop-filter:
+    blur(26px) saturate(140%);
+}
+
+:global(html[data-theme="dark"]) .entrySelector {
+  background:
+    rgba(5, 21, 13, 0.62);
+  border-color:
+    rgba(153, 216, 180, 0.12);
+  box-shadow:
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.04);
+}
+
+:global(html[data-theme="dark"]) .entryOption {
+  color: var(--color-text-muted);
+}
+
+:global(html[data-theme="dark"]) .entryOption:hover {
+  color: var(--color-primary-dark);
+  background:
+    rgba(81, 178, 123, 0.1);
+}
+
+:global(html[data-theme="dark"]) .entryActive {
+  color: var(--color-primary-dark);
+  background:
+    rgba(31, 66, 45, 0.82);
+  border-color:
+    rgba(111, 213, 155, 0.2);
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.07);
+}
+
+:global(html[data-theme="dark"])
+.entryOption > span,
+:global(html[data-theme="dark"])
+.entryActive > span {
+  color: #8fe0b1;
+  background:
+    rgba(48, 145, 89, 0.16);
+  border-color:
+    rgba(105, 210, 150, 0.19);
+}
+
+/* ===== END DARK TRANSACTION ENTRY PANEL ===== */

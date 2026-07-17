@@ -383,3 +383,208 @@ textarea:focus {
     rgba(255, 255, 255, 0.92);
 }
 /* ===== END LIQUID GLASS OVERRIDES ===== */
+
+/* ===== LIQUID GLASS DARK THEME ===== */
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-primary: #57c78b;
+  --color-primary-dark: #9ae3b9;
+  --color-primary-light:
+    rgba(55, 150, 97, 0.18);
+  --color-primary-border:
+    rgba(93, 200, 140, 0.28);
+
+  --color-accent: #f3bd54;
+  --color-accent-light:
+    rgba(243, 189, 84, 0.14);
+
+  --color-background: #07150e;
+  --color-surface:
+    rgba(17, 35, 25, 0.84);
+  --color-surface-soft:
+    rgba(20, 42, 30, 0.68);
+
+  --color-border:
+    rgba(155, 188, 169, 0.15);
+  --color-border-strong:
+    rgba(155, 188, 169, 0.24);
+
+  --color-text: #edf7f0;
+  --color-text-muted: #a8bdb0;
+  --color-text-light: #738b7c;
+
+  --color-success: #72daa0;
+  --color-success-light:
+    rgba(40, 137, 81, 0.16);
+
+  --color-warning: #f5c769;
+  --color-warning-light:
+    rgba(177, 119, 10, 0.15);
+
+  --color-danger: #ff8f83;
+  --color-danger-light:
+    rgba(197, 65, 53, 0.15);
+
+  --shadow-xs:
+    0 2px 9px
+      rgba(0, 0, 0, 0.16);
+
+  --shadow-sm:
+    0 8px 24px
+      rgba(0, 0, 0, 0.2);
+
+  --shadow-md:
+    0 16px 42px
+      rgba(0, 0, 0, 0.28);
+
+  --shadow-lg:
+    0 26px 72px
+      rgba(0, 0, 0, 0.38);
+
+  --glass-surface:
+    rgba(17, 37, 26, 0.68);
+
+  --glass-surface-strong:
+    rgba(21, 44, 31, 0.84);
+
+  --glass-surface-soft:
+    rgba(20, 42, 30, 0.5);
+
+  --glass-border:
+    rgba(172, 215, 190, 0.14);
+
+  --glass-border-muted:
+    rgba(130, 178, 150, 0.16);
+
+  --glass-shadow:
+    0 22px 60px
+      rgba(0, 0, 0, 0.3);
+
+  --glass-shadow-hover:
+    0 27px 74px
+      rgba(0, 0, 0, 0.4);
+
+  --glass-highlight:
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0
+      rgba(0, 0, 0, 0.2);
+
+  background: #07150e;
+}
+
+html[data-theme="dark"] body {
+  background:
+    radial-gradient(
+      circle at 8% 8%,
+      rgba(209, 147, 40, 0.13),
+      transparent 25rem
+    ),
+    radial-gradient(
+      circle at 88% 18%,
+      rgba(47, 158, 96, 0.15),
+      transparent 29rem
+    ),
+    radial-gradient(
+      circle at 46% 92%,
+      rgba(54, 104, 149, 0.12),
+      transparent 31rem
+    ),
+    linear-gradient(
+      145deg,
+      #06130c 0%,
+      #091b12 50%,
+      #07150e 100%
+    );
+  color: var(--color-text);
+}
+
+html[data-theme="dark"] body::before {
+  background:
+    radial-gradient(
+      circle,
+      rgba(34, 152, 84, 0.1),
+      transparent 70%
+    );
+}
+
+html[data-theme="dark"] body::after {
+  background:
+    radial-gradient(
+      circle,
+      rgba(243, 189, 84, 0.09),
+      transparent 70%
+    );
+}
+
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+  color: var(--color-text);
+  background:
+    rgba(16, 34, 24, 0.82);
+  border-color:
+    rgba(150, 191, 169, 0.2);
+  box-shadow:
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.05);
+}
+
+html[data-theme="dark"] input:hover,
+html[data-theme="dark"] select:hover,
+html[data-theme="dark"] textarea:hover {
+  background:
+    rgba(21, 43, 31, 0.92);
+  border-color:
+    rgba(116, 205, 154, 0.32);
+}
+
+html[data-theme="dark"] input:focus,
+html[data-theme="dark"] select:focus,
+html[data-theme="dark"] textarea:focus {
+  background:
+    rgba(20, 43, 30, 0.96);
+  border-color: #57c78b;
+  box-shadow:
+    0 0 0 3px
+      rgba(87, 199, 139, 0.15);
+}
+
+html[data-theme="dark"]
+input::placeholder,
+html[data-theme="dark"]
+textarea::placeholder {
+  color: #62796a;
+}
+
+html[data-theme="dark"] option {
+  color: #edf7f0;
+  background: #10261a;
+}
+
+html[data-theme="dark"] a {
+  color: #80dba6;
+}
+
+html[data-theme="dark"]
+::-webkit-scrollbar-thumb {
+  background: #31483a;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+html[data-theme="dark"]
+::-webkit-scrollbar-thumb:hover {
+  background: #476451;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+html[data-theme="dark"] ::selection {
+  color: #07150e;
+  background: #79daa3;
+}
+
+/* ===== END LIQUID GLASS DARK THEME ===== */

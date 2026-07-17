@@ -88,3 +88,146 @@
     width: 100%;
   }
 }
+
+/* ===== SHARED DARK GLASS OVERRIDES ===== */
+
+:global(html[data-theme="dark"]) .card,
+:global(html[data-theme="dark"]) .form,
+:global(html[data-theme="dark"]) .review,
+:global(html[data-theme="dark"]) .summaryCard,
+:global(html[data-theme="dark"]) .item,
+:global(html[data-theme="dark"]) .history,
+:global(html[data-theme="dark"]) .progressWrap {
+  color: var(--color-text);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(20, 43, 30, 0.77),
+      rgba(10, 29, 19, 0.6)
+    );
+  border-color:
+    rgba(162, 211, 183, 0.13);
+  box-shadow:
+    0 18px 50px
+      rgba(0, 0, 0, 0.29),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.06);
+}
+
+:global(html[data-theme="dark"]) .card:hover,
+:global(html[data-theme="dark"]) .item:hover,
+:global(html[data-theme="dark"]) .summaryCard:hover {
+  border-color:
+    rgba(112, 214, 156, 0.23);
+  box-shadow:
+    0 25px 67px
+      rgba(0, 0, 0, 0.38),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.08);
+}
+
+:global(html[data-theme="dark"]) .empty {
+  color: var(--color-text-muted);
+  background:
+    rgba(17, 37, 26, 0.58);
+  border-color:
+    rgba(162, 211, 183, 0.16);
+}
+
+:global(html[data-theme="dark"]) .title {
+  color: var(--color-text);
+}
+
+:global(html[data-theme="dark"]) .meta,
+:global(html[data-theme="dark"]) .prices,
+:global(html[data-theme="dark"]) .hint,
+:global(html[data-theme="dark"]) .note {
+  color: var(--color-text-muted);
+}
+
+/* ===== END SHARED DARK GLASS OVERRIDES ===== */
+
+/* ===== DARK MODE: CHAT ENTRY ===== */
+
+:global(html[data-theme="dark"]) .wrap {
+  color: var(--color-text);
+}
+
+:global(html[data-theme="dark"]) .inputRow {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(20, 43, 30, 0.84),
+      rgba(9, 28, 18, 0.7)
+    );
+  border-color:
+    rgba(153, 216, 180, 0.14);
+  box-shadow:
+    0 18px 48px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.06);
+  backdrop-filter:
+    blur(22px) saturate(140%);
+  -webkit-backdrop-filter:
+    blur(22px) saturate(140%);
+}
+
+:global(html[data-theme="dark"]) .input {
+  color: #edf7f0;
+  background:
+    rgba(4, 20, 12, 0.62);
+  border-color:
+    rgba(143, 204, 169, 0.17);
+  box-shadow:
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.035);
+}
+
+:global(html[data-theme="dark"]) .input:hover {
+  background:
+    rgba(8, 27, 17, 0.78);
+  border-color:
+    rgba(111, 213, 155, 0.25);
+}
+
+:global(html[data-theme="dark"]) .input:focus {
+  background:
+    rgba(10, 31, 20, 0.9);
+  border-color: #57c78b;
+  box-shadow:
+    0 0 0 3px
+      rgba(87, 199, 139, 0.14);
+}
+
+:global(html[data-theme="dark"]) .input::placeholder {
+  color: #637b6c;
+}
+
+:global(html[data-theme="dark"]) .notice {
+  color: #f4ca76;
+  background:
+    rgba(146, 96, 11, 0.14);
+  border-color:
+    rgba(244, 193, 91, 0.2);
+}
+
+:global(html[data-theme="dark"]) .history {
+  color: var(--color-text);
+  background:
+    rgba(31, 92, 57, 0.16);
+  border-color:
+    rgba(105, 210, 150, 0.18);
+  box-shadow:
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.04);
+}
+
+:global(html[data-theme="dark"]) .historyTitle {
+  color: #83dca8;
+}
+
+:global(html[data-theme="dark"]) .history ul {
+  color: var(--color-text-muted);
+}
+
+/* ===== END DARK CHAT ENTRY ===== */

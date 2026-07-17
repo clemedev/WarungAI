@@ -11,6 +11,7 @@ import ProductList from './components/ProductList/ProductList';
 import ExpenseTracker from './components/ExpenseTracker/ExpenseTracker';
 import LoginScreen from './components/LoginScreen/LoginScreen';
 import SalesList from './components/SalesList/SalesList';
+import ThemeToggle from './components/ThemeToggle/ThemeToggle.jsx';
 import OverviewMetrics from './components/OverviewMetrics/OverviewMetrics';
 
 import {
@@ -428,6 +429,12 @@ export default function App() {
           </div>
         </div>
 
+        <div className={styles.themeControl}>
+          <ThemeToggle
+            darkSurface
+          />
+        </div>
+
         <p className={styles.navHeading}>
           Ruang kerja
         </p>
@@ -501,16 +508,20 @@ export default function App() {
             <strong>WarungAI</strong>
           </div>
 
-          <button
-            type="button"
-            className={styles.mobileProfile}
-            onClick={() =>
-              setCreateMenuOpen(true)
-            }
-            aria-label="Buka menu tindakan"
-          >
-            {getInitials(user.name)}
-          </button>
+          <div className={styles.mobileControls}>
+            <ThemeToggle compact />
+
+            <button
+              type="button"
+              className={styles.mobileProfile}
+              onClick={() =>
+                setCreateMenuOpen(true)
+              }
+              aria-label="Buka menu tindakan"
+            >
+              {getInitials(user.name)}
+            </button>
+          </div>
         </header>
 
         <main className={styles.main}>

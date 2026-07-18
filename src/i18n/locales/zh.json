@@ -111,6 +111,13 @@
     "errPassword": "密码至少需要 8 个字符。",
     "errName": "请输入档口或卖家名称。",
     "errVerify": "账户已创建。请先查看电邮完成验证再登录。",
+    "verifyNoticeTitle": "验证你的电邮",
+    "verifySent": "我们已将验证链接发送到 {{email}}。请先打开链接，再回来登录。",
+    "verifyRequired": "请先打开电邮中的验证链接，然后再登录。",
+    "checkEmailTitle": "请查看收件箱",
+    "checkEmailDescription": "我们已将验证链接发送到 {{email}}。",
+    "checkEmailNext": "请打开该链接以验证账户。验证完成前，你无法进入应用。",
+    "backToLogin": "返回登录",
     "errGeneric": "登录失败，请再试一次。"
   },
   "demo": {

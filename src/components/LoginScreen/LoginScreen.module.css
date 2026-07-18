@@ -166,6 +166,79 @@
   line-height: 1.45;
 }
 
+.notice {
+  display: grid;
+  gap: 0.18rem;
+
+  margin: 0;
+  padding: 0.72rem 0.8rem;
+  color: var(--color-primary-dark);
+  background: var(--color-primary-light);
+  border: 1px solid var(--color-primary-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.notice strong {
+  font-weight: 850;
+}
+
+.verificationBox {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.85rem;
+  padding: 1rem;
+  color: var(--color-primary-dark);
+  background: var(--color-primary-light);
+  border: 1px solid var(--color-primary-border);
+  border-radius: var(--radius-md);
+  text-align: left;
+}
+
+.verificationIcon {
+  display: grid;
+  width: 2.35rem;
+  height: 2.35rem;
+  place-items: center;
+  color: #ffffff;
+  background: var(--color-primary);
+  border-radius: 50%;
+  font-size: 1.1rem;
+}
+
+.verificationBox h2,
+.verificationBox p {
+  margin: 0;
+}
+
+.verificationBox h2 {
+  font-size: 0.96rem;
+  font-weight: 850;
+}
+
+.verificationBox p {
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.verificationNext {
+  color: var(--color-text);
+  font-weight: 750;
+}
+
+.returnButton {
+  grid-column: 1 / -1;
+  min-height: 42px;
+  padding: 0.55rem 0.8rem;
+  color: var(--color-primary-dark);
+  background: var(--color-surface);
+  border: 1px solid var(--color-primary-border);
+  border-radius: var(--radius-sm);
+  font-weight: 800;
+}
+
 .submit {
   min-height: 49px;
   margin-top: 0.15rem;
@@ -295,6 +368,22 @@
 :global(html[data-theme="dark"]) .hint,
 :global(html[data-theme="dark"]) .note {
   color: var(--color-text-muted);
+}
+
+:global(html[data-theme="dark"]) .verificationBox {
+  color: var(--color-text);
+  background: rgba(34, 97, 62, 0.46);
+  border-color: rgba(126, 222, 165, 0.33);
+}
+
+:global(html[data-theme="dark"]) .verificationNext {
+  color: var(--color-text);
+}
+
+:global(html[data-theme="dark"]) .returnButton {
+  color: var(--color-text);
+  background: rgba(7, 28, 18, 0.46);
+  border-color: rgba(126, 222, 165, 0.33);
 }
 
 /* ===== END SHARED DARK GLASS OVERRIDES ===== */

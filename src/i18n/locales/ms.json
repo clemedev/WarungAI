@@ -111,6 +111,13 @@
     "errPassword": "Kata laluan mesti sekurang-kurangnya 8 aksara.",
     "errName": "Sila masukkan nama kedai atau penjual.",
     "errVerify": "Akaun dicipta. Sila semak e-mel anda sebelum log masuk.",
+    "verifyNoticeTitle": "Sahkan e-mel anda",
+    "verifySent": "Kami telah menghantar pautan pengesahan ke {{email}}. Buka pautan itu dahulu, kemudian kembali untuk log masuk.",
+    "verifyRequired": "Sila buka pautan pengesahan dalam e-mel anda sebelum log masuk.",
+    "checkEmailTitle": "Semak peti masuk anda",
+    "checkEmailDescription": "Kami telah menghantar pautan pengesahan ke {{email}}.",
+    "checkEmailNext": "Buka pautan itu untuk mengesahkan akaun anda. Anda tidak boleh masuk ke aplikasi sehingga akaun disahkan.",
+    "backToLogin": "Kembali ke log masuk",
     "errGeneric": "Log masuk gagal. Sila cuba lagi."
   },
   "demo": {

@@ -112,6 +112,13 @@
     "errPassword": "Password must be at least 8 characters.",
     "errName": "Please enter a stall or seller name.",
     "errVerify": "Account created. Please check your email before logging in.",
+    "verifyNoticeTitle": "Verify your email",
+    "verifySent": "We sent a verification link to {{email}}. Open it first, then return here to log in.",
+    "verifyRequired": "Please open the verification link in your email before logging in.",
+    "checkEmailTitle": "Check your inbox",
+    "checkEmailDescription": "We sent a verification link to {{email}}.",
+    "checkEmailNext": "Open that link to verify your account. You cannot enter the app until it is verified.",
+    "backToLogin": "Back to log in",
     "errGeneric": "Log in failed. Please try again."
   },
   "demo": {

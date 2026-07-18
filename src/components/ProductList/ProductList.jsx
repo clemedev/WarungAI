@@ -161,7 +161,7 @@ export default function ProductList({
   ) {
     const confirmed =
       window.confirm(
-        `Arkibkan "${product.name}"? Produk ini tidak akan muncul untuk jualan baru.`,
+        t('product.archiveConfirm', { name: product.name }),
       );
 
     if (!confirmed) {
@@ -427,7 +427,7 @@ export default function ProductList({
                           : styles.marginBad
                       }
                     >
-                      Untung RM
+                      {t('product.profit')} RM
                       {margin.toFixed(2)}
                     </span>
                   </span>

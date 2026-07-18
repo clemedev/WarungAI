@@ -86,4 +86,4 @@ The recent UI and demo improvements are codebase-only changes; they do not requi
 
 ## License
 
-© clemedev. All rights reserved.
+© clemedev, dashvink. All rights reserved.

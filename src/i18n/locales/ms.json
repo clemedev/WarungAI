@@ -49,7 +49,19 @@
     "tabBusy": "Mod pantas"
   },
   "busy": {
-    "hint": "Pilih produk untuk tambah ke jualan.", "noProducts": "Tambah produk dahulu untuk menggunakan Mod pantas.", "addProduct": "Tambah {{name}}", "removeProduct": "Kurangkan {{name}}", "stock_other": "Stok {{count}}", "cart": "Jualan semasa", "emptyCart": "Pilih produk untuk mula.", "paymentAria": "Kaedah bayaran", "cash": "Tunai", "qr": "QR", "save_other": "Simpan {{count}} item", "saving": "Menyimpan...", "saveFailed": "Gagal menyimpan jualan pantas."
+    "hint": "Pilih produk untuk tambah ke jualan.",
+    "noProducts": "Tambah produk dahulu untuk menggunakan Mod pantas.",
+    "addProduct": "Tambah {{name}}",
+    "removeProduct": "Kurangkan {{name}}",
+    "stock_other": "Stok {{count}}",
+    "cart": "Jualan semasa",
+    "emptyCart": "Pilih produk untuk mula.",
+    "paymentAria": "Kaedah bayaran",
+    "cash": "Tunai",
+    "qr": "QR",
+    "save_other": "Simpan {{count}} item",
+    "saving": "Menyimpan...",
+    "saveFailed": "Gagal menyimpan jualan pantas."
   },
   "quick": {
     "eyebrow": "Hari ini",
@@ -133,12 +145,26 @@
     "walkthrough": "Panduan demo"
   },
   "walkthrough": {
-    "eyebrow": "Laluan untuk juri", "title": "Panduan demo", "close": "Tutup panduan", "next": "Langkah seterusnya", "done": "Tamatkan panduan",
-    "busyTitle": "Mod Sibuk", "busyHint": "Tekan, bayar, simpan.", "busyScript": "Rekod jualan waktu sibuk dalam beberapa sentuhan.",
-    "safeTitle": "Semakan resit", "safeHint": "Semak sebelum simpan.", "safeScript": "Pemilik menyemak item OCR yang tidak pasti dahulu.",
-    "closingTitle": "Penutup Harian", "closingHint": "Jualan, untung, stok.", "closingScript": "Gambaran perniagaan harian dalam beberapa saat.",
-    "analyticsTitle": "Analitik", "analyticsHint": "Apa berlaku dan apa seterusnya.", "analyticsScript": "Lihat yang laris, risiko dan persediaan esok.",
-    "reportTitle": "Laporan mingguan", "reportHint": "Cetak atau simpan PDF.", "reportScript": "Simpan atau kongsi dengan akauntan."
+    "eyebrow": "Laluan untuk juri",
+    "title": "Panduan demo",
+    "close": "Tutup panduan",
+    "next": "Langkah seterusnya",
+    "done": "Tamatkan panduan",
+    "busyTitle": "Mod Sibuk",
+    "busyHint": "Tekan, bayar, simpan.",
+    "busyScript": "Rekod jualan waktu sibuk dalam beberapa sentuhan.",
+    "safeTitle": "Semakan resit",
+    "safeHint": "Semak sebelum simpan.",
+    "safeScript": "Pemilik menyemak item OCR yang tidak pasti dahulu.",
+    "closingTitle": "Penutup Harian",
+    "closingHint": "Jualan, untung, stok.",
+    "closingScript": "Gambaran perniagaan harian dalam beberapa saat.",
+    "analyticsTitle": "Analitik",
+    "analyticsHint": "Apa berlaku dan apa seterusnya.",
+    "analyticsScript": "Lihat yang laris, risiko dan persediaan esok.",
+    "reportTitle": "Laporan mingguan",
+    "reportHint": "Cetak atau simpan PDF.",
+    "reportScript": "Simpan atau kongsi dengan akauntan."
   },
   "lang": {
     "select": "Pilih bahasa",
@@ -183,7 +209,9 @@
     "expensesDetail": "Kos operasi hari ini",
     "transactionsLabel": "Transaksi",
     "transactionsDetail": "Jualan direkod",
-    "loadFailed": "Gagal memuatkan ringkasan."
+    "loadFailed": "Gagal memuatkan ringkasan.",
+    "loadingAria": "Memuatkan ringkasan hari ini",
+    "summaryAria": "Ringkasan hari ini"
   },
   "summaryCard": {
     "eyebrow": "Prestasi hari ini",
@@ -251,10 +279,32 @@
     "none": "Tiada data lagi."
   },
   "prepare": {
-    "loading": "Menyediakan cadangan esok...", "loadFailed": "Gagal memuatkan cadangan esok.", "eyebrow": "Rancang awal", "title": "Sedia untuk {{weekday}}", "hint": "Berdasarkan {{count}} hari {{weekday}} yang lalu.", "average_other": "Purata {{count}} unit", "recommend_other": "Sedia {{count}}"
+    "loading": "Menyediakan cadangan esok...",
+    "loadFailed": "Gagal memuatkan cadangan esok.",
+    "eyebrow": "Rancang awal",
+    "title": "Sedia untuk {{weekday}}",
+    "hint": "Berdasarkan {{count}} hari {{weekday}} yang lalu.",
+    "average_other": "Purata {{count}} unit",
+    "recommend_other": "Sedia {{count}}"
   },
   "closing": {
-    "eyebrow": "Tutup hari ini", "title": "Ringkasan penutup", "empty": "Belum ada jualan untuk ditutup hari ini.", "sales": "Jualan hari ini: {{amount}}.", "profit": "Untung bersih: {{amount}}.", "salesLabel": "Jualan", "profitLabel": "Untung bersih", "cash": "Tunai", "qr": "QR", "top_other": "Paling laris: {{name}} ({{count}} unit)", "share": "Kongsi penutup hari", "lowStock": "Stok rendah", "manageStock": "Urus stok", "health": "Kesihatan perniagaan", "healthHealthy": "Nampak sihat hari ini", "healthAttention": "Beberapa perkara perlu perhatian", "healthCritical": "Ambil tindakan atas risiko hari ini"
+    "eyebrow": "Tutup hari ini",
+    "title": "Ringkasan penutup",
+    "empty": "Belum ada jualan untuk ditutup hari ini.",
+    "sales": "Jualan hari ini: {{amount}}.",
+    "profit": "Untung bersih: {{amount}}.",
+    "salesLabel": "Jualan",
+    "profitLabel": "Untung bersih",
+    "cash": "Tunai",
+    "qr": "QR",
+    "top_other": "Paling laris: {{name}} ({{count}} unit)",
+    "share": "Kongsi penutup hari",
+    "lowStock": "Stok rendah",
+    "manageStock": "Urus stok",
+    "health": "Kesihatan perniagaan",
+    "healthHealthy": "Nampak sihat hari ini",
+    "healthAttention": "Beberapa perkara perlu perhatian",
+    "healthCritical": "Ambil tindakan atas risiko hari ini"
   },
   "chat": {
     "placeholder": "cth: \"Jual 3 nasi lemak RM12\"",
@@ -320,8 +370,9 @@
     "pick": "— pilih —",
     "saveItems_other": "Simpan {{count}} item",
     "noValidItems": "Tiada item yang sah untuk disimpan.",
-    "saleSaveFailed": "Gagal menyimpan jualan daripada resit."
-    ,"attentionCount_other": "{{count}} item perlu disemak sebelum disimpan.", "needsAttention": "Perlu semakan"
+    "saleSaveFailed": "Gagal menyimpan jualan daripada resit.",
+    "attentionCount_other": "{{count}} item perlu disemak sebelum disimpan.",
+    "needsAttention": "Perlu semakan"
   },
   "salesList": {
     "title": "Sejarah jualan",
@@ -386,6 +437,8 @@
     "archiveTitle": "Arkibkan produk",
     "loadFailed": "Gagal mendapatkan senarai produk.",
     "saveFailed": "Gagal menyimpan produk.",
-    "archiveFailed": "Gagal mengarkib produk."
+    "archiveFailed": "Gagal mengarkib produk.",
+    "profit": "Untung",
+    "archiveConfirm": "Arkibkan \"{{name}}\"? Produk ini tidak akan muncul untuk jualan baharu."
   }
 }

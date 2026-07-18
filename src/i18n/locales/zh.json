@@ -49,7 +49,19 @@
     "tabBusy": "快速模式"
   },
   "busy": {
-    "hint": "点击产品以添加到销售记录。", "noProducts": "请先添加产品，再使用快速模式。", "addProduct": "添加 {{name}}", "removeProduct": "减少一个 {{name}}", "stock_other": "库存 {{count}}", "cart": "当前销售", "emptyCart": "点击产品以开始。", "paymentAria": "付款方式", "cash": "现金", "qr": "QR", "save_other": "保存 {{count}} 个项目", "saving": "正在保存...", "saveFailed": "无法保存快速销售记录。"
+    "hint": "点击产品以添加到销售记录。",
+    "noProducts": "请先添加产品，再使用快速模式。",
+    "addProduct": "添加 {{name}}",
+    "removeProduct": "减少一个 {{name}}",
+    "stock_other": "库存 {{count}}",
+    "cart": "当前销售",
+    "emptyCart": "点击产品以开始。",
+    "paymentAria": "付款方式",
+    "cash": "现金",
+    "qr": "QR",
+    "save_other": "保存 {{count}} 个项目",
+    "saving": "正在保存...",
+    "saveFailed": "无法保存快速销售记录。"
   },
   "quick": {
     "eyebrow": "今天",
@@ -133,12 +145,26 @@
     "walkthrough": "演示指南"
   },
   "walkthrough": {
-    "eyebrow": "评委演示路线", "title": "演示流程", "close": "关闭流程", "next": "下一步", "done": "完成流程",
-    "busyTitle": "忙碌模式", "busyHint": "点击、付款、保存。", "busyScript": "几次点击即可记录高峰时段销售。",
-    "safeTitle": "收据审核", "safeHint": "保存前先审核。", "safeScript": "老板先检查不确定的 OCR 项目。",
-    "closingTitle": "每日结算", "closingHint": "销售、利润、库存。", "closingScript": "数秒内掌握当天业务情况。",
-    "analyticsTitle": "数据分析", "analyticsHint": "发生了什么，下一步做什么。", "analyticsScript": "找出畅销品、风险和明日备货。",
-    "reportTitle": "每周报告", "reportHint": "打印或保存 PDF。", "reportScript": "保存或分享给会计师。"
+    "eyebrow": "评委演示路线",
+    "title": "演示流程",
+    "close": "关闭流程",
+    "next": "下一步",
+    "done": "完成流程",
+    "busyTitle": "忙碌模式",
+    "busyHint": "点击、付款、保存。",
+    "busyScript": "几次点击即可记录高峰时段销售。",
+    "safeTitle": "收据审核",
+    "safeHint": "保存前先审核。",
+    "safeScript": "老板先检查不确定的 OCR 项目。",
+    "closingTitle": "每日结算",
+    "closingHint": "销售、利润、库存。",
+    "closingScript": "数秒内掌握当天业务情况。",
+    "analyticsTitle": "数据分析",
+    "analyticsHint": "发生了什么，下一步做什么。",
+    "analyticsScript": "找出畅销品、风险和明日备货。",
+    "reportTitle": "每周报告",
+    "reportHint": "打印或保存 PDF。",
+    "reportScript": "保存或分享给会计师。"
   },
   "lang": {
     "select": "选择语言",
@@ -183,7 +209,9 @@
     "expensesDetail": "今日营运成本",
     "transactionsLabel": "交易",
     "transactionsDetail": "已记录的销售",
-    "loadFailed": "无法加载摘要。"
+    "loadFailed": "无法加载摘要。",
+    "loadingAria": "正在加载今日摘要",
+    "summaryAria": "今日摘要"
   },
   "summaryCard": {
     "eyebrow": "今日表现",
@@ -249,10 +277,32 @@
     "none": "暂无数据。"
   },
   "prepare": {
-    "loading": "正在准备明日建议...", "loadFailed": "无法加载明日建议。", "eyebrow": "提前规划", "title": "为 {{weekday}} 做准备", "hint": "基于过去 {{count}} 个相同星期几的数据。", "average_other": "平均 {{count}} 件", "recommend_other": "准备 {{count}}"
+    "loading": "正在准备明日建议...",
+    "loadFailed": "无法加载明日建议。",
+    "eyebrow": "提前规划",
+    "title": "为 {{weekday}} 做准备",
+    "hint": "基于过去 {{count}} 个相同星期几的数据。",
+    "average_other": "平均 {{count}} 件",
+    "recommend_other": "准备 {{count}}"
   },
   "closing": {
-    "eyebrow": "今日结算", "title": "结算摘要", "empty": "今天还没有销售记录可结算。", "sales": "今日销售：{{amount}}。", "profit": "净利润：{{amount}}。", "salesLabel": "销售额", "profitLabel": "净利润", "cash": "现金", "qr": "QR", "top_other": "畅销产品：{{name}}（{{count}} 件）", "share": "分享每日结算", "lowStock": "库存不足", "manageStock": "管理库存", "health": "业务健康度", "healthHealthy": "今天状况良好", "healthAttention": "有几项需要注意", "healthCritical": "请处理今天的风险"
+    "eyebrow": "今日结算",
+    "title": "结算摘要",
+    "empty": "今天还没有销售记录可结算。",
+    "sales": "今日销售：{{amount}}。",
+    "profit": "净利润：{{amount}}。",
+    "salesLabel": "销售额",
+    "profitLabel": "净利润",
+    "cash": "现金",
+    "qr": "QR",
+    "top_other": "畅销产品：{{name}}（{{count}} 件）",
+    "share": "分享每日结算",
+    "lowStock": "库存不足",
+    "manageStock": "管理库存",
+    "health": "业务健康度",
+    "healthHealthy": "今天状况良好",
+    "healthAttention": "有几项需要注意",
+    "healthCritical": "请处理今天的风险"
   },
   "chat": {
     "placeholder": "例如：“卖了 3 份 nasi lemak RM12”",
@@ -318,8 +368,9 @@
     "pick": "— 选择 —",
     "saveItems_other": "保存 {{count}} 个项目",
     "noValidItems": "没有可保存的有效项目。",
-    "saleSaveFailed": "无法保存这张收据的销售。"
-    ,"attentionCount_other": "保存前有 {{count}} 个项目需要检查。", "needsAttention": "需要检查"
+    "saleSaveFailed": "无法保存这张收据的销售。",
+    "attentionCount_other": "保存前有 {{count}} 个项目需要检查。",
+    "needsAttention": "需要检查"
   },
   "salesList": {
     "title": "销售历史",
@@ -384,6 +435,8 @@
     "archiveTitle": "归档产品",
     "loadFailed": "无法加载产品列表。",
     "saveFailed": "无法保存产品。",
-    "archiveFailed": "无法归档产品。"
+    "archiveFailed": "无法归档产品。",
+    "profit": "利润",
+    "archiveConfirm": "要归档“{{name}}”吗？此商品将不再出现在新销售中。"
   }
 }

@@ -49,7 +49,21 @@
     "tabBusy": "Busy mode"
   },
   "busy": {
-    "hint": "Tap products to add them to the sale.", "noProducts": "Add products before using Busy Mode.", "addProduct": "Add {{name}}", "removeProduct": "Remove one {{name}}", "stock_one": "{{count}} in stock", "stock_other": "{{count}} in stock", "cart": "Current sale", "emptyCart": "Tap a product to begin.", "paymentAria": "Payment method", "cash": "Cash", "qr": "QR", "save_one": "Save {{count}} item", "save_other": "Save {{count}} items", "saving": "Saving...", "saveFailed": "Could not save the quick sale."
+    "hint": "Tap products to add them to the sale.",
+    "noProducts": "Add products before using Busy Mode.",
+    "addProduct": "Add {{name}}",
+    "removeProduct": "Remove one {{name}}",
+    "stock_one": "{{count}} in stock",
+    "stock_other": "{{count}} in stock",
+    "cart": "Current sale",
+    "emptyCart": "Tap a product to begin.",
+    "paymentAria": "Payment method",
+    "cash": "Cash",
+    "qr": "QR",
+    "save_one": "Save {{count}} item",
+    "save_other": "Save {{count}} items",
+    "saving": "Saving...",
+    "saveFailed": "Could not save the quick sale."
   },
   "quick": {
     "eyebrow": "Today",
@@ -134,12 +148,26 @@
     "walkthrough": "Demo guide"
   },
   "walkthrough": {
-    "eyebrow": "Judge-ready route", "title": "Demo walkthrough", "close": "Close walkthrough", "next": "Next step", "done": "Finish walkthrough",
-    "busyTitle": "Busy Mode", "busyHint": "Tap, pay, save.", "busyScript": "Record a rush-hour sale in a few taps.",
-    "safeTitle": "Receipt review", "safeHint": "Review before saving.", "safeScript": "The owner checks uncertain OCR items first.",
-    "closingTitle": "Daily Closing", "closingHint": "Sales, profit, stock.", "closingScript": "The daily business picture in seconds.",
-    "analyticsTitle": "Analytics", "analyticsHint": "What happened and what next.", "analyticsScript": "Find winners, risks, and tomorrow's preparation.",
-    "reportTitle": "Weekly report", "reportHint": "Print or save PDF.", "reportScript": "Keep it or share it with an accountant."
+    "eyebrow": "Judge-ready route",
+    "title": "Demo walkthrough",
+    "close": "Close walkthrough",
+    "next": "Next step",
+    "done": "Finish walkthrough",
+    "busyTitle": "Busy Mode",
+    "busyHint": "Tap, pay, save.",
+    "busyScript": "Record a rush-hour sale in a few taps.",
+    "safeTitle": "Receipt review",
+    "safeHint": "Review before saving.",
+    "safeScript": "The owner checks uncertain OCR items first.",
+    "closingTitle": "Daily Closing",
+    "closingHint": "Sales, profit, stock.",
+    "closingScript": "The daily business picture in seconds.",
+    "analyticsTitle": "Analytics",
+    "analyticsHint": "What happened and what next.",
+    "analyticsScript": "Find winners, risks, and tomorrow's preparation.",
+    "reportTitle": "Weekly report",
+    "reportHint": "Print or save PDF.",
+    "reportScript": "Keep it or share it with an accountant."
   },
   "lang": {
     "select": "Select language",
@@ -189,7 +217,9 @@
     "expensesDetail": "Today's operating costs",
     "transactionsLabel": "Transactions",
     "transactionsDetail": "Sales recorded",
-    "loadFailed": "Could not load the summary."
+    "loadFailed": "Could not load the summary.",
+    "loadingAria": "Loading today summary",
+    "summaryAria": "Today summary"
   },
   "summaryCard": {
     "eyebrow": "Today's performance",
@@ -258,10 +288,35 @@
     "none": "No data yet."
   },
   "prepare": {
-    "loading": "Preparing tomorrow's suggestion...", "loadFailed": "Could not load tomorrow's suggestion.", "eyebrow": "Plan ahead", "title": "Prepare for {{weekday}}", "hint": "Based on {{count}} previous matching weekdays.", "average_one": "Average {{count}} unit", "average_other": "Average {{count}} units", "recommend_one": "Prepare {{count}}", "recommend_other": "Prepare {{count}}"
+    "loading": "Preparing tomorrow's suggestion...",
+    "loadFailed": "Could not load tomorrow's suggestion.",
+    "eyebrow": "Plan ahead",
+    "title": "Prepare for {{weekday}}",
+    "hint": "Based on {{count}} previous matching weekdays.",
+    "average_one": "Average {{count}} unit",
+    "average_other": "Average {{count}} units",
+    "recommend_one": "Prepare {{count}}",
+    "recommend_other": "Prepare {{count}}"
   },
   "closing": {
-    "eyebrow": "Close today", "title": "Closing summary", "empty": "No sales to close today yet.", "sales": "Today's sales: {{amount}}.", "profit": "Net profit: {{amount}}.", "salesLabel": "Sales", "profitLabel": "Net profit", "cash": "Cash", "qr": "QR", "top_one": "Top seller: {{name}} ({{count}} unit)", "top_other": "Top seller: {{name}} ({{count}} units)", "share": "Share daily close", "lowStock": "Low stock", "manageStock": "Manage stock", "health": "Business health", "healthHealthy": "Looking healthy today", "healthAttention": "A few items need attention", "healthCritical": "Act on today's risks"
+    "eyebrow": "Close today",
+    "title": "Closing summary",
+    "empty": "No sales to close today yet.",
+    "sales": "Today's sales: {{amount}}.",
+    "profit": "Net profit: {{amount}}.",
+    "salesLabel": "Sales",
+    "profitLabel": "Net profit",
+    "cash": "Cash",
+    "qr": "QR",
+    "top_one": "Top seller: {{name}} ({{count}} unit)",
+    "top_other": "Top seller: {{name}} ({{count}} units)",
+    "share": "Share daily close",
+    "lowStock": "Low stock",
+    "manageStock": "Manage stock",
+    "health": "Business health",
+    "healthHealthy": "Looking healthy today",
+    "healthAttention": "A few items need attention",
+    "healthCritical": "Act on today's risks"
   },
   "chat": {
     "placeholder": "e.g. \"Sold 3 nasi lemak RM12\"",
@@ -328,8 +383,10 @@
     "saveItems_one": "Save {{count}} item",
     "saveItems_other": "Save {{count}} items",
     "noValidItems": "No valid items to save.",
-    "saleSaveFailed": "Could not save the sales from this receipt."
-    ,"attentionCount_one": "{{count}} item needs checking before saving.", "attentionCount_other": "{{count}} items need checking before saving.", "needsAttention": "Needs review"
+    "saleSaveFailed": "Could not save the sales from this receipt.",
+    "attentionCount_one": "{{count}} item needs checking before saving.",
+    "attentionCount_other": "{{count}} items need checking before saving.",
+    "needsAttention": "Needs review"
   },
   "salesList": {
     "title": "Sales history",
@@ -394,6 +451,8 @@
     "archiveTitle": "Archive product",
     "loadFailed": "Could not load the product list.",
     "saveFailed": "Could not save the product.",
-    "archiveFailed": "Could not archive the product."
+    "archiveFailed": "Could not archive the product.",
+    "profit": "Profit",
+    "archiveConfirm": "Archive \"{{name}}\"? This product will no longer appear for new sales."
   }
 }

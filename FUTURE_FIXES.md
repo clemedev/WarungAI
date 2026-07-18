@@ -146,5 +146,3 @@ This is the next backlog for `design/ui-redesign-2.0`. It excludes the issues al
 4. CSV export and offline state.
 5. Idempotent sale creation and stock-movement ledger when Supabase work is allowed.
 6. End-to-end and accessibility tests before a wider release.
-
-Items 1–4 would make the product feel noticeably more reliable in front of real stall owners. Items 11–14 should be planned when database changes are allowed.

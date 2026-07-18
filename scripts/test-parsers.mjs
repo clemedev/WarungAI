@@ -208,6 +208,42 @@ test('nl: empty product list is safe', () => {
   assert.equal(r.total, 8);
 });
 
+// ---------- Chinese product names via voice ----------
+
+const zhProducts = [
+  { id: 'z1', name: '椰浆饭', sellPrice: 4.0, costPrice: 2.0 },
+  { id: 'z2', name: '拉茶', sellPrice: 3.0, costPrice: 1.0 },
+  ...products,
+];
+
+test('nl: zh "三份椰浆饭" — hanzi qty + measure word, no spaces', () => {
+  const r = parseNaturalLanguageEntry('三份椰浆饭', zhProducts);
+  assert.equal(r.productId, 'z1');
+  assert.equal(r.quantity, 3);
+  assert.equal(r.total, 12);
+  assert.equal(r.needsReview, false);
+});
+
+test('nl: zh "卖了两杯拉茶" — sale verb stripped, 两 = 2', () => {
+  const r = parseNaturalLanguageEntry('卖了两杯拉茶', zhProducts);
+  assert.equal(r.productId, 'z2');
+  assert.equal(r.quantity, 2);
+  assert.equal(r.total, 6);
+});
+
+test('nl: zh "3份椰浆饭" — digit qty glued to measure word', () => {
+  const r = parseNaturalLanguageEntry('3份椰浆饭', zhProducts);
+  assert.equal(r.productId, 'z1');
+  assert.equal(r.quantity, 3);
+});
+
+test('nl: zh unknown product still safe', () => {
+  const r = parseNaturalLanguageEntry('三份汉堡包', zhProducts);
+  assert.equal(r.productId, null);
+  assert.equal(r.quantity, 3);
+  assert.equal(r.needsReview, true);
+});
+
 test('matchProduct: exact and extra-words matches', () => {
   assert.equal(matchProduct('nasi lemak', products).product.id, 'p1');
   assert.equal(matchProduct('nasi lemak ayam', products).product.id, 'p1');

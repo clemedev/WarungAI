@@ -19,12 +19,24 @@ const BM_NUMBER_WORDS = {
   eight: 8, nine: 9, ten: 10,
 };
 
+// Chinese numerals + measure words ("三份椰浆饭"). Spoken/typed Chinese has no
+// spaces, so these can't go through the word-boundary matching above.
+const ZH_NUMBER_WORDS = {
+  一: 1, 两: 2, 二: 2, 三: 3, 四: 4, 五: 5,
+  六: 6, 七: 7, 八: 8, 九: 9, 十: 10,
+};
+// numeral (hanzi or digit) followed by a measure word, e.g. 三份 / 3杯 / 两碗
+const ZH_QTY_RE = /([一两二三四五六七八九十]|\d{1,3})\s*[份个杯碗盘包碟只条串块]/u;
+// common sale verbs said before the product ("卖了三份椰浆饭")
+const ZH_FILLER_RE = /卖出了|卖出|卖了|卖|买了|加/gu;
+
 function round2(n) {
   return Math.round(n * 100) / 100;
 }
 
 function normalize(s) {
-  return s.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  // \p{L}/\p{N} instead of a-z0-9 so non-Latin product names (椰浆饭) survive
+  return s.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim();
 }
 
 /** Classic Levenshtein distance. */
@@ -129,9 +141,17 @@ export function parseNaturalLanguageEntry(text, products) {
     working = working.replace(rmMatch[0], ' ');
   }
 
-  // 2. quantity: first standalone number, or a number word (dua/two/...)
+  working = working.replace(ZH_FILLER_RE, ' ');
+
+  // 2. quantity: Chinese numeral+measure word first (no word boundaries in
+  // Chinese, so "三份椰浆饭" must match inside the blob), then a standalone
+  // number, then a number word (dua/two/...)
+  const zhQtyMatch = working.match(ZH_QTY_RE);
   const qtyMatch = working.match(/(?:^|\s)(\d{1,3})(?:\s|$|x\b)/);
-  if (qtyMatch) {
+  if (zhQtyMatch) {
+    result.quantity = ZH_NUMBER_WORDS[zhQtyMatch[1]] ?? parseInt(zhQtyMatch[1], 10);
+    working = working.replace(zhQtyMatch[0], ' ');
+  } else if (qtyMatch) {
     result.quantity = parseInt(qtyMatch[1], 10);
     working = working.replace(qtyMatch[0], ' ');
   } else {
